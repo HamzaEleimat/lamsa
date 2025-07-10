@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "title": "بيوتي كورت",
+    "tagline": "احجزي جلسة جمالك في ثوانٍ",
+    "getStarted": "ابدأي الآن",
+    "providerLink": "أنا مقدمة خدمة"
+  },
+  "common": {
+    "language": "اللغة",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "retry": "إعادة المحاولة"
+  },
+  "phoneAuth": {
+    "title": "أدخلي رقم هاتفك",
+    "subtitle": "سنرسل لك رمز التحقق",
+    "phoneLabel": "رقم الهاتف",
+    "phonePlaceholder": "7X XXX XXXX",
+    "sendOTP": "أرسل رمز التحقق",
+    "termsPrefix": "بالمتابعة، أنت توافقين على",
+    "termsLink": "الشروط والأحكام",
+    "termsRequired": "يجب الموافقة على الشروط والأحكام",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneInvalid": "الرجاء إدخال رقم هاتف أردني صحيح",
+    "otpSent": "تم إرسال رمز التحقق بنجاح",
+    "otpError": "فشل إرسال رمز التحقق. الرجاء المحاولة مرة أخرى."
+  },
+  "navigation": {
+    "search": "البحث",
+    "bookings": "الحجوزات",
+    "profile": "الملف الشخصي"
+  }
+}

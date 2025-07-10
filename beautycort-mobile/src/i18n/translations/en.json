@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "title": "BeautyCort",
+    "tagline": "Book beauty in seconds",
+    "getStarted": "Get Started",
+    "providerLink": "I'm a Provider"
+  },
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "arabic": "Arabic",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry"
+  },
+  "phoneAuth": {
+    "title": "Enter your phone number",
+    "subtitle": "We'll send you a verification code",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "7X XXX XXXX",
+    "sendOTP": "Send OTP",
+    "termsPrefix": "By continuing, you agree to our",
+    "termsLink": "Terms & Conditions",
+    "termsRequired": "You must accept the terms and conditions",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Please enter a valid Jordanian phone number",
+    "otpSent": "OTP sent successfully",
+    "otpError": "Failed to send OTP. Please try again."
+  },
+  "navigation": {
+    "search": "Search",
+    "bookings": "Bookings",
+    "profile": "Profile"
+  }
+}
