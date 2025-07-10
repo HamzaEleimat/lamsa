@@ -1,0 +1,24 @@
+SUPABASE_URL=https://libwbqgceovhknljmuvh.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpYndicWdjZW92aGtubGptdXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNTc5ODAsImV4cCI6MjA2NzczMzk4MH0.5JbUoRtamov3v7h5Z2qgbMc4mdyCWBF83jIezW69rnQ
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpYndicWdjZW92aGtubGptdXZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjE1Nzk4MCwiZXhwIjoyMDY3NzMzOTgwfQ.igC-mdft5dRmeeGKHGnsGRRpLG5FJLKgqFa8-ZUCWuE
+
+# App Configuration
+APP_NAME=BeautyCort
+DEFAULT_LANGUAGE=ar
+CURRENCY=JOD
+
+# Development
+NODE_ENV=development
+PORT=3000
+
+# Payments (Tap - get later)
+TAP_SECRET_KEY=
+TAP_PUBLIC_KEY=
+
+# SMS (Twilio - get later)
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=
+
+# Push Notifications (Expo - get later)
+EXPO_PUSH_TOKEN=
