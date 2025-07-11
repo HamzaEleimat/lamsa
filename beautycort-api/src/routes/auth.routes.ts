@@ -5,26 +5,36 @@ import { validate } from '../middleware/validation.middleware';
 
 const router = Router();
 
-// Customer signup with phone
+// Send OTP to customer phone
 router.post(
-  '/customer/signup',
+  '/customer/send-otp',
   validate([
     body('phone')
       .notEmpty().withMessage('Phone number is required')
-      .isString().withMessage('Phone number must be a string'),
+      .isString().withMessage('Phone number must be a string')
+      .matches(/^(\+962[7-9][0-9]{8}|\+1[0-9]{10}|\+34[0-9]{9})$/).withMessage('Invalid phone number. Format: +962XXXXXXXXX, +1XXXXXXXXXX, or +34XXXXXXXXX'),
+  ]),
+  (req, res, next) => authController.customerSendOTP(req, res, next)
+);
+
+// Verify OTP and create customer account
+router.post(
+  '/customer/verify-otp',
+  validate([
+    body('phone')
+      .notEmpty().withMessage('Phone number is required')
+      .isString().withMessage('Phone number must be a string')
+      .matches(/^(\+962[7-9][0-9]{8}|\+1[0-9]{10}|\+34[0-9]{9})$/).withMessage('Invalid phone number. Format: +962XXXXXXXXX, +1XXXXXXXXXX, or +34XXXXXXXXX'),
+    body('otp')
+      .notEmpty().withMessage('OTP is required')
+      .isString().withMessage('OTP must be a string')
+      .isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
     body('name')
-      .notEmpty().withMessage('Name is required')
+      .optional()
       .trim()
       .isLength({ min: 2 }).withMessage('Name must be at least 2 characters long'),
-    body('email')
-      .optional()
-      .isEmail().withMessage('Please provide a valid email')
-      .normalizeEmail(),
-    body('language')
-      .optional()
-      .isIn(['ar', 'en']).withMessage('Language must be either ar or en'),
   ]),
-  (req, res, next) => authController.customerSignup(req, res, next)
+  (req, res, next) => authController.verifyOTP(req, res, next)
 );
 
 // Provider signup with email/password

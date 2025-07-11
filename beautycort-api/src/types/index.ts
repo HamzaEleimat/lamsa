@@ -5,7 +5,9 @@ export interface AuthRequest extends Request {
     id: string;
     email: string;
     role: UserRole;
+    type?: 'customer' | 'provider' | 'admin';
   };
+  file?: any; // Multer file object
 }
 
 export enum UserRole {

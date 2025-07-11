@@ -1,0 +1,17 @@
+{
+  "email": "test@salon.com",
+  "password": "Test123!",
+  "phone": "0791234568",
+  "business_name_ar": "صالون الجمال",
+  "business_name_en": "Beauty Salon",
+  "owner_name": "Test Owner",
+  "latitude": 31.9539,
+  "longitude": 35.9106,
+  "address": {
+    "street": "123 Main St",
+    "city": "Amman",
+    "district": "Abdali",
+    "country": "Jordan"
+  },
+  "license_number": "12345"
+}

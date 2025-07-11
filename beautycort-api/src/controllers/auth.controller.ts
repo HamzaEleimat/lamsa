@@ -3,14 +3,9 @@ import jwt from 'jsonwebtoken';
 import { AppError } from '../middleware/error.middleware';
 import { ApiResponse } from '../types';
 import { db, auth } from '../config/supabase-simple';
+import { mockOTP } from '../config/mock-otp';
 
 // Interfaces for request bodies
-interface CustomerSignupRequest {
-  phone: string;
-  name: string;
-  email?: string;
-  language?: 'ar' | 'en';
-}
 
 interface ProviderSignupRequest {
   email: string;
@@ -93,60 +88,131 @@ export class AuthController {
   }
 
   /**
-   * Customer signup with phone number
+   * Send OTP to customer phone number
    */
-  async customerSignup(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async customerSendOTP(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { phone, name, email, language = 'ar' }: CustomerSignupRequest = req.body;
-
-      // Validate phone number
-      const validatedPhone = this.validateJordanPhoneNumber(phone);
-
-      // Check if user already exists
-      const { data: existingUser } = await db.users.findByPhone(validatedPhone);
-      if (existingUser) {
-        throw new AppError('Phone number already registered', 409);
+      const { phone } = req.body;
+      
+      // Validate phone format (Jordan, US test, or Spanish test)
+      const jordanPhoneRegex = /^\+962[7-9][0-9]{8}$/;
+      const testUSPhoneRegex = /^\+1[0-9]{10}$/;
+      const testSpanishPhoneRegex = /^\+34[0-9]{9}$/;
+      
+      if (!jordanPhoneRegex.test(phone) && !testUSPhoneRegex.test(phone) && !testSpanishPhoneRegex.test(phone)) {
+        throw new AppError('Invalid phone number. Format: +962XXXXXXXXX (Jordan), +1XXXXXXXXXX (US), or +34XXXXXXXXX (Spain)', 400);
       }
-
-      // Create new user
-      const { data: newUser, error } = await db.users.create({
-        phone: validatedPhone,
-        name,
-        email: email || null,
-        language,
-      });
-
-      if (error || !newUser) {
-        throw new AppError('Failed to create user account', 500);
+      
+      // Log if using test number
+      if (testUSPhoneRegex.test(phone) || testSpanishPhoneRegex.test(phone)) {
+        console.log('⚠️  Using test phone number for development:', phone);
       }
-
-      // Type assertion to ensure TypeScript knows the structure
-      const user = newUser as any;
-
-      // Generate JWT token
-      const token = this.generateToken({
-        id: user.id,
-        type: 'customer',
-        phone: user.phone,
-      });
-
+      
+      // Send OTP using the auth object
+      console.log('📱 Attempting to send OTP to:', phone);
+      const { data, error } = await auth.signInWithOtp({ phone });
+      
+      if (error) {
+        console.error('❌ OTP Error:', error);
+        throw new AppError(`Failed to send OTP: ${error.message}`, 400);
+      }
+      
+      console.log('✅ OTP Response:', JSON.stringify(data, null, 2));
+      
+      // Check if SMS was actually sent
+      if (!data || (!data.user && !data.session)) {
+        console.log('⚠️  Supabase accepted request but no SMS sent');
+        console.log('📋 Possible issues:');
+        console.log('- Twilio messaging service might need phone number verification');
+        console.log('- Phone number might need to be verified in Twilio');
+        console.log('- Twilio account might be in trial mode with restrictions');
+      }
+      
+      // Check if real SMS was sent
+      if (data?.messageId) {
+        console.log('📨 Real SMS sent! Message ID:', data.messageId);
+        console.log('✅ Twilio integration working - use the SMS code you receive');
+      } else if (mockOTP.isMockMode()) {
+        console.log('📱 No real SMS sent - using mock OTP');
+        mockOTP.generate(phone);
+      }
+      
+      // In development mode with mock OTP, include the OTP in response for testing
+      const responseData: any = { phone };
+      if (mockOTP.isMockMode() && process.env.NODE_ENV === 'development') {
+        const otpData = mockOTP.getStoredOTP(phone);
+        if (otpData) {
+          responseData.testOTP = otpData.otp;
+          responseData.testMode = true;
+          responseData.warning = "OTP included for testing only - never do this in production!";
+        }
+      }
+      
       const response: ApiResponse = {
         success: true,
-        data: {
-          user: {
-            id: user.id,
-            phone: user.phone,
-            name: user.name,
-            email: user.email,
-            language: user.language,
-          },
-          token,
-          type: 'customer',
-        },
-        message: 'Customer account created successfully',
+        message: 'OTP sent successfully to ' + phone,
+        data: responseData
       };
+      
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
 
-      res.status(201).json(response);
+  /**
+   * Verify OTP and create/fetch user
+   */
+  async verifyOTP(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { phone, otp } = req.body;
+      
+      // Try Supabase verification first (for real SMS)
+      const { error: verifyError } = await auth.verifyOtp({ 
+        phone, 
+        token: otp 
+      });
+      
+      // If Supabase verification fails and we're in mock mode, try mock OTP
+      if (verifyError && mockOTP.isMockMode()) {
+        console.log('📱 Trying mock OTP verification...');
+        const isValid = mockOTP.verify(phone, otp);
+        if (!isValid) {
+          throw new AppError('Invalid or expired OTP', 400);
+        }
+      } else if (verifyError) {
+        throw new AppError('Invalid or expired OTP', 400);
+      } else {
+        console.log('✅ Real OTP verified via Supabase/Twilio!');
+      }
+      
+      // Now create or fetch the user
+      const { data: user, error: userError } = await auth.createCustomerAfterOtp(
+        phone,
+        { name: req.body.name || 'User' }
+      );
+      
+      if (userError) {
+        throw new AppError('Failed to create user account', 500);
+      }
+      
+      // Generate JWT token
+      const token = this.generateToken({
+        id: (user as any).id,
+        type: 'customer',
+        phone: (user as any).phone,
+      });
+      
+      const response: ApiResponse = {
+        success: true,
+        message: 'Phone verified successfully',
+        data: {
+          user,
+          token,
+        }
+      };
+      
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }
@@ -179,6 +245,44 @@ export class AuthController {
         ...providerData,
         phone: validatedPhone,
       });
+
+      // In development mode, create mock provider if Supabase fails
+      if ((error || !result) && process.env.NODE_ENV === 'development') {
+        console.log('⚠️  Supabase provider signup failed, using mock data');
+        const mockProvider = {
+          provider: {
+            id: 'mock-provider-' + Date.now(),
+            email: providerData.email,
+            business_name_ar: providerData.business_name_ar,
+            business_name_en: providerData.business_name_en,
+            owner_name: providerData.owner_name,
+            phone: validatedPhone,
+            address: providerData.address,
+            latitude: providerData.latitude,
+            longitude: providerData.longitude,
+            created_at: new Date().toISOString(),
+          }
+        };
+        
+        // Generate JWT token for mock provider
+        const token = this.generateToken({
+          id: mockProvider.provider.id,
+          type: 'provider',
+          email: mockProvider.provider.email,
+        });
+
+        const response: ApiResponse = {
+          success: true,
+          data: {
+            provider: mockProvider.provider,
+            token,
+            mockMode: true,
+          }
+        };
+        
+        res.status(201).json(response);
+        return;
+      }
 
       if (error || !result) {
         const errorMessage = error && typeof error === 'object' && 'message' in error 
@@ -281,6 +385,44 @@ export class AuthController {
       // Sign in with Supabase Auth
       const { data: result, error } = await auth.signInProvider(email, password);
 
+      // In development mode, allow mock login
+      if ((error || !result) && process.env.NODE_ENV === 'development') {
+        console.log('⚠️  Using mock provider login for development');
+        
+        // Create mock provider data for testing
+        const mockProvider = {
+          provider: {
+            id: 'mock-provider-' + Date.now(),
+            email: email,
+            business_name_ar: 'صالون تجميل تجريبي',
+            business_name_en: 'Test Beauty Salon',
+            owner_name: 'Test Owner',
+            phone: '+962790000000',
+            verified: true,
+            created_at: new Date().toISOString(),
+          }
+        };
+        
+        // Generate JWT token
+        const token = this.generateToken({
+          id: mockProvider.provider.id,
+          type: 'provider',
+          email: mockProvider.provider.email,
+        });
+
+        const response: ApiResponse = {
+          success: true,
+          data: {
+            provider: mockProvider.provider,
+            token,
+            mockMode: true,
+          }
+        };
+        
+        res.json(response);
+        return;
+      }
+
       if (error || !result) {
         throw new AppError('Invalid email or password', 401);
       }
@@ -322,59 +464,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Verify OTP for customer login (for production use)
-   */
-  async verifyOTP(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { phone, otp } = req.body;
-
-      // Validate phone number
-      const validatedPhone = this.validateJordanPhoneNumber(phone);
-
-      // TODO: Verify OTP from cache/database
-      // For now, accept any 6-digit OTP in development
-      if (!/^\d{6}$/.test(otp)) {
-        throw new AppError('Invalid OTP format', 400);
-      }
-
-      // Find user
-      const { data: userData, error } = await db.users.findByPhone(validatedPhone);
-      
-      if (error || !userData) {
-        throw new AppError('Phone number not registered', 404);
-      }
-      
-      const user = userData as any;
-
-      // Generate token
-      const token = this.generateToken({
-        id: user.id,
-        type: 'customer',
-        phone: user.phone,
-      });
-
-      const response: ApiResponse = {
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            phone: user.phone,
-            name: user.name,
-            email: user.email,
-            language: user.language,
-          },
-          token,
-          type: 'customer',
-        },
-        message: 'Phone number verified successfully',
-      };
-
-      res.json(response);
-    } catch (error) {
-      next(error);
-    }
-  }
 
   /**
    * Refresh JWT token

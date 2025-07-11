@@ -1,0 +1,16 @@
+{
+  "email": "salon.test@example.com",
+  "password": "TestPass123!",
+  "business_name_en": "Beauty Salon Test",
+  "business_name_ar": "صالون تجميل تجريبي",
+  "owner_name": "Sarah Ahmed",
+  "phone": "+962798765432",
+  "address": {
+    "street": "Rainbow Street",
+    "city": "Amman",
+    "district": "Jabal Amman",
+    "country": "Jordan"
+  },
+  "latitude": 31.9539,
+  "longitude": 35.9106
+}

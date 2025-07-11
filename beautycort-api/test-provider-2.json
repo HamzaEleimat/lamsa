@@ -1,0 +1,16 @@
+{
+  "email": "spa.center@example.com",
+  "password": "SecurePass456!",
+  "business_name_en": "Luxury Spa Center",
+  "business_name_ar": "مركز سبا فاخر",
+  "owner_name": "Layla Hassan",
+  "phone": "+962791234567",
+  "address": {
+    "street": "Gardens Street",
+    "city": "Amman",
+    "district": "Abdoun",
+    "country": "Jordan"
+  },
+  "latitude": 31.9565,
+  "longitude": 35.8945
+}

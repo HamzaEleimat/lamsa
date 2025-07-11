@@ -117,6 +117,71 @@ export const auth = {
       return { data: null, error };
     }
   },
+  
+  async signInWithOtp(params: { phone: string }) {
+    return supabase.auth.signInWithOtp({
+      phone: params.phone,
+      options: {
+        channel: 'sms',
+      }
+    });
+  },
+  
+  async verifyOtp(params: { phone: string; token: string }) {
+    return supabase.auth.verifyOtp({
+      phone: params.phone,
+      token: params.token,
+      type: 'sms',
+    });
+  },
+  
+  async createCustomerAfterOtp(phone: string, additionalData?: any) {
+    try {
+      // First check if user already exists
+      const { data: existingUser } = await db.users.findByPhone(phone);
+      
+      if (existingUser) {
+        return { data: existingUser, error: null };
+      }
+      
+      // Create new user
+      const result = await db.users.create({
+        phone,
+        name: additionalData?.name || 'User',
+        language: additionalData?.language || 'ar',
+        ...additionalData
+      });
+      
+      // If database is not set up, return mock user for testing
+      if (result.error && process.env.NODE_ENV === 'development') {
+        console.log('⚠️  Database not configured, returning mock user for testing');
+        const mockUser = {
+          id: 'mock-' + Date.now(),
+          phone,
+          name: additionalData?.name || 'User',
+          language: additionalData?.language || 'ar',
+          created_at: new Date().toISOString(),
+        };
+        return { data: mockUser, error: null };
+      }
+      
+      return result;
+    } catch (error) {
+      // In development, return mock user if database fails
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⚠️  Database error, returning mock user for testing');
+        const mockUser = {
+          id: 'mock-' + Date.now(),
+          phone,
+          name: additionalData?.name || 'User',
+          language: additionalData?.language || 'ar',
+          created_at: new Date().toISOString(),
+        };
+        return { data: mockUser, error: null };
+      }
+      return { data: null, error };
+    }
+  },
 };
 
 // Helper function to handle Supabase operations

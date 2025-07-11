@@ -1,5 +1,15 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, UserRole } from '../types';
+import jwt from 'jsonwebtoken';
+
+interface JWTPayload {
+  id: string;
+  type?: 'customer' | 'provider' | 'admin';
+  email?: string;
+  phone?: string;
+  iat?: number;
+  exp?: number;
+}
 
 export const authenticate = async (
   req: AuthRequest,
@@ -17,20 +27,36 @@ export const authenticate = async (
       return;
     }
 
-    // TODO: Implement JWT verification
-    // For now, mock user data
+    // Verify JWT token
+    const jwtSecret = process.env.JWT_SECRET || 'beautycort-jwt-secret-2024';
+    const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
+    
+    // Map the JWT payload to our user object
     req.user = {
-      id: '1',
-      email: 'test@example.com',
-      role: UserRole.CUSTOMER,
+      id: decoded.id,
+      email: decoded.email || '',
+      role: mapTypeToRole(decoded.type),
+      type: decoded.type
     };
 
     next();
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      error: 'Invalid token',
-    });
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({
+        success: false,
+        error: 'Token expired',
+      });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({
+        success: false,
+        error: 'Invalid token',
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        error: 'Authentication failed',
+      });
+    }
   }
 };
 
@@ -55,3 +81,17 @@ export const authorize = (...roles: UserRole[]) => {
     next();
   };
 };
+
+// Helper function to map JWT type to UserRole enum
+function mapTypeToRole(type?: string): UserRole {
+  switch (type) {
+    case 'customer':
+      return UserRole.CUSTOMER;
+    case 'provider':
+      return UserRole.PROVIDER;
+    case 'admin':
+      return UserRole.ADMIN;
+    default:
+      return UserRole.CUSTOMER;
+  }
+}
