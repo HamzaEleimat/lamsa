@@ -1,0 +1,189 @@
+# Provider Email/Password Authentication Flow
+
+This diagram illustrates the authentication flow for service providers using email and password credentials.
+
+```mermaid
+sequenceDiagram
+    participant P as Provider
+    participant W as Web Dashboard
+    participant A as API Server
+    participant D as Database
+    participant T as Token Store
+    participant E as Email Service
+
+    Note over P,E: Provider Authentication Flow
+
+    %% Login Process
+    P->>+W: Enter email and password
+    W->>W: Client-side validation
+    
+    W->>+A: POST /api/auth/provider/login
+    Note right of A: { email: "salon@example.com", password: "password123" }
+    
+    A->>A: Validate request format
+    A->>A: Check rate limiting
+    
+    A->>+D: Find provider by email
+    D-->>-A: Provider record
+    
+    alt Provider Found and Active
+        A->>A: Compare password hash
+        
+        alt Password Valid
+            %% Check Verification Status
+            alt Provider Verified
+                %% Generate JWT Token
+                A->>A: Generate JWT token
+                Note right of A: { id, type: "provider", email, verified: true }
+                
+                A->>+T: Store refresh token
+                T-->>-A: Token stored
+                
+                A->>+D: Update last login timestamp
+                D-->>-A: Updated
+                
+                A-->>-W: Login successful
+                Note right of A: { success: true, provider: {...}, token: "jwt...", type: "provider" }
+                
+                W->>W: Store JWT securely
+                W->>W: Store provider data
+                W-->>-P: Redirect to dashboard
+                
+            else Provider Unverified
+                A-->>-W: Account pending verification
+                Note right of A: { success: false, error: "Account pending admin verification" }
+                W-->>P: "Your account is pending verification"
+            end
+            
+        else Password Invalid
+            A->>+D: Log failed attempt
+            D-->>-A: Logged
+            A-->>-W: Invalid credentials
+            Note right of A: { success: false, error: "Invalid email or password" }
+            W-->>P: "Invalid email or password"
+        end
+        
+    else Provider Not Found
+        A->>A: Simulate password check (prevent timing attacks)
+        A-->>-W: Invalid credentials
+        Note right of A: { success: false, error: "Invalid email or password" }
+        W-->>P: "Invalid email or password"
+    end
+
+    %% Password Reset Flow
+    Note over P,E: Password Reset Process
+    
+    P->>+W: Click "Forgot Password"
+    W->>+A: POST /api/auth/provider/forgot-password
+    Note right of A: { email: "salon@example.com" }
+    
+    A->>+D: Find provider by email
+    D-->>-A: Provider record
+    
+    alt Provider Found
+        A->>A: Generate reset token (32 chars)
+        A->>+D: Store reset token with 1-hour expiry
+        D-->>-A: Token stored
+        
+        A->>+E: Send password reset email
+        Note right of E: Reset link with token
+        E-->>-A: Email sent
+        
+        A-->>-W: Reset email sent
+        Note right of A: { success: true, message: "Password reset instructions sent" }
+        W-->>-P: "Check your email for reset instructions"
+        
+        %% Reset Password
+        P->>P: Check email and click reset link
+        P->>+W: Enter new password
+        W->>+A: POST /api/auth/provider/reset-password
+        Note right of A: { token: "reset_token", newPassword: "newPassword123" }
+        
+        A->>+D: Validate reset token
+        D-->>-A: Token valid and not expired
+        
+        alt Token Valid
+            A->>A: Hash new password
+            A->>+D: Update password and clear reset token
+            D-->>-A: Password updated
+            
+            A-->>-W: Password reset successful
+            Note right of A: { success: true, message: "Password reset successful" }
+            W-->>-P: "Password updated successfully, please login"
+            
+        else Token Invalid/Expired
+            A-->>-W: Invalid reset token
+            Note right of A: { success: false, error: "Invalid or expired reset token" }
+            W-->>P: "Reset link expired, please request a new one"
+        end
+        
+    else Provider Not Found
+        %% Don't reveal if email exists (security)
+        A-->>-W: Reset email sent
+        Note right of A: { success: true, message: "Password reset instructions sent" }
+        W-->>P: "Check your email for reset instructions"
+    end
+
+    %% Token Refresh (Same as Customer)
+    Note over W,T: Token Refresh Process
+    
+    W->>W: Check token expiry
+    W->>+A: POST /api/auth/refresh
+    Note right of A: { refreshToken: "refresh_token" }
+    
+    A->>+T: Validate refresh token
+    T-->>-A: Token valid
+    
+    A->>A: Generate new JWT
+    A-->>-W: New token
+    Note right of A: { success: true, token: "new_jwt..." }
+    
+    W->>W: Update stored token
+```
+
+## Provider Authentication Security
+
+### Password Requirements
+```
+- Minimum 6 characters
+- Password hashing: bcrypt with salt rounds 12
+- Failed login tracking with account lockout
+- Password reset token: 32 character random string
+- Reset token expiry: 1 hour
+```
+
+### Account Verification Process
+```
+1. Provider registers with business details
+2. Admin reviews business license and information
+3. Manual verification by platform administrators
+4. Email notification sent upon verification
+5. Provider can access full dashboard features
+```
+
+### Rate Limiting
+```
+- Login attempts: Max 5 per 15 minutes per IP
+- Password reset: Max 3 requests per hour per email
+- Account lockout: 30 minutes after 5 failed attempts
+```
+
+### JWT Token Structure (Provider)
+```json
+{
+  "id": "provider-uuid",
+  "type": "provider",
+  "email": "salon@example.com",
+  "verified": true,
+  "businessName": "Beauty Salon",
+  "iat": 1704067200,
+  "exp": 1704671200
+}
+```
+
+### Security Considerations
+- **Email Enumeration Protection**: Same response for valid/invalid emails
+- **Timing Attack Prevention**: Consistent response times
+- **Password Reset Security**: Tokens are single-use and time-limited
+- **Session Management**: Secure token storage and automatic refresh
+- **Audit Logging**: All authentication attempts logged for security monitoring

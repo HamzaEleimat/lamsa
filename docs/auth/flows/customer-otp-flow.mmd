@@ -1,0 +1,129 @@
+# Customer Phone + OTP Authentication Flow
+
+This diagram illustrates the complete authentication flow for customers using phone number and OTP verification.
+
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant M as Mobile App
+    participant A as API Server
+    participant D as Database
+    participant S as SMS Service
+    participant T as Token Store
+
+    Note over C,T: Customer Authentication Flow
+
+    %% Phone Number Entry
+    C->>+M: Enter phone number
+    M->>M: Validate Jordan format (+962XXXXXXXXX)
+    
+    %% OTP Request
+    M->>+A: POST /api/auth/customer/send-otp
+    Note right of A: { phone: "+962791234567" }
+    
+    A->>A: Validate phone format
+    A->>A: Check rate limiting
+    A->>+D: Check if user exists
+    D-->>-A: User status
+    
+    %% Generate and Send OTP
+    A->>A: Generate 6-digit OTP
+    A->>+S: Send OTP via SMS
+    S-->>-A: SMS delivery status
+    A->>A: Store OTP with 5-min expiry
+    A-->>-M: OTP sent confirmation
+    
+    M-->>-C: "Verification code sent to your phone"
+    
+    %% OTP Entry and Verification
+    C->>+M: Enter OTP code
+    M->>+A: POST /api/auth/verify-otp
+    Note right of A: { phone: "+962791234567", otp: "123456", name: "أحمد محمد" }
+    
+    A->>A: Validate OTP
+    A->>A: Check OTP expiry
+    
+    alt OTP Valid
+        %% Create or Login User
+        A->>+D: Create/Update user record
+        D-->>-A: User data
+        
+        %% Generate JWT Token
+        A->>A: Generate JWT token
+        Note right of A: { id, type: "customer", phone, iat, exp }
+        
+        A->>+T: Store refresh token
+        T-->>-A: Token stored
+        
+        A-->>-M: Authentication success
+        Note right of A: { success: true, user: {...}, token: "jwt...", type: "customer" }
+        
+        M->>M: Store JWT securely
+        M->>M: Store user data
+        M-->>-C: Redirect to main app
+        
+    else OTP Invalid/Expired
+        A-->>-M: Authentication failed
+        Note right of A: { success: false, error: "Invalid or expired OTP" }
+        M-->>C: "Invalid code, please try again"
+    end
+
+    %% Automatic Token Refresh (Background)
+    Note over M,T: Token Refresh (Before Expiry)
+    
+    M->>M: Check token expiry (background)
+    M->>+A: POST /api/auth/refresh
+    Note right of A: { refreshToken: "refresh..." }
+    
+    A->>+T: Validate refresh token
+    T-->>-A: Token valid
+    
+    A->>A: Generate new JWT
+    A-->>-M: New token
+    Note right of A: { success: true, token: "new_jwt..." }
+    
+    M->>M: Update stored token
+```
+
+## Flow States and Validations
+
+### Phone Number Validation
+```
+Input Formats Accepted:
+- +962791234567 (International)
+- 962791234567 (Country code without +)
+- 0791234567 (Local with 0)
+- 791234567 (Local without 0)
+
+All formats normalized to: +962XXXXXXXXX
+
+Valid Prefixes: 77, 78, 79
+```
+
+### OTP Security Measures
+```
+- 6-digit random numeric code
+- 5-minute expiry time
+- Rate limiting: Max 3 attempts per 15 minutes
+- SMS delivery tracking
+- Secure storage with bcrypt hashing
+```
+
+### JWT Token Structure
+```json
+{
+  "id": "user-uuid",
+  "type": "customer",
+  "phone": "+962791234567",
+  "iat": 1704067200,
+  "exp": 1704671200
+}
+```
+
+### Error Handling
+- **Invalid Phone Format**: Immediate client-side validation
+- **Rate Limit Exceeded**: "Too many attempts, please wait"
+- **SMS Delivery Failed**: "Unable to send code, please try again"
+- **Invalid OTP**: "Invalid verification code"
+- **Expired OTP**: "Verification code expired, request new one"
+- **Token Expired**: Automatic refresh or re-authentication

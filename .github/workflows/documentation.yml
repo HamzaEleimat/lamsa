@@ -1,0 +1,274 @@
+name: Update Documentation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: 
+      - 'beautycort-api/src/routes/**'
+      - 'beautycort-api/src/controllers/**'
+      - 'database/**'
+      - 'docs/**'
+      - '.github/workflows/documentation.yml'
+  pull_request:
+    branches: [ main ]
+    paths: 
+      - 'docs/**'
+
+jobs:
+  generate-api-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: beautycort-api/package-lock.json
+        
+    - name: Install API dependencies
+      run: |
+        cd beautycort-api
+        npm ci
+        
+    - name: Install documentation tools
+      run: |
+        npm install -g swagger-jsdoc swagger-ui-express @redocly/openapi-cli
+        
+    - name: Create OpenAPI spec from routes
+      run: |
+        cd beautycort-api
+        # Create docs generation script if it doesn't exist
+        if [ ! -f "scripts/generate-docs.js" ]; then
+          mkdir -p scripts
+          cat > scripts/generate-docs.js << 'EOF'
+        const swaggerJsdoc = require('swagger-jsdoc');
+        const fs = require('fs');
+        const path = require('path');
+        
+        const options = {
+          definition: {
+            openapi: '3.0.0',
+            info: {
+              title: 'BeautyCort API',
+              version: '1.0.0',
+              description: 'Beauty booking platform API for Jordan market'
+            }
+          },
+          apis: ['./src/routes/*.ts', '../docs/api/endpoints/*.md']
+        };
+        
+        const specs = swaggerJsdoc(options);
+        
+        // Ensure docs/api directory exists
+        const docsDir = path.join(__dirname, '..', '..', 'docs', 'api');
+        if (!fs.existsSync(docsDir)) {
+          fs.mkdirSync(docsDir, { recursive: true });
+        }
+        
+        // Write OpenAPI spec
+        fs.writeFileSync(
+          path.join(docsDir, 'openapi.json'),
+          JSON.stringify(specs, null, 2)
+        );
+        
+        console.log('OpenAPI specification generated successfully');
+        EOF
+        fi
+        
+        # Generate the documentation
+        node scripts/generate-docs.js
+        
+    - name: Validate OpenAPI specification
+      run: |
+        if [ -f "docs/api/openapi.json" ]; then
+          npx @redocly/openapi-cli lint docs/api/openapi.json
+        fi
+        
+    - name: Generate Mermaid diagrams
+      run: |
+        # Install mermaid CLI
+        npm install -g @mermaid-js/mermaid-cli
+        
+        # Generate PNG versions of Mermaid diagrams for documentation site
+        find docs -name "*.mmd" -exec sh -c '
+          for file; do
+            output="${file%.mmd}.png"
+            mmdc -i "$file" -o "$output" -t dark -b transparent || true
+          done
+        ' sh {} +
+        
+    - name: Build documentation site
+      run: |
+        # Create a simple documentation site structure
+        mkdir -p docs-build
+        
+        # Copy all markdown files
+        find docs -name "*.md" -exec cp --parents {} docs-build/ \;
+        
+        # Copy generated OpenAPI spec
+        if [ -f "docs/api/openapi.json" ]; then
+          cp docs/api/openapi.json docs-build/
+        fi
+        
+        # Create index.html for the documentation site
+        cat > docs-build/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>BeautyCort Documentation</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+                .nav { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                .nav a { margin-right: 20px; text-decoration: none; color: #0066cc; }
+                .section { margin-bottom: 30px; }
+                .section h2 { color: #333; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <h1>BeautyCort Platform Documentation</h1>
+            
+            <div class="nav">
+                <a href="#api">API Documentation</a>
+                <a href="#database">Database Schema</a>
+                <a href="#auth">Authentication</a>
+                <a href="#troubleshooting">Troubleshooting</a>
+                <a href="#setup">Setup Guides</a>
+            </div>
+            
+            <div class="section" id="api">
+                <h2>API Documentation</h2>
+                <p><a href="openapi.json" target="_blank">OpenAPI Specification (JSON)</a></p>
+                <p>Interactive API documentation with live testing capabilities.</p>
+            </div>
+            
+            <div class="section" id="database">
+                <h2>Database Documentation</h2>
+                <p>Comprehensive PostgreSQL + PostGIS schema documentation</p>
+                <ul>
+                    <li><a href="docs/database/README.md">Database Overview</a></li>
+                    <li><a href="docs/database/tables/">Table Definitions</a></li>
+                </ul>
+            </div>
+            
+            <div class="section" id="auth">
+                <h2>Authentication Flows</h2>
+                <ul>
+                    <li><a href="docs/auth/flows/customer-otp-flow.mmd">Customer OTP Flow</a></li>
+                    <li><a href="docs/auth/flows/provider-login-flow.mmd">Provider Login Flow</a></li>
+                </ul>
+            </div>
+            
+            <div class="section" id="troubleshooting">
+                <h2>Troubleshooting</h2>
+                <p><a href="docs/troubleshooting/README.md">Comprehensive Troubleshooting Guide</a></p>
+            </div>
+            
+            <div class="section" id="setup">
+                <h2>Setup and Development</h2>
+                <ul>
+                    <li><a href="ENVIRONMENT_SETUP.md">Environment Setup</a></li>
+                    <li><a href="docs/DOCUMENTATION_MASTER_PLAN.md">Documentation Plan</a></li>
+                </ul>
+            </div>
+            
+            <footer style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
+                <p>Generated automatically from BeautyCort repository</p>
+                <p>Last updated: <span id="lastUpdated"></span></p>
+                <script>
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                </script>
+            </footer>
+        </body>
+        </html>
+        EOF
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs-build
+        custom_domain: docs.beautycort.com  # Set this if you have a custom domain
+        
+    - name: Comment on PR with documentation preview
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const pr_number = context.payload.pull_request.number;
+          
+          const comment = `## 📚 Documentation Preview
+          
+          Documentation has been generated for this PR:
+          
+          - **API Documentation**: Check the generated OpenAPI spec
+          - **Database Schema**: Updated table documentation
+          - **Authentication Flows**: Visual diagrams updated
+          
+          ### Files Changed:
+          - \`docs/api/openapi.json\` - API specification
+          - \`docs/database/tables/\` - Table documentation
+          - \`docs/troubleshooting/\` - Troubleshooting guides
+          
+          The documentation will be automatically deployed when this PR is merged to main.`;
+          
+          github.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: pr_number,
+            body: comment
+          });
+          
+  validate-links:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install markdown link checker
+      run: npm install -g markdown-link-check
+      
+    - name: Check internal links
+      run: |
+        find docs -name "*.md" -exec markdown-link-check {} \; || true
+        
+    - name: Validate Mermaid diagrams
+      run: |
+        # Install mermaid CLI for validation
+        npm install -g @mermaid-js/mermaid-cli
+        
+        # Validate all Mermaid diagrams
+        find docs -name "*.mmd" -exec sh -c '
+          for file; do
+            echo "Validating $file..."
+            mmdc -i "$file" -o /tmp/test.png || echo "Warning: $file has syntax issues"
+          done
+        ' sh {} +
+        
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Check for sensitive information in docs
+      run: |
+        # Check for potential secrets in documentation
+        echo "Checking for sensitive information..."
+        
+        # Look for potential API keys, passwords, etc.
+        grep -r -i "password\|secret\|key\|token" docs/ | grep -v "example\|placeholder\|<your_" || true
+        
+        # Check for real phone numbers (should use examples)
+        grep -r "\+962[0-9]\{9\}" docs/ | grep -v "example\|sample" || true
+        
+        echo "Security check completed"
