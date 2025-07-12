@@ -308,7 +308,7 @@ export const ValidationHelpers = {
   },
   
   isValidFileType: (mimeType: string, type: 'IMAGE' | 'LICENSE'): boolean => {
-    return FILE_UPLOAD_CONSTRAINTS[type].ALLOWED_TYPES.includes(mimeType);
+    return FILE_UPLOAD_CONSTRAINTS[type].ALLOWED_TYPES.includes(mimeType as any);
   },
   
   isValidOTP: (otp: string): boolean => {

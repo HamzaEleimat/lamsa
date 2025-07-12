@@ -4,6 +4,7 @@ import { AppError } from '../middleware/error.middleware';
 import { ApiResponse } from '../types';
 import { db, auth } from '../config/supabase-simple';
 import { mockOTP } from '../config/mock-otp';
+import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
 
 // Interfaces for request bodies
 
@@ -94,33 +95,73 @@ export class AuthController {
     try {
       const { phone } = req.body;
       
-      // Validate phone format (Jordan, US test, or Spanish test)
-      const jordanPhoneRegex = /^\+962[7-9][0-9]{8}$/;
-      const testUSPhoneRegex = /^\+1[0-9]{10}$/;
-      const testSpanishPhoneRegex = /^\+34[0-9]{9}$/;
-      
-      if (!jordanPhoneRegex.test(phone) && !testUSPhoneRegex.test(phone) && !testSpanishPhoneRegex.test(phone)) {
-        throw new AppError('Invalid phone number. Format: +962XXXXXXXXX (Jordan), +1XXXXXXXXXX (US), or +34XXXXXXXXX (Spain)', 400);
+      if (!phone) {
+        throw new AppError('Phone number is required', 400);
       }
+      
+      // Validate phone number using centralized validation
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(phone)
+        : validateJordanPhoneNumber(phone);
+      
+      if (!validation.isValid) {
+        throw new AppError(validation.error || 'Invalid phone number', 400);
+      }
+      
+      const normalizedPhone = validation.normalizedPhone!;
       
       // Log if using test number
-      if (testUSPhoneRegex.test(phone) || testSpanishPhoneRegex.test(phone)) {
-        console.log('⚠️  Using test phone number for development:', phone);
+      if (process.env.NODE_ENV === 'development' && validation.isTestNumber) {
+        console.log('⚠️  Using test phone number for development:', normalizedPhone);
       }
       
-      // Send OTP using the auth object
-      console.log('📱 Attempting to send OTP to:', phone);
-      const { data, error } = await auth.signInWithOtp({ phone });
+      // In development mode with mock OTP, skip Supabase if not configured
+      let data: any = null;
       
-      if (error) {
-        console.error('❌ OTP Error:', error);
-        throw new AppError(`Failed to send OTP: ${error.message}`, 400);
+      if (mockOTP.isMockMode()) {
+        // Check if Supabase is properly configured
+        const hasValidSupabaseConfig = process.env.SUPABASE_URL && 
+                                      process.env.SUPABASE_ANON_KEY && 
+                                      process.env.SUPABASE_URL !== 'your_supabase_url_here';
+        
+        if (hasValidSupabaseConfig) {
+          // Try Supabase first
+          console.log('📱 Attempting to send OTP via Supabase to:', normalizedPhone);
+          const result = await auth.signInWithOtp({ phone: normalizedPhone });
+          
+          if (!result.success) {
+            console.error('❌ Supabase OTP Error:', result.error);
+            console.log('📱 Falling back to mock OTP in development mode');
+          } else {
+            data = result.data;
+            console.log('✅ OTP Response:', JSON.stringify(data, null, 2));
+          }
+        } else {
+          console.log('⚠️  Supabase not configured - using mock OTP for development');
+        }
+        
+        // Use mock OTP if Supabase failed or not configured
+        if (!data) {
+          console.log('📱 Using mock OTP for development');
+          mockOTP.generate(normalizedPhone);
+          data = { mockMode: true };
+        }
+      } else {
+        // Production mode - Supabase is required
+        console.log('📱 Attempting to send OTP to:', normalizedPhone);
+        const result = await auth.signInWithOtp({ phone: normalizedPhone });
+        
+        if (!result.success) {
+          console.error('❌ OTP Error:', result.error);
+          throw new AppError(result.error?.message || 'Failed to send OTP', 400);
+        }
+        
+        data = result.data;
+        console.log('✅ OTP Response:', JSON.stringify(data, null, 2));
       }
-      
-      console.log('✅ OTP Response:', JSON.stringify(data, null, 2));
       
       // Check if SMS was actually sent
-      if (!data || (!data.user && !data.session)) {
+      if (data && !data.mockMode && !data.user && !data.session) {
         console.log('⚠️  Supabase accepted request but no SMS sent');
         console.log('📋 Possible issues:');
         console.log('- Twilio messaging service might need phone number verification');
@@ -132,15 +173,12 @@ export class AuthController {
       if (data?.messageId) {
         console.log('📨 Real SMS sent! Message ID:', data.messageId);
         console.log('✅ Twilio integration working - use the SMS code you receive');
-      } else if (mockOTP.isMockMode()) {
-        console.log('📱 No real SMS sent - using mock OTP');
-        mockOTP.generate(phone);
       }
       
       // In development mode with mock OTP, include the OTP in response for testing
-      const responseData: any = { phone };
+      const responseData: any = { phone: normalizedPhone };
       if (mockOTP.isMockMode() && process.env.NODE_ENV === 'development') {
-        const otpData = mockOTP.getStoredOTP(phone);
+        const otpData = mockOTP.getStoredOTP(normalizedPhone);
         if (otpData) {
           responseData.testOTP = otpData.otp;
           responseData.testMode = true;
@@ -150,7 +188,7 @@ export class AuthController {
       
       const response: ApiResponse = {
         success: true,
-        message: 'OTP sent successfully to ' + phone,
+        message: 'OTP sent successfully to ' + normalizedPhone,
         data: responseData
       };
       
@@ -167,21 +205,26 @@ export class AuthController {
     try {
       const { phone, otp } = req.body;
       
+      // Validate phone is provided
+      if (!phone) {
+        throw new AppError('Phone number is required', 400);
+      }
+      
       // Try Supabase verification first (for real SMS)
-      const { error: verifyError } = await auth.verifyOtp({ 
+      const verifyResult = await auth.verifyOtp({ 
         phone, 
         token: otp 
       });
       
       // If Supabase verification fails and we're in mock mode, try mock OTP
-      if (verifyError && mockOTP.isMockMode()) {
+      if (!verifyResult.success && mockOTP.isMockMode()) {
         console.log('📱 Trying mock OTP verification...');
         const isValid = mockOTP.verify(phone, otp);
         if (!isValid) {
           throw new AppError('Invalid or expired OTP', 400);
         }
-      } else if (verifyError) {
-        throw new AppError('Invalid or expired OTP', 400);
+      } else if (!verifyResult.success) {
+        throw new AppError(verifyResult.error?.message || 'Invalid or expired OTP', 400);
       } else {
         console.log('✅ Real OTP verified via Supabase/Twilio!');
       }

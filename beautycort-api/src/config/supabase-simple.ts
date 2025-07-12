@@ -1,5 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
+import { 
+  PhoneAuthResult, 
+  PhoneAuthErrorCode,
+  OtpConfig,
+  VerifyOtpConfig,
+  PhoneAuthSession,
+  OtpResponse,
+  mapSupabaseError,
+  OtpAttemptTracker
+} from '../utils/auth-types';
 
 dotenv.config();
 
@@ -30,6 +41,9 @@ export const supabaseAdmin = supabaseServiceKey
       },
     })
   : null;
+
+// Initialize OTP attempt tracker for security
+const otpAttemptTracker = new OtpAttemptTracker();
 
 // Export auth helpers
 export const auth = {
@@ -118,25 +132,190 @@ export const auth = {
     }
   },
   
-  async signInWithOtp(params: { phone: string }) {
-    return supabase.auth.signInWithOtp({
-      phone: params.phone,
-      options: {
-        channel: 'sms',
+  async signInWithOtp(config: OtpConfig): Promise<PhoneAuthResult<OtpResponse>> {
+    try {
+      // Validate phone number
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(config.phone)
+        : validateJordanPhoneNumber(config.phone);
+      
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INVALID_PHONE_NUMBER,
+            message: validation.error || 'Invalid phone number'
+          }
+        };
       }
-    });
+
+      const normalizedPhone = validation.normalizedPhone!;
+      
+      // Check rate limiting
+      const attemptResult = otpAttemptTracker.recordAttempt(normalizedPhone);
+      if (!attemptResult.allowed) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.TOO_MANY_ATTEMPTS,
+            message: `Too many attempts. Please try again after ${attemptResult.blockedUntil?.toLocaleTimeString()}`,
+            status: 429
+          }
+        };
+      }
+      
+      // Send OTP via Supabase
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: normalizedPhone,
+        options: {
+          channel: config.channel || 'sms',
+          ...(config.captchaToken && { captchaToken: config.captchaToken })
+        }
+      });
+      
+      if (error) {
+        return {
+          success: false,
+          error: mapSupabaseError(error)
+        };
+      }
+      
+      // Check if SMS was actually sent
+      const response: OtpResponse = {
+        messageId: data?.messageId,
+        user: data?.user,
+        session: data?.session
+      };
+      
+      // Log for monitoring (without exposing phone numbers in production)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📱 OTP sent to:', normalizedPhone);
+        if (response.messageId) {
+          console.log('✅ SMS delivered, message ID:', response.messageId);
+        } else {
+          console.log('⚠️  OTP created but SMS delivery status unknown');
+        }
+      }
+      
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: mapSupabaseError(error)
+      };
+    }
   },
   
-  async verifyOtp(params: { phone: string; token: string }) {
-    return supabase.auth.verifyOtp({
-      phone: params.phone,
-      token: params.token,
-      type: 'sms',
-    });
+  async verifyOtp(config: VerifyOtpConfig): Promise<PhoneAuthResult<PhoneAuthSession>> {
+    try {
+      // Validate phone number
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(config.phone)
+        : validateJordanPhoneNumber(config.phone);
+      
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INVALID_PHONE_NUMBER,
+            message: validation.error || 'Invalid phone number'
+          }
+        };
+      }
+
+      const normalizedPhone = validation.normalizedPhone!;
+      
+      // Validate OTP format (6 digits)
+      if (!/^\d{6}$/.test(config.token)) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INVALID_OTP,
+            message: 'Verification code must be 6 digits'
+          }
+        };
+      }
+      
+      // Verify OTP via Supabase
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: normalizedPhone,
+        token: config.token,
+        type: config.type || 'sms',
+        options: config.captchaToken ? { captchaToken: config.captchaToken } : undefined
+      });
+      
+      if (error) {
+        // Map specific OTP errors
+        const mappedError = mapSupabaseError(error);
+        
+        // Special handling for invalid OTP - track failed attempts
+        if (mappedError.code === PhoneAuthErrorCode.INVALID_OTP || 
+            mappedError.code === PhoneAuthErrorCode.EXPIRED_OTP) {
+          const attemptResult = otpAttemptTracker.recordAttempt(normalizedPhone);
+          if (!attemptResult.allowed) {
+            mappedError.code = PhoneAuthErrorCode.TOO_MANY_ATTEMPTS;
+            mappedError.message = `Too many failed attempts. Account locked until ${attemptResult.blockedUntil?.toLocaleTimeString()}`;
+          } else if (attemptResult.remainingAttempts > 0) {
+            mappedError.message += ` (${attemptResult.remainingAttempts} attempts remaining)`;
+          }
+        }
+        
+        return {
+          success: false,
+          error: mappedError
+        };
+      }
+      
+      if (!data.session) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INTERNAL_ERROR,
+            message: 'Verification succeeded but no session was created'
+          }
+        };
+      }
+      
+      // Reset attempt tracker on successful verification
+      otpAttemptTracker.resetAttempts(normalizedPhone);
+      
+      // Return session data
+      const session: PhoneAuthSession = {
+        access_token: data.session.access_token,
+        token_type: data.session.token_type || 'bearer',
+        expires_in: data.session.expires_in || 3600,
+        refresh_token: data.session.refresh_token,
+        user: {
+          id: data.user?.id || data.session.user.id,
+          phone: data.user?.phone || data.session.user.phone || null,
+          phone_confirmed_at: data.user?.phone_confirmed_at || data.session.user.phone_confirmed_at || null,
+          created_at: data.user?.created_at || data.session.user.created_at || new Date().toISOString(),
+          updated_at: data.user?.updated_at || data.session.user.updated_at || new Date().toISOString()
+        }
+      };
+      
+      return {
+        success: true,
+        data: session
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: mapSupabaseError(error)
+      };
+    }
   },
   
   async createCustomerAfterOtp(phone: string, additionalData?: any) {
     try {
+      // Validate phone is provided
+      if (!phone) {
+        throw new Error('Phone number is required');
+      }
+      
       // First check if user already exists
       const { data: existingUser } = await db.users.findByPhone(phone);
       
@@ -144,9 +323,10 @@ export const auth = {
         return { data: existingUser, error: null };
       }
       
-      // Create new user
+      // Create new user - ensure phone is string
+      const userPhone = phone as string; // We've already validated it's not undefined
       const result = await db.users.create({
-        phone,
+        phone: userPhone,
         name: additionalData?.name || 'User',
         language: additionalData?.language || 'ar',
         ...additionalData
@@ -157,7 +337,7 @@ export const auth = {
         console.log('⚠️  Database not configured, returning mock user for testing');
         const mockUser = {
           id: 'mock-' + Date.now(),
-          phone,
+          phone: userPhone,
           name: additionalData?.name || 'User',
           language: additionalData?.language || 'ar',
           created_at: new Date().toISOString(),
@@ -168,11 +348,12 @@ export const auth = {
       return result;
     } catch (error) {
       // In development, return mock user if database fails
+      // At this point, we know phone is defined because we checked at the beginning
       if (process.env.NODE_ENV === 'development') {
         console.log('⚠️  Database error, returning mock user for testing');
         const mockUser = {
           id: 'mock-' + Date.now(),
-          phone,
+          phone: phone as string, // Safe cast because we validated at the beginning
           name: additionalData?.name || 'User',
           language: additionalData?.language || 'ar',
           created_at: new Date().toISOString(),

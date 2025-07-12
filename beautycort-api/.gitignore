@@ -12,6 +12,14 @@ build/
 .env.test
 .env.production
 
+# Security - NEVER commit these files
+customer_token.txt
+provider_token.txt
+otp.txt
+*_token.txt
+*.key
+*.pem
+
 # Logs
 logs/
 *.log

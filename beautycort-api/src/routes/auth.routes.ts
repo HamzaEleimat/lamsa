@@ -12,19 +12,20 @@ router.post(
     body('phone')
       .notEmpty().withMessage('Phone number is required')
       .isString().withMessage('Phone number must be a string')
-      .matches(/^(\+962[7-9][0-9]{8}|\+1[0-9]{10}|\+34[0-9]{9})$/).withMessage('Invalid phone number. Format: +962XXXXXXXXX, +1XXXXXXXXXX, or +34XXXXXXXXX'),
+      // Phone validation is handled in the controller
   ]),
   (req, res, next) => authController.customerSendOTP(req, res, next)
 );
 
 // Verify OTP and create customer account
 router.post(
-  '/customer/verify-otp',
+  '/verify-otp',
   validate([
     body('phone')
       .notEmpty().withMessage('Phone number is required')
       .isString().withMessage('Phone number must be a string')
-      .matches(/^(\+962[7-9][0-9]{8}|\+1[0-9]{10}|\+34[0-9]{9})$/).withMessage('Invalid phone number. Format: +962XXXXXXXXX, +1XXXXXXXXXX, or +34XXXXXXXXX'),
+      // Phone validation is handled in the controller
+      ,
     body('otp')
       .notEmpty().withMessage('OTP is required')
       .isString().withMessage('OTP must be a string')
@@ -102,19 +103,7 @@ router.post(
   (req, res, next) => authController.providerLogin(req, res, next)
 );
 
-// Verify OTP for customer (for production use)
-router.post(
-  '/customer/verify-otp',
-  validate([
-    body('phone')
-      .notEmpty().withMessage('Phone number is required'),
-    body('otp')
-      .notEmpty().withMessage('OTP is required')
-      .isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits')
-      .isNumeric().withMessage('OTP must contain only numbers'),
-  ]),
-  (req, res, next) => authController.verifyOTP(req, res, next)
-);
+// (Duplicate route removed - already defined above)
 
 // Refresh token (for both customer and provider)
 router.post(
