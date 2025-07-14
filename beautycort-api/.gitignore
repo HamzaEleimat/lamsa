@@ -7,10 +7,9 @@ build/
 
 # Environment variables
 .env
-.env.local
-.env.development
-.env.test
-.env.production
+.env.*
+!.env.example
+!.env.template
 
 # Security - NEVER commit these files
 customer_token.txt
