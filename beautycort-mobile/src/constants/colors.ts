@@ -9,11 +9,15 @@ export const colors = {
   secondary: '#ED8936',
   secondaryDark: '#DD6B20',
   secondaryLight: '#F6AD55',
+  lightSecondary: '#FED7AA',
   
   // Status colors
   success: '#48BB78',
+  lightSuccess: '#C6F6D5',
   warning: '#F6AD55',
+  lightWarning: '#FEFCBF',
   error: '#F56565',
+  lightError: '#FED7D7',
   info: '#4299E1',
   
   // Neutral colors

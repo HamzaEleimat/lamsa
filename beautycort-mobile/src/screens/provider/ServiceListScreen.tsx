@@ -22,10 +22,13 @@ import {
   EnhancedService, 
   ServiceFilters, 
   ServiceCategory,
-  BulkServiceOperation 
+  BulkServiceOperation,
+  ServiceTag
 } from '../../types/service.types';
 import { colors } from '../../constants/colors';
 import { API_URL } from '../../config';
+import ServiceCard from '../../components/service/ServiceCard';
+import ServiceFiltersModal from '../../components/service/ServiceFilters';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -37,12 +40,25 @@ export default function ServiceListScreen() {
   const [services, setServices] = useState<EnhancedService[]>([]);
   const [packages, setPackages] = useState<any[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [tags, setTags] = useState<ServiceTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [filters, setFilters] = useState<ServiceFilters>({
+    search: '',
+    category_id: '',
+    status: 'all',
+    price_range: [0, 1000],
+    tags: [],
+    gender_preference: 'all',
+    sort_by: 'name',
+    sort_order: 'asc',
+  });
+  const [quickActionVisible, setQuickActionVisible] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -54,6 +70,7 @@ export default function ServiceListScreen() {
         fetchServices(),
         fetchPackages(),
         fetchCategories(),
+        fetchTags(),
       ]);
     } catch (error) {
       console.error('Error loading initial data:', error);
@@ -118,6 +135,18 @@ export default function ServiceListScreen() {
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchTags = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/services/tags`);
+      if (response.ok) {
+        const data = await response.json();
+        setTags(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching tags:', error);
     }
   };
 
@@ -187,70 +216,18 @@ export default function ServiceListScreen() {
   const inactiveServices = filteredServices.filter(s => !s.active);
 
   const renderServiceItem = ({ item }: { item: EnhancedService }) => (
-    <TouchableOpacity
-      style={[
-        styles.serviceCard,
-        bulkMode && selectedServices.includes(item.id) && styles.selectedCard
-      ]}
-      onPress={() => {
-        if (bulkMode) {
-          toggleServiceSelection(item.id);
-        } else {
-          navigation.navigate('ServiceForm', { serviceId: item.id });
-        }
-      }}
-      onLongPress={() => {
-        if (!bulkMode) {
-          setBulkMode(true);
-          toggleServiceSelection(item.id);
-        }
-      }}
-    >
-      {bulkMode && (
-        <View style={styles.checkboxContainer}>
-          <Ionicons
-            name={selectedServices.includes(item.id) ? 'checkbox' : 'square-outline'}
-            size={24}
-            color={colors.primary}
-          />
-        </View>
-      )}
-      
-      <View style={styles.serviceInfo}>
-        <Text style={styles.serviceName}>
-          {i18n.language === 'ar' ? item.name_ar : item.name_en}
-        </Text>
-        <Text style={styles.serviceDetails}>
-          {t('price')}: {item.price} {t('jod')} • {t('duration')}: {item.duration_minutes} {t('minutes')}
-        </Text>
-        {item.tags && item.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.slice(0, 3).map((tag, index) => (
-              <View key={index} style={[styles.tag, { backgroundColor: tag.color || colors.lightGray }]}>
-                <Text style={styles.tagText}>
-                  {i18n.language === 'ar' ? tag.name_ar : tag.name_en}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
-
-      <View style={styles.serviceActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('ServiceForm', { serviceId: item.id })}
-        >
-          <Ionicons name="create-outline" size={20} color={colors.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleDuplicateService(item.id)}
-        >
-          <Ionicons name="copy-outline" size={20} color={colors.secondary} />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+    <ServiceCard
+      service={item}
+      onPress={() => navigation.navigate('ServiceForm', { serviceId: item.id })}
+      onQuickToggle={() => handleQuickToggle(item.id)}
+      onEdit={() => navigation.navigate('ServiceForm', { serviceId: item.id })}
+      onDuplicate={() => handleDuplicateService(item.id)}
+      onDelete={() => handleDeleteService(item.id)}
+      bulkMode={bulkMode}
+      isSelected={selectedServices.includes(item.id)}
+      onToggleSelection={() => toggleServiceSelection(item.id)}
+      showAnalytics={true}
+    />
   );
 
   const handleDuplicateService = async (serviceId: string) => {
@@ -275,6 +252,89 @@ export default function ServiceListScreen() {
       console.error('Error duplicating service:', error);
       Alert.alert(t('error'), t('somethingWentWrong'));
     }
+  };
+
+  const handleQuickToggle = async (serviceId: string) => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      const service = services.find(s => s.id === serviceId);
+      
+      const response = await fetch(`${API_URL}/api/services/${serviceId}/toggle`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          active: !service?.active,
+        }),
+      });
+
+      if (response.ok) {
+        setServices(prev => prev.map(s => 
+          s.id === serviceId ? { ...s, active: !s.active } : s
+        ));
+      } else {
+        Alert.alert(t('error'), t('failedToToggleService'));
+      }
+    } catch (error) {
+      console.error('Error toggling service:', error);
+      Alert.alert(t('error'), t('somethingWentWrong'));
+    }
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    Alert.alert(
+      t('confirmDelete'),
+      t('deleteServiceConfirmation'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('authToken');
+              
+              const response = await fetch(`${API_URL}/api/services/${serviceId}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+              });
+
+              if (response.ok) {
+                setServices(prev => prev.filter(s => s.id !== serviceId));
+                Alert.alert(t('success'), t('serviceDeleted'));
+              } else {
+                Alert.alert(t('error'), t('failedToDeleteService'));
+              }
+            } catch (error) {
+              console.error('Error deleting service:', error);
+              Alert.alert(t('error'), t('somethingWentWrong'));
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleFiltersChange = (newFilters: ServiceFilters) => {
+    setFilters(newFilters);
+    setSearchQuery(newFilters.search || '');
+    setSelectedCategory(newFilters.category_id || null);
+  };
+
+  const handleBulkActions = () => {
+    if (selectedServices.length === 0) {
+      Alert.alert(t('error'), t('noServicesSelected'));
+      return;
+    }
+    
+    navigation.navigate('BulkActions', {
+      serviceIds: selectedServices,
+      selectedCount: selectedServices.length,
+    });
   };
 
   const ServicesTab = ({ status }: { status: 'active' | 'inactive' }) => {
@@ -360,15 +420,40 @@ export default function ServiceListScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={colors.gray} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t('searchServices')}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor={colors.gray}
-          />
+        <View style={styles.headerTop}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={colors.gray} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={t('searchServices')}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor={colors.gray}
+            />
+          </View>
+          
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.headerActionButton}
+              onPress={() => setFiltersVisible(true)}
+            >
+              <Ionicons name="filter-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.headerActionButton}
+              onPress={() => navigation.navigate('ServiceAnalytics')}
+            >
+              <Ionicons name="analytics-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.headerActionButton}
+              onPress={() => navigation.navigate('ServiceTemplates')}
+            >
+              <Ionicons name="library-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
         
         {/* Category Filter */}
@@ -406,17 +491,10 @@ export default function ServiceListScreen() {
           <View style={styles.bulkActions}>
             <TouchableOpacity
               style={styles.bulkButton}
-              onPress={() => handleBulkOperation('activate')}
+              onPress={handleBulkActions}
             >
-              <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
-              <Text style={styles.bulkButtonText}>{t('activate')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.bulkButton}
-              onPress={() => handleBulkOperation('deactivate')}
-            >
-              <Ionicons name="close-circle-outline" size={20} color={colors.warning} />
-              <Text style={styles.bulkButtonText}>{t('deactivate')}</Text>
+              <Ionicons name="cog-outline" size={20} color={colors.primary} />
+              <Text style={styles.bulkButtonText}>{t('bulkActions')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.bulkButton}
@@ -459,13 +537,34 @@ export default function ServiceListScreen() {
         />
       </Tab.Navigator>
 
-      {/* FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('ServiceForm')}
-      >
-        <Ionicons name="add" size={28} color={colors.white} />
-      </TouchableOpacity>
+      {/* Enhanced FAB */}
+      {!bulkMode && (
+        <View style={styles.fabContainer}>
+          <TouchableOpacity
+            style={styles.secondaryFab}
+            onPress={() => navigation.navigate('QuickService')}
+          >
+            <Ionicons name="flash" size={20} color={colors.white} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => navigation.navigate('ServiceForm')}
+          >
+            <Ionicons name="add" size={28} color={colors.white} />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Service Filters Modal */}
+      <ServiceFiltersModal
+        visible={filtersVisible}
+        onClose={() => setFiltersVisible(false)}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        categories={categories}
+        tags={tags}
+      />
     </View>
   );
 }
@@ -496,6 +595,21 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
     }),
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  headerActionButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: colors.lightGray,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -716,10 +830,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  fab: {
+  fabContainer: {
     position: 'absolute',
     right: 16,
     bottom: 24,
+    alignItems: 'center',
+    gap: 12,
+  },
+  fab: {
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -735,6 +853,25 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 8,
+      },
+    }),
+  },
+  secondaryFab: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 6,
       },
     }),
   },

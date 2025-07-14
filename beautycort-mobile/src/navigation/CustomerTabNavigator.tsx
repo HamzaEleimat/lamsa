@@ -11,12 +11,15 @@ import SearchScreen from '../screens/customer/SearchScreen';
 import BookingsScreen from '../screens/customer/BookingsScreen';
 import ProfileScreen from '../screens/customer/ProfileScreen';
 import HomeScreen from '../screens/customer/HomeScreen';
+import ProviderDetailScreen from '../screens/customer/ProviderDetailScreen';
+import ProviderFiltersScreen from '../screens/customer/ProviderFiltersScreen';
 
 // Stack Parameter Lists
 export type HomeStackParamList = {
   Home: undefined;
   ServiceDetails: { serviceId: string };
   ProviderProfile: { providerId: string };
+  ProviderDetail: { providerId: string };
   BookingFlow: { serviceId: string; providerId: string };
 };
 
@@ -25,6 +28,11 @@ export type SearchStackParamList = {
   Filters: undefined;
   ServiceDetails: { serviceId: string };
   ProviderProfile: { providerId: string };
+  ProviderDetail: { providerId: string };
+  ProviderFilters: {
+    currentFilters: any;
+    onApply: (filters: any) => void;
+  };
 };
 
 export type BookingsStackParamList = {
@@ -60,6 +68,7 @@ const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 const HomeStackScreen = () => (
   <HomeStack.Navigator screenOptions={{ headerShown: false }}>
     <HomeStack.Screen name="Home" component={HomeScreen} />
+    <HomeStack.Screen name="ProviderDetail" component={ProviderDetailScreen} />
     {/* Add other home stack screens here */}
   </HomeStack.Navigator>
 );
@@ -67,6 +76,15 @@ const HomeStackScreen = () => (
 const SearchStackScreen = () => (
   <SearchStack.Navigator screenOptions={{ headerShown: false }}>
     <SearchStack.Screen name="Search" component={SearchScreen} />
+    <SearchStack.Screen name="ProviderDetail" component={ProviderDetailScreen} />
+    <SearchStack.Screen 
+      name="ProviderFilters" 
+      component={ProviderFiltersScreen}
+      options={{
+        presentation: 'modal',
+        headerShown: false,
+      }}
+    />
     {/* Add other search stack screens here */}
   </SearchStack.Navigator>
 );

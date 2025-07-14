@@ -50,6 +50,58 @@ export interface Provider {
   active: boolean;
   rating: number;
   totalReviews: number;
+  ratingDistribution?: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+  
+  // Additional public profile properties
+  whatsappNumber?: string;
+  yearsExperience?: number;
+  totalCustomers?: number;
+  responseTime?: number;
+  certificates?: Array<{
+    id: string;
+    name: string;
+    nameAr: string;
+    issuer: string;
+    issuerAr: string;
+    year: number;
+    imageUrl?: string;
+    verified: boolean;
+  }>;
+  licenses?: Array<{
+    type: string;
+    number: string;
+    verified: boolean;
+  }>;
+  awards?: Array<{
+    name: string;
+    nameAr: string;
+    year: number;
+    organization: string;
+  }>;
+  staffCount?: number;
+  femaleStaff?: boolean;
+  languages?: string[];
+  specializations?: string[];
+  workingHours?: { [key: number]: any };
+  amenities?: string[];
+  parkingAvailable?: boolean;
+  accessibleEntrance?: boolean;
+  femaleSection?: boolean;
+  
+  // Social Media
+  socialLinks?: Array<{
+    platform: 'instagram' | 'facebook' | 'tiktok' | 'snapchat' | 'youtube';
+    username?: string;
+    url?: string;
+    verified?: boolean;
+  }>;
+  instagramToken?: string;
   
   // Timestamps
   createdAt: string;
