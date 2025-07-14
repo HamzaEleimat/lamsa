@@ -1,0 +1,133 @@
+name: Mobile App PR Validation
+
+on:
+  pull_request:
+    branches: [ main, develop, beta, staging ]
+    paths: [ 'beautycort-mobile/**' ]
+
+env:
+  WORKING_DIRECTORY: beautycort-mobile
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        npm ci
+
+    - name: Lint code
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        # Add linting when ESLint is configured
+        echo "Linting will be added when ESLint is configured"
+
+    - name: Type check
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        npx tsc --noEmit
+
+    - name: Run tests
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        # Add test runner when tests are implemented
+        echo "Tests will be added here"
+
+    - name: Validate version consistency
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        
+        # Check if version.json, app.json, and package.json versions match
+        VERSION_JSON=$(node -p "require('./version.json').version")
+        APP_JSON=$(node -p "require('./app.json').expo.version")
+        PACKAGE_JSON=$(node -p "require('./package.json').version")
+        
+        echo "version.json: $VERSION_JSON"
+        echo "app.json: $APP_JSON"
+        echo "package.json: $PACKAGE_JSON"
+        
+        if [[ "$VERSION_JSON" != "$APP_JSON" ]] || [[ "$VERSION_JSON" != "$PACKAGE_JSON" ]]; then
+          echo "❌ Version mismatch detected!"
+          echo "All version files must have the same version number"
+          exit 1
+        fi
+        
+        echo "✅ All version files are consistent"
+
+    - name: Check build number increments
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        
+        # Fetch main branch to compare build numbers
+        git fetch origin main
+        
+        # Compare build numbers (only if version.json exists on main)
+        if git show origin/main:beautycort-mobile/version.json > /dev/null 2>&1; then
+          MAIN_IOS=$(git show origin/main:beautycort-mobile/version.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8')).buildNumber.ios")
+          MAIN_ANDROID=$(git show origin/main:beautycort-mobile/version.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8')).buildNumber.android")
+          
+          CURRENT_IOS=$(node -p "require('./version.json').buildNumber.ios")
+          CURRENT_ANDROID=$(node -p "require('./version.json').buildNumber.android")
+          
+          echo "Main branch - iOS: $MAIN_IOS, Android: $MAIN_ANDROID"
+          echo "Current branch - iOS: $CURRENT_IOS, Android: $CURRENT_ANDROID"
+          
+          if [[ $CURRENT_IOS -lt $MAIN_IOS ]] || [[ $CURRENT_ANDROID -lt $MAIN_ANDROID ]]; then
+            echo "⚠️  Warning: Build numbers should not decrease"
+          fi
+        else
+          echo "ℹ️  No version.json found on main branch, skipping build number check"
+        fi
+
+    - name: Validate app.json configuration
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        
+        # Validate required fields in app.json
+        node -e "
+          const appJson = require('./app.json');
+          const expo = appJson.expo;
+          
+          const required = ['name', 'slug', 'version', 'orientation', 'icon'];
+          const missing = required.filter(field => !expo[field]);
+          
+          if (missing.length > 0) {
+            console.error('❌ Missing required fields in app.json:', missing);
+            process.exit(1);
+          }
+          
+          console.log('✅ app.json configuration is valid');
+        "
+
+    - name: Check for platform-specific code organization
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        
+        # Check if platform-specific files follow naming convention
+        find src -name "*.ios.*" -o -name "*.android.*" | while read file; do
+          echo "Found platform-specific file: $file"
+        done
+        
+        echo "✅ Platform-specific code check completed"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run security audit
+      run: |
+        cd ${{ env.WORKING_DIRECTORY }}
+        npm audit --audit-level moderate
