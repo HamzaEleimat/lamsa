@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../middleware/error.middleware';
-import { ApiResponse } from '../types';
+import { ApiResponse, AuthRequest } from '../types';
 import { db, auth } from '../config/supabase-simple';
 import { mockOTP } from '../config/mock-otp';
 import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
+import { getEnvironmentConfig } from '../utils/environment-validation';
 
 // Interfaces for request bodies
 
@@ -43,8 +44,7 @@ interface JWTPayload {
 }
 
 export class AuthController {
-  private readonly JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
-  private readonly JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+  private readonly config = getEnvironmentConfig();
 
   /**
    * Validate Jordan phone number format
@@ -83,8 +83,19 @@ export class AuthController {
   private generateToken(payload: JWTPayload): string {
     return jwt.sign(
       payload, 
-      this.JWT_SECRET, 
-      { expiresIn: this.JWT_EXPIRES_IN } as jwt.SignOptions
+      this.config.JWT_SECRET, 
+      { expiresIn: this.config.JWT_EXPIRES_IN } as jwt.SignOptions
+    );
+  }
+
+  /**
+   * Generate refresh token
+   */
+  private generateRefreshToken(payload: JWTPayload): string {
+    return jwt.sign(
+      payload,
+      this.config.JWT_SECRET,
+      { expiresIn: this.config.REFRESH_TOKEN_EXPIRES_IN } as jwt.SignOptions
     );
   }
 
@@ -245,6 +256,12 @@ export class AuthController {
         type: 'customer',
         phone: (user as any).phone,
       });
+
+      const refreshToken = this.generateRefreshToken({
+        id: (user as any).id,
+        type: 'customer',
+        phone: (user as any).phone,
+      });
       
       const response: ApiResponse = {
         success: true,
@@ -252,6 +269,7 @@ export class AuthController {
         data: {
           user,
           token,
+          refreshToken,
         }
       };
       
@@ -520,7 +538,7 @@ export class AuthController {
       }
 
       // Verify refresh token
-      const decoded = jwt.verify(refreshToken, this.JWT_SECRET) as JWTPayload;
+      const decoded = jwt.verify(refreshToken, this.config.JWT_SECRET) as JWTPayload;
 
       // Generate new token
       const newToken = this.generateToken({
@@ -548,7 +566,206 @@ export class AuthController {
   }
 
   /**
+   * Send OTP to provider phone number for verification
+   */
+  async providerSendOTP(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { phone } = req.body;
+      
+      if (!phone) {
+        throw new AppError('Phone number is required', 400);
+      }
+      
+      // Validate phone number using centralized validation
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(phone)
+        : validateJordanPhoneNumber(phone);
+      
+      if (!validation.isValid) {
+        throw new AppError(validation.error || 'Invalid phone number', 400);
+      }
+      
+      const normalizedPhone = validation.normalizedPhone!;
+      
+      // Check if phone is already registered to a provider
+      const { data: existingProvider } = await db.providers.findByPhone(normalizedPhone);
+      if (existingProvider) {
+        throw new AppError('This phone number is already registered to another provider', 409);
+      }
+      
+      // Send OTP (same logic as customer OTP)
+      let data: any = null;
+      
+      if (mockOTP.isMockMode()) {
+        console.log('📱 Using mock OTP for provider verification');
+        mockOTP.generate(normalizedPhone);
+        data = { mockMode: true };
+      } else {
+        console.log('📱 Attempting to send OTP to provider:', normalizedPhone);
+        const result = await auth.signInWithOtp({ phone: normalizedPhone });
+        
+        if (!result.success) {
+          console.error('❌ OTP Error:', result.error);
+          throw new AppError(result.error?.message || 'Failed to send OTP', 400);
+        }
+        
+        data = result.data;
+      }
+      
+      // Check if SMS was actually sent
+      if (data && !data.mockMode && !data.user && !data.session) {
+        console.log('⚠️  Supabase accepted request but no SMS sent');
+        console.log('📋 Possible issues:');
+        console.log('- Twilio messaging service might need phone number verification');
+        console.log('- Phone number might need to be verified in Twilio');
+        console.log('- Twilio account might be in trial mode with restrictions');
+      }
+      
+      // Check if real SMS was sent
+      if (data?.messageId) {
+        console.log('📨 Real SMS sent! Message ID:', data.messageId);
+        console.log('✅ Twilio integration working - use the SMS code you receive');
+      }
+      
+      // In development mode with mock OTP, include the OTP in response for testing
+      const responseData: any = { phone: normalizedPhone };
+      if (mockOTP.isMockMode() && process.env.NODE_ENV === 'development') {
+        const otpData = mockOTP.getStoredOTP(normalizedPhone);
+        if (otpData) {
+          responseData.testOTP = otpData.otp;
+          responseData.testMode = true;
+          responseData.warning = "OTP included for testing only - never do this in production!";
+        }
+      }
+      
+      const response: ApiResponse = {
+        success: true,
+        message: 'OTP sent successfully to provider phone',
+        data: responseData
+      };
+      
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Verify provider phone number
+   */
+  async providerVerifyOTP(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { phone, otp } = req.body;
+      
+      if (!phone || !otp) {
+        throw new AppError('Phone number and OTP are required', 400);
+      }
+      
+      // Try Supabase verification first (for real SMS)
+      const verifyResult = await auth.verifyOtp({ 
+        phone, 
+        token: otp 
+      });
+      
+      // If Supabase verification fails and we're in mock mode, try mock OTP
+      if (!verifyResult.success && mockOTP.isMockMode()) {
+        console.log('📱 Trying mock OTP verification for provider...');
+        const isValid = mockOTP.verify(phone, otp);
+        if (!isValid) {
+          throw new AppError('Invalid or expired OTP', 400);
+        }
+      } else if (!verifyResult.success) {
+        throw new AppError(verifyResult.error?.message || 'Invalid or expired OTP', 400);
+      } else {
+        console.log('✅ Provider phone verified via Supabase/Twilio!');
+      }
+      
+      const response: ApiResponse = {
+        success: true,
+        message: 'Phone verified successfully',
+        data: {
+          phone,
+          verified: true,
+        }
+      };
+      
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get current user profile
+   */
+  async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      let userData: any;
+
+      if (req.user.type === 'customer') {
+        const { data: customer, error } = await db.users.findById(req.user.id);
+        if (error || !customer) {
+          throw new AppError('User not found', 404);
+        }
+        userData = {
+          type: 'customer',
+          profile: customer,
+        };
+      } else if (req.user.type === 'provider') {
+        const { data: provider, error } = await db.providers.findById(req.user.id);
+        if (error || !provider) {
+          throw new AppError('Provider not found', 404);
+        }
+        userData = {
+          type: 'provider',
+          profile: provider,
+        };
+      } else {
+        throw new AppError('Invalid user type', 400);
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        data: userData,
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Sign out (invalidate token)
+   */
+  async signout(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // Sign out from Supabase (if using Supabase session)
+      await auth.signOut();
+
+      // In production, you might want to:
+      // 1. Blacklist the JWT token
+      // 2. Clear any server-side sessions
+      // 3. Revoke refresh tokens
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Signed out successfully',
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Logout (mainly for providers using Supabase Auth)
+   * @deprecated Use signout instead
    */
   async logout(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {

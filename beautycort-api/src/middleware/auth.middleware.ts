@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, UserRole } from '../types';
 import jwt from 'jsonwebtoken';
+import { getEnvironmentConfig } from '../utils/environment-validation';
 
 interface JWTPayload {
   id: string;
@@ -27,9 +28,9 @@ export const authenticate = async (
       return;
     }
 
-    // Verify JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'beautycort-jwt-secret-2024';
-    const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
+    // Verify JWT token using secure environment configuration
+    const config = getEnvironmentConfig();
+    const decoded = jwt.verify(token, config.JWT_SECRET) as JWTPayload;
     
     // Map the JWT payload to our user object
     req.user = {
