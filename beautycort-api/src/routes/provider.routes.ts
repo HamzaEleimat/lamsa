@@ -3,6 +3,7 @@ import { body, query, param } from 'express-validator';
 import { providerController } from '../controllers/provider.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { validate } from '../middleware/validation.middleware';
+import { searchRateLimiter } from '../middleware/rate-limit.middleware';
 import { UserRole } from '../types';
 import multer from 'multer';
 
@@ -42,6 +43,7 @@ router.get(
 // Search providers with advanced filters
 router.post(
   '/search',
+  searchRateLimiter, // Rate limit expensive search operations
   validate([
     body('query').optional().isString().trim().withMessage('Search query must be a string'),
     body('location').optional().isObject().withMessage('Location must be an object'),

@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "buildNumber": {
+    "ios": 1,
+    "android": 1
+  },
+  "lastUpdated": "2025-01-07T19:20:00Z",
+  "releaseNotes": {
+    "1.0.0": "Initial release with phone authentication and provider booking"
+  },
+  "channels": {
+    "production": "1.0.0",
+    "beta": "1.0.0-beta.1",
+    "staging": "1.0.0-alpha.1"
+  },
+  "expo": {
+    "runtimeVersion": "1.0.0",
+    "sdkVersion": "53.0.17"
+  }
+}

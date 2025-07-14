@@ -1,0 +1,407 @@
+# BeautyCort Performance Testing Configuration
+# 
+# This configuration defines load testing scenarios for all critical API endpoints
+# using Artillery.js for comprehensive performance validation.
+
+config:
+  target: '{{ $processEnvironment.API_BASE_URL || "http://localhost:3000" }}'
+  phases:
+    # Warm-up phase
+    - duration: 30
+      arrivalRate: 5
+      name: "Warm-up"
+    
+    # Ramp-up phase  
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 50
+      name: "Ramp-up"
+    
+    # Sustained load phase
+    - duration: 300
+      arrivalRate: 50
+      name: "Sustained Load"
+    
+    # Peak load phase
+    - duration: 120
+      arrivalRate: 100
+      name: "Peak Load"
+    
+    # Cool-down phase
+    - duration: 30
+      arrivalRate: 10
+      name: "Cool-down"
+
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+      Accept: 'application/json'
+  
+  processor: './load-test-processor.js'
+  
+  # Performance thresholds
+  ensure:
+    - http.response_time.p95: 1000  # 95th percentile response time < 1s
+    - http.response_time.p99: 2000  # 99th percentile response time < 2s
+    - http.request_rate: 45         # Minimum requests per second
+    - http.codes.200: 95            # 95% success rate
+    - http.codes.201: 95            # 95% success rate for POST requests
+
+  environments:
+    development:
+      target: 'http://localhost:3000'
+      phases:
+        - duration: 60
+          arrivalRate: 10
+    
+    staging:
+      target: 'https://staging-api.beautycort.com'
+      phases:
+        - duration: 180
+          arrivalRate: 50
+    
+    production:
+      target: 'https://api.beautycort.com'
+      phases:
+        - duration: 300
+          arrivalRate: 100
+
+scenarios:
+  # Authentication Performance Tests
+  - name: "Customer Authentication Flow"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/auth/customer/send-otp"
+          json:
+            phone: "+962{{ $randomInt(77, 79) }}{{ $randomInt(1000000, 9999999) }}"
+          capture:
+            - json: "$.data.phone"
+              as: "customerPhone"
+            - json: "$.data.testOTP"
+              as: "otpCode"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.phone"
+      
+      - think: 2  # Wait 2 seconds (realistic user delay)
+      
+      - post:
+          url: "/api/auth/verify-otp"
+          json:
+            phone: "{{ customerPhone }}"
+            otp: "{{ otpCode }}"
+            name: "Load Test User {{ $randomString() }}"
+          capture:
+            - json: "$.data.token"
+              as: "authToken"
+            - json: "$.data.user.id"
+              as: "userId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.token"
+
+  - name: "Provider Authentication Flow"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/auth/provider/login"
+          json:
+            email: "{{ $randomElement(['provider1@test.com', 'provider2@test.com', 'provider3@test.com']) }}"
+            password: "TestPassword123!"
+          capture:
+            - json: "$.data.token"
+              as: "providerToken"
+            - json: "$.data.provider.id"
+              as: "providerId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.token"
+
+  # Provider Search Performance Tests
+  - name: "Location-Based Provider Search"
+    weight: 30
+    flow:
+      # Amman area coordinates with random variations
+      - get:
+          url: "/api/providers"
+          qs:
+            lat: "{{ 31.9539 + ($random() - 0.5) * 0.1 }}"  # ±0.05 degree variation
+            lng: "{{ 35.9106 + ($random() - 0.5) * 0.1 }}"
+            radius: "{{ $randomInt(1000, 10000) }}"
+            limit: "{{ $randomInt(10, 50) }}"
+            page: "{{ $randomInt(1, 5) }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.data"
+            - contentType: json
+
+  - name: "Advanced Provider Search"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/providers/search"
+          json:
+            query: "{{ $randomElement(['salon', 'spa', 'makeup', 'hair', 'nails']) }}"
+            location:
+              lat: "{{ 31.9539 + ($random() - 0.5) * 0.1 }}"
+              lng: "{{ 35.9106 + ($random() - 0.5) * 0.1 }}"
+              radius: "{{ $randomInt(2000, 8000) }}"
+            services: 
+              - "{{ $randomElement(['hair_styling', 'makeup', 'nails', 'skincare']) }}"
+            priceRange:
+              min: "{{ $randomInt(0, 20) }}"
+              max: "{{ $randomInt(50, 150) }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.data"
+
+  # Provider Details Performance Tests
+  - name: "Provider Details and Availability"
+    weight: 15
+    flow:
+      # First get list of providers
+      - get:
+          url: "/api/providers"
+          qs:
+            lat: 31.9539
+            lng: 35.9106
+            radius: 5000
+            limit: 10
+          capture:
+            - json: "$.data.data[0].id"
+              as: "selectedProviderId"
+          expect:
+            - statusCode: 200
+      
+      # Get provider details
+      - get:
+          url: "/api/providers/{{ selectedProviderId }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.business_name"
+      
+      # Check availability
+      - get:
+          url: "/api/providers/{{ selectedProviderId }}/availability"
+          qs:
+            date: "{{ $formatDate('YYYY-MM-DD', $addDays(new Date(), $randomInt(1, 14))) }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.slots"
+
+  # Booking Flow Performance Tests  
+  - name: "Booking Creation Flow"
+    weight: 25
+    beforeRequest: "authenticateCustomer"
+    flow:
+      # Search for providers
+      - get:
+          url: "/api/providers"
+          qs:
+            lat: 31.9539
+            lng: 35.9106
+            radius: 5000
+            limit: 5
+          capture:
+            - json: "$.data.data[0].id"
+              as: "targetProviderId"
+          expect:
+            - statusCode: 200
+      
+      # Get provider services
+      - get:
+          url: "/api/providers/{{ targetProviderId }}/services"
+          capture:
+            - json: "$.data[0].id"
+              as: "selectedServiceId"
+          expect:
+            - statusCode: 200
+      
+      # Check availability
+      - get:
+          url: "/api/providers/{{ targetProviderId }}/availability"
+          qs:
+            date: "{{ $formatDate('YYYY-MM-DD', $addDays(new Date(), $randomInt(1, 7))) }}"
+          capture:
+            - json: "$.data.slots[0].time"
+              as: "availableTime"
+            - json: "$.data.date"
+              as: "bookingDate"
+          expect:
+            - statusCode: 200
+      
+      # Create booking
+      - post:
+          url: "/api/bookings"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            providerId: "{{ targetProviderId }}"
+            serviceId: "{{ selectedServiceId }}"
+            date: "{{ bookingDate }}"
+            time: "{{ availableTime }}"
+            notes: "Load test booking {{ $randomString() }}"
+          expect:
+            - statusCode: 201
+            - hasProperty: "data.id"
+
+  # User Profile and History Performance Tests
+  - name: "User Profile Operations"
+    weight: 10
+    beforeRequest: "authenticateCustomer"
+    flow:
+      # Get user profile
+      - get:
+          url: "/api/user/profile"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.user"
+      
+      # Get booking history
+      - get:
+          url: "/api/bookings/user"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            page: "{{ $randomInt(1, 3) }}"
+            limit: "{{ $randomInt(10, 20) }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.data"
+      
+      # Get loyalty status
+      - get:
+          url: "/api/user/loyalty"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+  # Provider Dashboard Performance Tests
+  - name: "Provider Dashboard Operations"
+    weight: 15
+    beforeRequest: "authenticateProvider"
+    flow:
+      # Get provider bookings
+      - get:
+          url: "/api/bookings/provider"
+          headers:
+            Authorization: "Bearer {{ providerToken }}"
+          qs:
+            page: 1
+            limit: 20
+            status: "{{ $randomElement(['pending', 'confirmed', 'completed']) }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.data"
+      
+      # Get provider statistics
+      - get:
+          url: "/api/providers/{{ providerId }}/stats"
+          headers:
+            Authorization: "Bearer {{ providerToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data"
+      
+      # Get provider services
+      - get:
+          url: "/api/providers/{{ providerId }}/services"
+          headers:
+            Authorization: "Bearer {{ providerToken }}"
+          expect:
+            - statusCode: 200
+
+# Database Performance Test Scenarios
+database_tests:
+  - name: "Geospatial Query Performance"
+    query: |
+      SELECT p.*, 
+             ST_Distance(p.location::geography, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography) / 1000 as distance_km
+      FROM providers p
+      WHERE p.verified = TRUE 
+        AND p.active = TRUE
+        AND ST_DWithin(p.location::geography, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3)
+      ORDER BY distance_km
+      LIMIT $4
+    params:
+      - 31.9539  # lat
+      - 35.9106  # lng  
+      - 5000     # radius in meters
+      - 20       # limit
+    expected_time_ms: 50
+    
+  - name: "Booking Conflict Check Performance"
+    query: |
+      SELECT check_provider_availability($1, $2, $3, $4) AS available
+    params:
+      - "test-provider-id"
+      - "2024-01-15"
+      - "14:00"
+      - 60
+    expected_time_ms: 10
+
+  - name: "Loyalty Points Calculation Performance"
+    query: |
+      WITH booking_completion AS (
+        UPDATE bookings 
+        SET status = 'completed', completed_at = NOW()
+        WHERE id = $1
+        RETURNING user_id, total_price
+      )
+      SELECT calculate_loyalty_points(bc.total_price) as points_earned
+      FROM booking_completion bc
+    params:
+      - "test-booking-id"
+    expected_time_ms: 25
+
+# Mobile App Performance Scenarios
+mobile_performance:
+  app_launch:
+    cold_start_target_ms: 3000
+    warm_start_target_ms: 1000
+    memory_baseline_mb: 150
+    
+  network_operations:
+    api_timeout_ms: 10000
+    retry_attempts: 3
+    cache_duration_minutes: 5
+    
+  offline_queue:
+    max_queued_requests: 50
+    sync_interval_ms: 30000
+    storage_limit_mb: 10
+
+# Load Test Reporting Configuration
+reporting:
+  # Metrics to track
+  metrics:
+    - http.response_time.min
+    - http.response_time.max
+    - http.response_time.median
+    - http.response_time.p95
+    - http.response_time.p99
+    - http.request_rate
+    - http.codes.200
+    - http.codes.201
+    - http.codes.400
+    - http.codes.401
+    - http.codes.403
+    - http.codes.404
+    - http.codes.500
+    
+  # Alert thresholds
+  alerts:
+    error_rate_threshold: 5     # Alert if error rate > 5%
+    response_time_p95: 1000     # Alert if p95 > 1000ms
+    response_time_p99: 2000     # Alert if p99 > 2000ms
+    min_throughput: 40          # Alert if RPS < 40
+
+  # Export formats
+  outputs:
+    - json: './reports/load-test-results.json'
+    - html: './reports/load-test-report.html'
+    - junit: './reports/load-test-junit.xml'

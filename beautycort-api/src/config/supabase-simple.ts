@@ -390,6 +390,16 @@ export const db = {
       );
     },
     
+    async findById(id: string) {
+      return handleSupabaseOperation(
+        supabase
+          .from('users')
+          .select('*')
+          .eq('id', id)
+          .single()
+      );
+    },
+    
     async create(userData: any) {
       return handleSupabaseOperation(
         supabase
@@ -418,6 +428,16 @@ export const db = {
           .from('providers')
           .select('*')
           .eq('phone', phone)
+          .single()
+      );
+    },
+    
+    async findById(id: string) {
+      return handleSupabaseOperation(
+        supabase
+          .from('providers')
+          .select('*')
+          .eq('id', id)
           .single()
       );
     },
