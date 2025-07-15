@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase-simple';
-import { format, startOfMonth, endOfMonth, subMonths, differenceInDays, differenceInMonths } from 'date-fns';
+import { format, differenceInDays, differenceInMonths } from 'date-fns';
 
 export interface CustomerMetrics {
   totalCustomers: number;
@@ -167,7 +167,7 @@ export class CustomerAnalyticsService {
 
     const { data: previousPeriodCustomers } = await supabase
       .from('bookings')
-      .select('DISTINCT user_id')
+      .select('user_id')
       .eq('provider_id', providerId)
       .gte('booking_date', format(previousPeriodStart, 'yyyy-MM-dd'))
       .lte('booking_date', format(previousPeriodEnd, 'yyyy-MM-dd'))
@@ -231,9 +231,9 @@ export class CustomerAnalyticsService {
     const totalCustomers = customerMetrics.length;
 
     return Object.entries(segmentGroups).map(([segment, customers]) => {
-      const avgLifetimeValue = customers.reduce((sum, c) => sum + Number(c.lifetime_value || 0), 0) / customers.length;
-      const avgVisits = customers.reduce((sum, c) => sum + (c.total_visits || 0), 0) / customers.length;
-      const avgLastVisitDays = customers.reduce((sum, c) => {
+      const avgLifetimeValue = customers.reduce((sum, c: any) => sum + Number(c.lifetime_value || 0), 0) / customers.length;
+      const avgVisits = customers.reduce((sum, c: any) => sum + (c.total_visits || 0), 0) / customers.length;
+      const avgLastVisitDays = customers.reduce((sum, c: any) => {
         const lastVisit = new Date(c.last_visit_date);
         const daysSince = differenceInDays(new Date(), lastVisit);
         return sum + daysSince;
@@ -304,7 +304,7 @@ export class CustomerAnalyticsService {
 
       return {
         customerId: customer.customer_id,
-        customerName: customer.users.name || 'Unknown',
+        customerName: customer.users?.name || 'Unknown',
         totalSpent,
         totalVisits,
         avgOrderValue,
@@ -424,7 +424,7 @@ export class CustomerAnalyticsService {
 
       return {
         customerId: customer.customer_id,
-        customerName: customer.users.name || 'Unknown',
+        customerName: customer.users?.name || 'Unknown',
         lastVisit: customer.last_visit_date,
         daysSinceLastVisit,
         totalSpent: Number(customer.total_spent || 0),
@@ -458,7 +458,7 @@ export class CustomerAnalyticsService {
     return factors;
   }
 
-  private getRetentionRecommendations(customer: any, riskFactors: string[]): string[] {
+  private getRetentionRecommendations(_customer: any, riskFactors: string[]): string[] {
     const recommendations: string[] = [];
     
     if (riskFactors.includes('Long time since last visit')) {
@@ -511,7 +511,7 @@ export class CustomerAnalyticsService {
       if (!acc[serviceId]) {
         acc[serviceId] = {
           serviceId,
-          serviceName: booking.services.name_en,
+          serviceName: booking.services?.name_en || 'Unknown Service',
           bookingCount: 0
         };
       }
@@ -561,9 +561,9 @@ export class CustomerAnalyticsService {
 
   // Get customer acquisition channel analysis
   async getAcquisitionChannels(
-    providerId: string,
-    startDate: Date,
-    endDate: Date
+    _providerId: string,
+    _startDate: Date,
+    _endDate: Date
   ): Promise<AcquisitionChannel[]> {
     // This would require tracking acquisition sources
     // For now, return mock data structure

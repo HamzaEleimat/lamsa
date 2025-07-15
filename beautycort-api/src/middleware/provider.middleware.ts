@@ -6,7 +6,7 @@ import { supabase } from '../config/supabase-simple';
 // Middleware to validate provider access
 export const validateProvider = async (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
@@ -79,7 +79,7 @@ export const validateProvider = async (
 // Middleware to check if user is a provider
 export const requireProvider = async (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
@@ -107,7 +107,7 @@ export const requireProvider = async (
 
 // Middleware to validate provider ownership of a resource
 export const validateProviderResource = (resourceIdParam: string = 'id') => {
-  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: AuthRequest, _res: Response, next: NextFunction): Promise<void> => {
     try {
       const resourceId = req.params[resourceIdParam];
       const providerId = req.user?.id;

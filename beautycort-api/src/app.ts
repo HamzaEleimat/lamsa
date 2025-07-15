@@ -75,7 +75,8 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Initialize and validate environment before creating app
 console.log('🔧 Initializing environment configuration...');
-const envConfig = initializeEnvironment();
+// const envConfig = initializeEnvironment(); // Commented out to suppress unused variable warning
+initializeEnvironment();
 
 const app: Application = express();
 

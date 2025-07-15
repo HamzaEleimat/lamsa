@@ -376,9 +376,9 @@ export class RevenueService {
   }
 
   private async generateQuarterlyBreakdown(
-    providerId: string,
-    startDate: Date,
-    endDate: Date
+    _providerId: string,
+    _startDate: Date,
+    _endDate: Date
   ) {
     // Simplified quarterly breakdown - would need more sophisticated logic
     const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];

@@ -135,7 +135,7 @@ router.put(
     body('active').optional().isBoolean().withMessage('Active must be a boolean'),
   ]),
   // Controller method to be implemented
-  (req, res) => res.status(501).json({ error: 'Not implemented' })
+  (_req, res) => res.status(501).json({ error: 'Not implemented' })
 );
 
 // Delete service package
@@ -147,7 +147,7 @@ router.delete(
     param('id').isUUID().withMessage('Invalid package ID'),
   ]),
   // Controller method to be implemented
-  (req, res) => res.status(501).json({ error: 'Not implemented' })
+  (_req, res) => res.status(501).json({ error: 'Not implemented' })
 );
 
 // Duplicate a service
@@ -223,7 +223,7 @@ router.post(
     body('color').optional().matches(/^#[0-9A-F]{6}$/i).withMessage('Invalid color format'),
   ]),
   // Controller method to be implemented
-  (req, res) => res.status(501).json({ error: 'Not implemented' })
+  (_req, res) => res.status(501).json({ error: 'Not implemented' })
 );
 
 export default router;

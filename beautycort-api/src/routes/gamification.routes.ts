@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { gamificationController } from '../controllers/gamification.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticate } from '../middleware/auth.middleware';
 import { validateProvider } from '../middleware/provider.middleware';
-import { rateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import { apiRateLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
 // Apply authentication to all gamification routes
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Apply rate limiting
-router.use(rateLimitMiddleware);
+router.use(apiRateLimiter);
 
 // Get comprehensive gamification overview
 router.get('/overview/:providerId?', 

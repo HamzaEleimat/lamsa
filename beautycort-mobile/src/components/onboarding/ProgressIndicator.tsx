@@ -1,3 +1,11 @@
+/**
+ * @file ProgressIndicator.tsx
+ * @description Visual progress indicator component for onboarding steps
+ * @author BeautyCort Development Team
+ * @date Created: 2025-01-14
+ * @copyright BeautyCort 2025
+ */
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, ProgressBar, useTheme } from 'react-native-paper';

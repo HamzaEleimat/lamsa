@@ -1,3 +1,11 @@
+/**
+ * @file WorkingHoursScreen.tsx
+ * @description Provider onboarding screen for configuring business working hours and availability
+ * @author BeautyCort Development Team
+ * @date Created: 2025-01-14
+ * @copyright BeautyCort 2025
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,

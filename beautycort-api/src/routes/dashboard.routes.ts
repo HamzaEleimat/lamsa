@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { dashboardController } from '../controllers/dashboard.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticate } from '../middleware/auth.middleware';
 import { validateProvider } from '../middleware/provider.middleware';
-import { rateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import { apiRateLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
 // Apply authentication to all dashboard routes
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Apply rate limiting for dashboard endpoints
-router.use(rateLimitMiddleware);
+router.use(apiRateLimiter);
 
 // Today's overview - high frequency endpoint
 router.get('/overview/today/:providerId?', 

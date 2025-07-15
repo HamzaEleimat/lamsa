@@ -1,0 +1,101 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push checks..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Track if any checks fail
+FAILED=0
+
+# 1. Check for console.log statements
+echo "\n📋 Checking for console.log statements..."
+CONSOLE_LOGS=$(git diff --cached --name-only | xargs grep -l "console\.\(log\|error\|warn\|debug\)" 2>/dev/null | grep -v node_modules | grep -v "\.test\." | grep -v "\.spec\." || true)
+if [ ! -z "$CONSOLE_LOGS" ]; then
+  echo "${YELLOW}⚠️  Warning: console statements found in:${NC}"
+  echo "$CONSOLE_LOGS"
+  echo "${YELLOW}Consider using the logger utility instead${NC}"
+fi
+
+# 2. Check for TODO comments
+echo "\n📋 Checking for TODO comments..."
+TODO_COUNT=$(git grep -n "TODO" -- ':!node_modules' ':!*.md' ':!.husky' | wc -l)
+if [ $TODO_COUNT -gt 0 ]; then
+  echo "${YELLOW}⚠️  Found $TODO_COUNT TODO comments${NC}"
+  echo "High priority TODOs:"
+  git grep -n "TODO.*\(security\|Security\|SECURITY\|jwt\|JWT\|auth\|Auth\|AUTH\)" -- ':!node_modules' ':!*.md' || true
+fi
+
+# 3. Check for debugging code
+echo "\n📋 Checking for debugging code..."
+DEBUG_CODE=$(git grep -n "debugger\|describe\.only\|it\.only\|test\.only" -- ':!node_modules' ':!*.md' || true)
+if [ ! -z "$DEBUG_CODE" ]; then
+  echo "${RED}❌ Error: Debugging code found:${NC}"
+  echo "$DEBUG_CODE"
+  FAILED=1
+fi
+
+# 4. Run type checking for TypeScript projects
+echo "\n📋 Running TypeScript type checks..."
+
+# Check API
+if [ -d "beautycort-api" ]; then
+  echo "Checking beautycort-api..."
+  cd beautycort-api
+  npm run typecheck
+  if [ $? -ne 0 ]; then
+    echo "${RED}❌ TypeScript errors in API${NC}"
+    FAILED=1
+  else
+    echo "${GREEN}✅ API type check passed${NC}"
+  fi
+  cd ..
+fi
+
+# Check Mobile
+if [ -d "beautycort-mobile" ]; then
+  echo "Checking beautycort-mobile..."
+  cd beautycort-mobile
+  npx tsc --noEmit
+  if [ $? -ne 0 ]; then
+    echo "${RED}❌ TypeScript errors in Mobile${NC}"
+    FAILED=1
+  else
+    echo "${GREEN}✅ Mobile type check passed${NC}"
+  fi
+  cd ..
+fi
+
+# 5. Check for large files
+echo "\n📋 Checking for large files..."
+LARGE_FILES=$(find . -type f -size +1M -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" -not -path "*/build/*" | head -5)
+if [ ! -z "$LARGE_FILES" ]; then
+  echo "${YELLOW}⚠️  Warning: Large files detected (>1MB):${NC}"
+  echo "$LARGE_FILES"
+  echo "${YELLOW}Consider using Git LFS for large files${NC}"
+fi
+
+# 6. Check for sensitive data patterns
+echo "\n📋 Checking for sensitive data..."
+SENSITIVE=$(git diff --cached --name-only | xargs grep -E "(password|secret|key|token)\s*=\s*[\"'][^\"']+[\"']" 2>/dev/null | grep -v "\.example" | grep -v "\.md" || true)
+if [ ! -z "$SENSITIVE" ]; then
+  echo "${RED}❌ Error: Possible hardcoded credentials found:${NC}"
+  echo "$SENSITIVE"
+  FAILED=1
+fi
+
+# Summary
+echo "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if [ $FAILED -eq 0 ]; then
+  echo "${GREEN}✅ All pre-push checks passed!${NC}"
+else
+  echo "${RED}❌ Pre-push checks failed!${NC}"
+  echo "Please fix the issues above before pushing."
+  exit 1
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

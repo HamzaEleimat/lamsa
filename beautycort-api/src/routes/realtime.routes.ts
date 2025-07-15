@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { realtimeController } from '../controllers/realtime.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticate } from '../middleware/auth.middleware';
 import { validateProvider } from '../middleware/provider.middleware';
-import { rateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import { apiRateLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
 // Apply authentication to all realtime routes
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Apply rate limiting
-router.use(rateLimitMiddleware);
+router.use(apiRateLimiter);
 
 // Get WebSocket connection info
 router.get('/info', 

@@ -6,7 +6,7 @@ import { cacheService } from '../services/cache.service';
 export class CacheController {
 
   // Get cache statistics
-  async getCacheStats(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async getCacheStats(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const stats = await cacheService.getStats();
       const hitMissStats = await cacheService.getHitMissStats();
@@ -78,7 +78,7 @@ export class CacheController {
   }
 
   // Clear all cache (admin only)
-  async clearAllCache(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async clearAllCache(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       await cacheService.clear();
 
@@ -154,7 +154,7 @@ export class CacheController {
   }
 
   // Get cache health
-  async getCacheHealth(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async getCacheHealth(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const stats = await cacheService.getStats();
       const hitMissStats = await cacheService.getHitMissStats();
@@ -222,7 +222,7 @@ export class CacheController {
   }
 
   // Reset cache statistics
-  async resetCacheStats(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async resetCacheStats(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       cacheService.resetStats();
 
@@ -268,7 +268,7 @@ export class CacheController {
   }
 
   // Get cache configuration
-  async getCacheConfig(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async getCacheConfig(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const response: ApiResponse = {
         success: true,

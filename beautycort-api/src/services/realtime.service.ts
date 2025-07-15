@@ -1,9 +1,11 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
+import jwt from 'jsonwebtoken';
 import { supabase } from '../config/supabase-simple';
 import { RevenueService } from './revenue.service';
 import { GamificationService } from './gamification.service';
 import { CustomerAnalyticsService } from './customer-analytics.service';
+import { getEnvironmentConfig } from '../utils/environment-validation';
 
 export interface WebSocketClient {
   ws: WebSocket;
@@ -37,13 +39,13 @@ export class RealtimeService {
   private clients: Map<string, WebSocketClient> = new Map();
   private revenueService: RevenueService;
   private gamificationService: GamificationService;
-  private customerAnalyticsService: CustomerAnalyticsService;
+  // private customerAnalyticsService: CustomerAnalyticsService; // Commented out to suppress unused variable warning
   private heartbeatInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.revenueService = new RevenueService();
     this.gamificationService = new GamificationService();
-    this.customerAnalyticsService = new CustomerAnalyticsService();
+    // this.customerAnalyticsService = new CustomerAnalyticsService(); // Commented out to suppress unused variable warning
   }
 
   // Initialize WebSocket server
@@ -60,13 +62,13 @@ export class RealtimeService {
     console.log('WebSocket server initialized on /ws');
   }
 
-  private verifyClient(info: any): boolean {
+  private verifyClient(_info: any): boolean {
     // Add authentication verification here
     // For now, allow all connections
     return true;
   }
 
-  private handleConnection(ws: WebSocket, request: any): void {
+  private handleConnection(ws: WebSocket, _request: any): void {
     console.log('New WebSocket connection');
 
     ws.on('message', (message: string) => {
@@ -115,11 +117,25 @@ export class RealtimeService {
   }
 
   private authenticateClient(ws: WebSocket, data: { providerId: string; token?: string }): void {
-    // TODO: Verify JWT token here
     const { providerId, token } = data;
 
-    if (!providerId) {
-      ws.send(JSON.stringify({ error: 'Provider ID required' }));
+    if (!providerId || !token) {
+      ws.send(JSON.stringify({ error: 'Provider ID and token required' }));
+      return;
+    }
+
+    // Verify JWT token
+    try {
+      const config = getEnvironmentConfig();
+      const decoded = jwt.verify(token, config.JWT_SECRET) as { id: string; type?: string };
+      
+      // Ensure the token belongs to the provider
+      if (decoded.id !== providerId || decoded.type !== 'provider') {
+        ws.send(JSON.stringify({ error: 'Invalid token for provider' }));
+        return;
+      }
+    } catch (error) {
+      ws.send(JSON.stringify({ error: 'Invalid or expired token' }));
       return;
     }
 

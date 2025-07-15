@@ -1,3 +1,11 @@
+/**
+ * @file LocationSetupScreen.tsx
+ * @description Provider onboarding screen for setting up business location and service areas
+ * @author BeautyCort Development Team
+ * @date Created: 2025-01-14
+ * @copyright BeautyCort 2025
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,

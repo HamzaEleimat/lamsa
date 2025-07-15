@@ -1,7 +1,7 @@
 import { supabase } from '../config/supabase-simple';
 import { prayerTimeService } from './prayer-time.service';
 import { AppError } from '../middleware/error.middleware';
-import { format, addMinutes, isAfter, isBefore, parseISO, startOfDay, endOfDay } from 'date-fns';
+import { format, addMinutes, isAfter, isBefore } from 'date-fns';
 
 interface TimeSlot {
   start: string;

@@ -1,0 +1,37 @@
+{
+  "name": "beautycort",
+  "version": "1.0.0",
+  "description": "BeautyCort - Beauty Booking Platform",
+  "private": true,
+  "scripts": {
+    "prepare": "husky install",
+    "pre-push-check": "sh .husky/pre-push",
+    "checklist": "node scripts/pre-push-checklist.js",
+    "check:all": "npm run check:console && npm run check:todo && npm run check:types",
+    "check:console": "grep -r 'console\\.' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build . || echo 'No console statements found'",
+    "check:todo": "grep -r 'TODO' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --exclude-dir=node_modules . | wc -l",
+    "check:types": "cd beautycort-api && npm run typecheck && cd ../beautycort-mobile && npx tsc --noEmit && cd ../beautycort-web && npm run type-check",
+    "api:dev": "cd beautycort-api && npm run dev",
+    "mobile:start": "cd beautycort-mobile && npm start",
+    "web:dev": "cd beautycort-web && npm run dev",
+    "install:all": "npm install && cd beautycort-api && npm install && cd ../beautycort-mobile && npm install && cd ../beautycort-web && npm install"
+  },
+  "devDependencies": {
+    "husky": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/beautycort/beautycort.git"
+  },
+  "keywords": [
+    "beauty",
+    "booking",
+    "marketplace",
+    "jordan",
+    "react-native",
+    "nodejs",
+    "nextjs"
+  ],
+  "author": "BeautyCort Development Team",
+  "license": "UNLICENSED"
+}

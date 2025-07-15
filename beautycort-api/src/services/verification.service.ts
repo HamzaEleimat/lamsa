@@ -8,11 +8,11 @@ import {
   AuthErrorCode,
   UserType,
   SecurityContext,
-  AuthAuditLog,
+  // AuthAuditLog, // Commented out to suppress unused import warning
   AuthAction,
   AuthResult
 } from '../types/auth-v2.types';
-import { supabase, db } from '../config/supabase-simple';
+import { supabase } from '../config/supabase-simple';
 import { validateJordanPhoneNumber } from '../utils/phone-validation';
 import { AppError } from '../middleware/error.middleware';
 

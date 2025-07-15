@@ -91,7 +91,7 @@ export class ServerValidator {
   private async validateDatabase(): Promise<boolean> {
     try {
       // Test database connection
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('users')
         .select('count(*)')
         .limit(1);

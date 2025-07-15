@@ -66,7 +66,7 @@ export type SupabaseResponse<T> = {
 
 // Common error handling wrapper
 export async function handleSupabaseOperation<T>(
-  operation: Promise<{ data: T | null; error: any }>
+  operation: PromiseLike<{ data: T | null; error: any }>
 ): Promise<SupabaseResponse<T>> {
   try {
     const { data, error } = await operation;
@@ -399,7 +399,7 @@ export const db = {
 export const auth = {
   async signUpUser(phone: string, name: string, email?: string): Promise<SupabaseResponse<User>> {
     // Create user in our users table
-    return db.users.create({ phone, name, email, language: 'ar' });
+    return db.users.create({ phone, name, email: email || null, language: 'ar' });
   },
 
   async signUpProvider(providerData: {

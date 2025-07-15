@@ -490,7 +490,7 @@ export default function ServiceFormScreen() {
                     style={styles.input}
                     value={variation.name_en}
                     onChangeText={(text) => updateVariation(index, 'name_en', text)}
-                    placeholder={t('e.g.')} + " Men's Cut"
+                    placeholder={`${t('e.g.')} Men's Cut`}
                     placeholderTextColor={colors.gray}
                   />
                 </View>
@@ -501,7 +501,7 @@ export default function ServiceFormScreen() {
                     style={[styles.input, isRTL && styles.rtlText]}
                     value={variation.name_ar}
                     onChangeText={(text) => updateVariation(index, 'name_ar', text)}
-                    placeholder={t('e.g.')} + " قص رجالي"
+                    placeholder={`${t('e.g.')} قص رجالي`}
                     placeholderTextColor={colors.gray}
                   />
                 </View>

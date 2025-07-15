@@ -8,7 +8,17 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "start:prod": "NODE_ENV=production node dist/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testMatch='**/*.unit.test.ts'",
+    "test:integration": "jest --testMatch='**/*.integration.test.ts'",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "migrate": "node scripts/run-migrations.js",
+    "migrate:create": "echo 'Create a new migration file in database/migrations/'"
   },
   "keywords": [],
   "author": "",

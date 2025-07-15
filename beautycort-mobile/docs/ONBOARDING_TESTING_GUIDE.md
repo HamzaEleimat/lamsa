@@ -1,3 +1,10 @@
+---
+title: Provider Onboarding Testing Guide
+author: BeautyCort Development Team
+date: 2025-01-14
+version: 1.0
+---
+
 # Provider Onboarding Testing Guide
 
 ## Overview

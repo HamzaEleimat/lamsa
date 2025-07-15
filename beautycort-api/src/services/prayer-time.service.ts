@@ -73,7 +73,7 @@ export class PrayerTimeService {
         throw new AppError(`City ${city} not found in Jordan cities`, 400);
       }
 
-      const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      // const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD // Commented out to suppress unused variable warning
       const timestamp = Math.floor(date.getTime() / 1000);
 
       const response = await axios.get(this.API_URL, {

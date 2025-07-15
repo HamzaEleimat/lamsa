@@ -118,7 +118,7 @@ export class RealtimeController {
   }
 
   // Get WebSocket connection info
-  async getWebSocketInfo(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async getWebSocketInfo(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const response: ApiResponse = {
         success: true,
@@ -230,7 +230,7 @@ export class RealtimeController {
   }
 
   // Get real-time statistics
-  async getRealtimeStats(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async getRealtimeStats(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const totalConnections = realtimeService.getConnectedClientsCount();
 

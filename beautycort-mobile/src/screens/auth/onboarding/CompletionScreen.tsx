@@ -1,3 +1,11 @@
+/**
+ * @file CompletionScreen.tsx
+ * @description Provider onboarding completion screen with celebration and next steps
+ * @author BeautyCort Development Team
+ * @date Created: 2025-01-14
+ * @copyright BeautyCort 2025
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,

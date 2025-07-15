@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase-simple';
-import { format, subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { subDays, subMonths } from 'date-fns';
 
 export interface ReviewAnalytics {
   totalReviews: number;
@@ -634,10 +634,10 @@ export class ReviewAnalyticsService {
 
   // Get review response suggestions based on AI analysis
   async getResponseSuggestions(
-    reviewId: string,
-    reviewText: string,
-    rating: number,
-    sentiment: string
+    _reviewId: string,
+    _reviewText: string,
+    _rating: number,
+    _sentiment: string
   ): Promise<{ suggestions: string[]; tone: string; keyPoints: string[] }> {
     // This would integrate with an AI service for advanced suggestions
     // For now, providing rule-based suggestions

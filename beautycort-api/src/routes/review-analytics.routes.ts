@@ -2,17 +2,17 @@ import { Router } from 'express';
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticate } from '../middleware/auth.middleware';
 import { validateProvider } from '../middleware/provider.middleware';
-import { rateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import { apiRateLimiter } from '../middleware/rate-limit.middleware';
 import { ReviewAnalyticsService } from '../services/review-analytics.service';
 
 const router = Router();
 const reviewAnalyticsService = new ReviewAnalyticsService();
 
 // Apply authentication and validation to all routes
-router.use(authenticateToken);
-router.use(rateLimitMiddleware);
+router.use(authenticate);
+router.use(apiRateLimiter);
 
 // Get comprehensive review analytics
 router.get('/analytics/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -140,7 +140,7 @@ router.get('/response-templates/:providerId?', validateProvider, async (req: Aut
 });
 
 // Get AI-powered response suggestions
-router.post('/response-suggestions', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post('/response-suggestions', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { reviewId, reviewText, rating, sentiment } = req.body;
     
@@ -167,7 +167,7 @@ router.post('/response-suggestions', authenticateToken, async (req: AuthRequest,
 });
 
 // Submit review response and track performance
-router.post('/respond/:reviewId', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post('/respond/:reviewId', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { reviewId } = req.params;
     const { responseText } = req.body;
@@ -198,7 +198,7 @@ router.post('/respond/:reviewId', authenticateToken, async (req: AuthRequest, re
 router.get('/sentiment-trends/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
-    const { period = 'month', months = 6 } = req.query;
+    const { period: _period = 'month', months = 6 } = req.query;
     
     if (!providerId) {
       throw new AppError('Provider ID is required', 400);

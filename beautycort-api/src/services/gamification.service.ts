@@ -506,8 +506,8 @@ export class GamificationService {
   }
 
   // Get current challenges/events
-  async getActiveChallenges(providerId: string): Promise<ChallengeEvent[]> {
-    const currentDate = new Date().toISOString();
+  async getActiveChallenges(_providerId: string): Promise<ChallengeEvent[]> {
+    // const currentDate = new Date().toISOString(); // Commented out to suppress unused variable warning
     
     // For now, return mock challenges - in production, these would come from a challenges table
     const mockChallenges: ChallengeEvent[] = [

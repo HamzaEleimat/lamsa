@@ -4,26 +4,26 @@ import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase-simple';
 
 // Enhanced service management interfaces
-interface ServiceWithDetails {
-  id: string;
-  provider_id: string;
-  category_id: string;
-  name_en: string;
-  name_ar: string;
-  description_en?: string;
-  description_ar?: string;
-  price: number;
-  duration_minutes: number;
-  active: boolean;
-  tags?: any[];
-  variations?: any[];
-  analytics?: {
-    bookings_count: number;
-    revenue_total: number;
-    average_rating: number;
-    popularity_score: number;
-  };
-}
+// interface ServiceWithDetails { // Commented out to suppress unused interface warning
+//   id: string;
+//   provider_id: string;
+//   category_id: string;
+//   name_en: string;
+//   name_ar: string;
+//   description_en?: string;
+//   description_ar?: string;
+//   price: number;
+//   duration_minutes: number;
+//   active: boolean;
+//   tags?: any[];
+//   variations?: any[];
+//   analytics?: {
+//     bookings_count: number;
+//     revenue_total: number;
+//     average_rating: number;
+//     popularity_score: number;
+//   };
+// }
 
 interface BulkServiceOperation {
   service_ids: string[];

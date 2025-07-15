@@ -1,3 +1,11 @@
+/**
+ * @file ProviderOnboardingNavigator.tsx
+ * @description Stack navigator for provider onboarding flow with 7 steps
+ * @author BeautyCort Development Team
+ * @date Created: 2025-01-14
+ * @copyright BeautyCort 2025
+ */
+
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BusinessInformationScreen from '../screens/auth/onboarding/BusinessInformationScreen';

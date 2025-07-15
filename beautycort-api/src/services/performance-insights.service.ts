@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase-simple';
-import { format, startOfMonth, endOfMonth, subMonths, differenceInDays, startOfWeek, endOfWeek } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { AnalyticsService } from './analytics.service';
 
 export interface PerformanceInsight {

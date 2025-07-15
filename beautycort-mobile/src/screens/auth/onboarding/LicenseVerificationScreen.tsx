@@ -1,3 +1,11 @@
+/**
+ * @file LicenseVerificationScreen.tsx
+ * @description Provider onboarding screen for license verification and portfolio submission
+ * @author BeautyCort Development Team
+ * @date Created: 2025-01-14
+ * @copyright BeautyCort 2025
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,

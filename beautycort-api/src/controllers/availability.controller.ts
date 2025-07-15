@@ -4,7 +4,7 @@ import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase-simple';
 import { availabilityService } from '../services/availability.service';
 import { prayerTimeService } from '../services/prayer-time.service';
-import { format, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns';
+import { format, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns/index.js';
 
 export class AvailabilityController {
   /**

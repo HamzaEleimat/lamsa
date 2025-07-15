@@ -1,3 +1,10 @@
+---
+title: BeautyCort Mobile Provider Onboarding Documentation
+author: BeautyCort Development Team
+date: 2025-01-14
+version: 1.0
+---
+
 # BeautyCort Mobile Provider Onboarding Documentation
 
 ## Overview

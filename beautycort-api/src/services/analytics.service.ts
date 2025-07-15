@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase-simple';
-import { format, startOfDay, endOfDay, differenceInDays, subDays, subMonths } from 'date-fns';
+import { format } from 'date-fns/index.js';
 import { RevenueService } from './revenue.service';
 import { CustomerAnalyticsService } from './customer-analytics.service';
 import { ReviewAnalyticsService } from './review-analytics.service';
@@ -84,7 +84,7 @@ export class AnalyticsService {
     period: string
   ): Promise<PeriodStatistics> {
     // First try to get from cache
-    const cacheKey = `${providerId}-${format(startDate, 'yyyy-MM-dd')}-${period}`;
+    // const cacheKey = `${providerId}-${format(startDate, 'yyyy-MM-dd')}-${period}`; // Commented out to suppress unused variable warning
     
     const { data: cachedData } = await supabase
       .from('provider_analytics_cache')
@@ -173,7 +173,7 @@ export class AnalyticsService {
 
     // Review metrics
     const totalReviews = reviewData?.length || 0;
-    const avgRating = totalReviews > 0 
+    const avgRating = totalReviews > 0 && reviewData
       ? reviewData.reduce((sum, r) => sum + r.rating, 0) / totalReviews 
       : 0;
     const fiveStarReviews = reviewData?.filter(r => r.rating === 5).length || 0;
@@ -391,7 +391,7 @@ export class AnalyticsService {
   }
 
   // Additional methods for other analytics features
-  async getStatisticsTrends(providerId: string, startDate: Date, endDate: Date) {
+  async getStatisticsTrends(_providerId: string, _startDate: Date, _endDate: Date) {
     // Implementation for trends analysis
     return {};
   }
@@ -432,32 +432,32 @@ export class AnalyticsService {
     return await this.revenueService.getPendingPayouts(providerId);
   }
 
-  async getServiceComparisons(providerId: string, startDate: Date, endDate: Date) {
+  async getServiceComparisons(_providerId: string, _startDate: Date, _endDate: Date) {
     // Implementation for service performance comparisons
     return {};
   }
 
-  async getUnderperformingServices(providerId: string, startDate: Date, endDate: Date) {
+  async getUnderperformingServices(_providerId: string, _startDate: Date, _endDate: Date) {
     // Implementation for underperforming services
     return [];
   }
 
-  async getServiceRecommendations(providerId: string) {
+  async getServiceRecommendations(_providerId: string) {
     // Implementation for service recommendations
     return [];
   }
 
-  async getPeakHours(providerId: string) {
+  async getPeakHours(_providerId: string) {
     // Implementation for peak hours analysis
     return {};
   }
 
-  async getSeasonalTrends(providerId: string) {
+  async getSeasonalTrends(_providerId: string) {
     // Implementation for seasonal trends
     return {};
   }
 
-  async getCompetitorAnalysis(providerId: string) {
+  async getCompetitorAnalysis(_providerId: string) {
     // Implementation for competitor analysis
     return {};
   }
@@ -466,22 +466,22 @@ export class AnalyticsService {
     return await performanceInsightsService.getOptimizationSuggestions(providerId);
   }
 
-  async getProviderAchievements(providerId: string) {
+  async getProviderAchievements(_providerId: string) {
     // This would be handled by the gamification service
     return [];
   }
 
-  async getLeaderboard(providerId: string) {
+  async getLeaderboard(_providerId: string) {
     // This would be handled by the gamification service
     return {};
   }
 
   async exportData(
-    providerId: string,
-    dataType: string,
-    startDate: Date,
-    endDate: Date,
-    format: string
+    _providerId: string,
+    _dataType: string,
+    _startDate: Date,
+    _endDate: Date,
+    _format: string
   ) {
     // Implementation for data export
     return '';
