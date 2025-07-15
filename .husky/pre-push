@@ -32,7 +32,7 @@ fi
 
 # 3. Check for debugging code (only critical ones)
 echo "\n📋 Checking for debugging code..."
-DEBUG_CODE=$(git grep -n "debugger;" -- ':!node_modules' ':!*.md' ':!package-lock.json' || true)
+DEBUG_CODE=$(git grep -n "debugger;" -- ':!node_modules' ':!*.md' ':!package-lock.json' ':!.husky' ':!scripts' || true)
 if [ ! -z "$DEBUG_CODE" ]; then
   echo "${RED}❌ Error: Debugging code found:${NC}"
   echo "$DEBUG_CODE"
@@ -72,7 +72,7 @@ fi
 
 # 5. Check for large files
 echo "\n📋 Checking for large files..."
-LARGE_FILES=$(find . -type f -size +1M -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" -not -path "*/build/*" | head -5)
+LARGE_FILES=$(find . -type f -size +1M -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" -not -path "*/build/*" -not -path "*/.next/*" | head -5)
 if [ ! -z "$LARGE_FILES" ]; then
   echo "${YELLOW}⚠️  Warning: Large files detected (>1MB):${NC}"
   echo "$LARGE_FILES"
