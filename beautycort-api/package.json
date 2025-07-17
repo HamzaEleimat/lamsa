@@ -23,7 +23,9 @@
     "optimize:db": "psql $DATABASE_URL -f database/performance-analysis.sql",
     "performance:test": "ts-node scripts/performance-test.ts",
     "test:connection": "node scripts/test-connection.js",
-    "test:connection:prod": "NODE_ENV=production node scripts/test-connection.js"
+    "test:connection:prod": "NODE_ENV=production node scripts/test-connection.js",
+    "test:redis": "node scripts/test-redis-connection.js",
+    "test:redis:prod": "NODE_ENV=production node scripts/test-redis-connection.js"
   },
   "keywords": [],
   "author": "",
