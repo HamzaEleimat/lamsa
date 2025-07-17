@@ -79,15 +79,7 @@ const config: Config = {
   },
   plugins: [
     require('tailwindcss-rtl'),
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
   ],
-  // RTL support
-  corePlugins: {
-    textAlign: true,
-    float: true,
-    clear: true,
-  },
 };
 
 export default config;

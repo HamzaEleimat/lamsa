@@ -60,8 +60,8 @@ export function getLocaleFromPathname(pathname: string): Locale {
 }
 
 // Get locale from headers
-export function getLocaleFromHeaders(): Locale {
-  const headersList = headers();
+export async function getLocaleFromHeaders(): Promise<Locale> {
+  const headersList = await headers();
   const acceptLanguage = headersList.get('Accept-Language');
   
   if (acceptLanguage) {
@@ -99,8 +99,18 @@ export default getRequestConfig(async ({ locale }) => {
       now: new Date(),
       formats: {
         dateTime: {
-          short: localeConfig[locale].dateFormat,
-          medium: `${localeConfig[locale].dateFormat} ${localeConfig[locale].timeFormat}`,
+          short: {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric'
+          },
+          medium: {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+          },
           long: {
             day: 'numeric',
             month: 'long',

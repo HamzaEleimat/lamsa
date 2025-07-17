@@ -8,12 +8,13 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'beautycort.com']
-    }
+      allowedOrigins: ['localhost:3000', 'beautycort.com', 'beautycort-web.vercel.app']
+    },
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   images: {
     remotePatterns: [
@@ -24,9 +25,44 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'supabase.co'
+      },
+      {
+        protocol: 'https',
+        hostname: 'libwbqgceovhknljmuvh.supabase.co'
       }
-    ]
+    ],
+    formats: ['image/webp', 'image/avif'],
   },
+  
+  // Environment variables
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard',
+        permanent: false,
+      },
+    ];
+  },
+
+  // API proxy rewrites (optional)
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
@@ -43,6 +79,10 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
           }
         ]
       }

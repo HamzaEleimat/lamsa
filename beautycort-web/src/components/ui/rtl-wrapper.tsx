@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useLocale } from 'next-intl';
 import { type Locale, localeConfig } from '@/i18n/request';
 import { createRTLClasses } from '@/lib/i18n-utils';
@@ -7,7 +8,7 @@ import { createRTLClasses } from '@/lib/i18n-utils';
 interface RTLWrapperProps {
   children: React.ReactNode;
   className?: string;
-  element?: keyof JSX.IntrinsicElements;
+  element?: keyof React.JSX.IntrinsicElements;
 }
 
 export function RTLWrapper({ 
