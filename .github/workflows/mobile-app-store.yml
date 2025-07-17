@@ -1,0 +1,287 @@
+name: Mobile App Store Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'beautycort-mobile/**'
+      - '.github/workflows/mobile-app-store.yml'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - ios
+          - android
+          - all
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+  EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: beautycort-mobile/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd beautycort-mobile
+          npm ci
+          
+      - name: Run TypeScript check
+        run: |
+          cd beautycort-mobile
+          npm run type-check
+          
+      - name: Run linting
+        run: |
+          cd beautycort-mobile
+          npm run lint
+          
+      - name: Run tests
+        run: |
+          cd beautycort-mobile
+          npm test
+        env:
+          NODE_ENV: test
+          
+      - name: Validate version consistency
+        run: |
+          cd beautycort-mobile
+          node scripts/validate-version.js
+
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: beautycort-mobile/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd beautycort-mobile
+          npm ci
+          
+      - name: Run security audit
+        run: |
+          cd beautycort-mobile
+          npm audit --audit-level=moderate
+          
+      - name: Check for hardcoded secrets
+        run: |
+          cd beautycort-mobile
+          # Check for potential hardcoded secrets
+          grep -r "sk_" src/ && exit 1 || echo "No hardcoded secrets found"
+          grep -r "pk_" src/ && exit 1 || echo "No hardcoded public keys found"
+
+  build-ios:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: |
+      github.ref == 'refs/heads/main' && 
+      (github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all' || github.event_name == 'push')
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: beautycort-mobile/package-lock.json
+          
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          cd beautycort-mobile
+          npm ci
+          
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
+        
+      - name: Configure environment
+        run: |
+          cd beautycort-mobile
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            echo "EXPO_PUBLIC_SUPABASE_URL=${{ secrets.PRODUCTION_SUPABASE_URL }}" >> .env
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}" >> .env
+            echo "EXPO_PUBLIC_API_URL=${{ secrets.PRODUCTION_API_URL }}" >> .env
+          else
+            echo "EXPO_PUBLIC_SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }}" >> .env
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}" >> .env
+            echo "EXPO_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}" >> .env
+          fi
+          
+      - name: Build iOS app
+        run: |
+          cd beautycort-mobile
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            eas build --platform ios --profile production --non-interactive
+          else
+            eas build --platform ios --profile staging --non-interactive
+          fi
+          
+      - name: Submit to App Store (Production Only)
+        if: github.event.inputs.environment == 'production'
+        run: |
+          cd beautycort-mobile
+          eas submit --platform ios --profile production --non-interactive
+
+  build-android:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: |
+      github.ref == 'refs/heads/main' && 
+      (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push')
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: beautycort-mobile/package-lock.json
+          
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          cd beautycort-mobile
+          npm ci
+          
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
+        
+      - name: Configure environment
+        run: |
+          cd beautycort-mobile
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            echo "EXPO_PUBLIC_SUPABASE_URL=${{ secrets.PRODUCTION_SUPABASE_URL }}" >> .env
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}" >> .env
+            echo "EXPO_PUBLIC_API_URL=${{ secrets.PRODUCTION_API_URL }}" >> .env
+          else
+            echo "EXPO_PUBLIC_SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }}" >> .env
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}" >> .env
+            echo "EXPO_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}" >> .env
+          fi
+          
+      - name: Build Android app
+        run: |
+          cd beautycort-mobile
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            eas build --platform android --profile production --non-interactive
+          else
+            eas build --platform android --profile staging --non-interactive
+          fi
+          
+      - name: Submit to Google Play (Production Only)
+        if: github.event.inputs.environment == 'production'
+        run: |
+          cd beautycort-mobile
+          eas submit --platform android --profile production --non-interactive
+
+  update-ota:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: beautycort-mobile/package-lock.json
+          
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          cd beautycort-mobile
+          npm ci
+          
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
+        
+      - name: Configure staging environment
+        run: |
+          cd beautycort-mobile
+          echo "EXPO_PUBLIC_SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }}" >> .env
+          echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}" >> .env
+          echo "EXPO_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}" >> .env
+          
+      - name: Publish OTA update
+        run: |
+          cd beautycort-mobile
+          eas update --branch staging --message "OTA update from GitHub Actions"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build-ios, build-android, update-ota]
+    if: always()
+    
+    steps:
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#mobile-deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()

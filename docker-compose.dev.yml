@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Redis for development
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass beautycort123
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - beautycort_dev
+
+  # BeautyCort API - Development
+  api:
+    build:
+      context: ./beautycort-api
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./beautycort-api:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=beautycort123
+      - ENABLE_SWAGGER=true
+      - ENABLE_MORGAN_LOGGING=true
+      - ENABLE_DETAILED_LOGGING=true
+    depends_on:
+      - redis
+    networks:
+      - beautycort_dev
+
+  # BeautyCort Web - Development
+  web:
+    build:
+      context: ./beautycort-web
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./beautycort-web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - api
+    networks:
+      - beautycort_dev
+
+volumes:
+  redis_dev_data:
+    driver: local
+
+networks:
+  beautycort_dev:
+    driver: bridge

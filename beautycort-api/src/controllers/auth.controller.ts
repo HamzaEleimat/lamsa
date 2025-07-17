@@ -7,6 +7,8 @@ import { mockOTP } from '../config/mock-otp';
 import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
 import { getEnvironmentConfig } from '../utils/environment-validation';
 import { logger } from '../utils/logger';
+import { tokenBlacklist } from '../utils/token-blacklist';
+import { refreshTokenManager } from '../utils/refresh-token-manager';
 
 // Interfaces for request bodies
 
@@ -45,7 +47,14 @@ interface JWTPayload {
 }
 
 export class AuthController {
-  private readonly config = getEnvironmentConfig();
+  private config: any;
+
+  private getConfig() {
+    if (!this.config) {
+      this.config = getEnvironmentConfig();
+    }
+    return this.config;
+  }
 
   /**
    * Validate Jordan phone number format
@@ -84,20 +93,16 @@ export class AuthController {
   private generateToken(payload: JWTPayload): string {
     return jwt.sign(
       payload, 
-      this.config.JWT_SECRET, 
-      { expiresIn: this.config.JWT_EXPIRES_IN } as jwt.SignOptions
+      this.getConfig().JWT_SECRET, 
+      { expiresIn: this.getConfig().JWT_EXPIRES_IN } as jwt.SignOptions
     );
   }
 
   /**
-   * Generate refresh token
+   * Generate refresh token with rotation support
    */
-  private generateRefreshToken(payload: JWTPayload): string {
-    return jwt.sign(
-      payload,
-      this.config.JWT_SECRET,
-      { expiresIn: this.config.REFRESH_TOKEN_EXPIRES_IN } as jwt.SignOptions
-    );
+  private async generateRefreshToken(payload: JWTPayload): Promise<{ refreshToken: string; tokenId: string; tokenFamily: string }> {
+    return await refreshTokenManager.generateRefreshToken(payload, undefined, this.getConfig().JWT_SECRET);
   }
 
   /**
@@ -188,16 +193,8 @@ export class AuthController {
         logger.info('Real SMS sent successfully', { messageId: data.messageId });
       }
       
-      // In development mode with mock OTP, include the OTP in response for testing
+      // Security: Never expose OTP codes in API responses (removed development bypass)
       const responseData: any = { phone: normalizedPhone };
-      if (mockOTP.isMockMode() && process.env.NODE_ENV === 'development') {
-        const otpData = mockOTP.getStoredOTP(normalizedPhone);
-        if (otpData) {
-          responseData.testOTP = otpData.otp;
-          responseData.testMode = true;
-          responseData.warning = "OTP included for testing only - never do this in production!";
-        }
-      }
       
       const response: ApiResponse = {
         success: true,
@@ -259,7 +256,7 @@ export class AuthController {
         phone: (user as any).phone,
       });
 
-      const refreshToken = this.generateRefreshToken({
+      const refreshTokenData = await this.generateRefreshToken({
         id: (user as any).id,
         type: 'customer',
         phone: (user as any).phone,
@@ -271,7 +268,7 @@ export class AuthController {
         data: {
           user,
           token,
-          refreshToken,
+          refreshToken: refreshTokenData.refreshToken,
         }
       };
       
@@ -539,28 +536,33 @@ export class AuthController {
         throw new AppError('Refresh token required', 400);
       }
 
-      // Verify refresh token
-      const decoded = jwt.verify(refreshToken, this.config.JWT_SECRET) as JWTPayload;
+      // Rotate the refresh token (validates, revokes old, generates new)
+      const rotationResult = await refreshTokenManager.rotateRefreshToken(
+        refreshToken,
+        this.getConfig().JWT_SECRET
+      );
 
-      // Generate new token
-      const newToken = this.generateToken({
-        id: decoded.id,
-        type: decoded.type,
-        phone: decoded.phone,
-        email: decoded.email,
+      // Generate new access token
+      const newAccessToken = this.generateToken({
+        id: rotationResult.payload.id,
+        type: rotationResult.payload.type as 'customer' | 'provider',
+        phone: rotationResult.payload.phone,
+        email: rotationResult.payload.email,
       });
 
       const response: ApiResponse = {
         success: true,
         data: {
-          token: newToken,
+          token: newAccessToken,
+          refreshToken: rotationResult.newRefreshToken, // Return new refresh token
         },
       };
 
+      logger.info(`Token refreshed for user ${rotationResult.payload.id}`);
       res.json(response);
     } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError) {
-        next(new AppError('Invalid refresh token', 401));
+      if (error instanceof jwt.JsonWebTokenError || (error as any)?.message?.includes('refresh token')) {
+        next(new AppError('Invalid or expired refresh token', 401));
       } else {
         next(error);
       }
@@ -630,16 +632,8 @@ export class AuthController {
         logger.info('Real SMS sent successfully', { messageId: data.messageId });
       }
       
-      // In development mode with mock OTP, include the OTP in response for testing
+      // Security: Never expose OTP codes in API responses (removed development bypass)
       const responseData: any = { phone: normalizedPhone };
-      if (mockOTP.isMockMode() && process.env.NODE_ENV === 'development') {
-        const otpData = mockOTP.getStoredOTP(normalizedPhone);
-        if (otpData) {
-          responseData.testOTP = otpData.otp;
-          responseData.testMode = true;
-          responseData.warning = "OTP included for testing only - never do this in production!";
-        }
-      }
       
       const response: ApiResponse = {
         success: true,
@@ -745,15 +739,23 @@ export class AuthController {
   /**
    * Sign out (invalidate token)
    */
-  async signout(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async signout(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      // Extract JWT token from request
+      const token = req.headers.authorization?.split(' ')[1];
+      
+      if (token && req.user?.id) {
+        // Blacklist the current JWT token to prevent reuse
+        await tokenBlacklist.blacklistToken(token, req.user.id, 'logout');
+        
+        // Revoke all refresh tokens for the user
+        await refreshTokenManager.revokeAllUserTokens(req.user.id);
+        
+        logger.info(`User ${req.user.id} tokens blacklisted and refresh tokens revoked on signout`);
+      }
+
       // Sign out from Supabase (if using Supabase session)
       await auth.signOut();
-
-      // In production, you might want to:
-      // 1. Blacklist the JWT token
-      // 2. Clear any server-side sessions
-      // 3. Revoke refresh tokens
 
       const response: ApiResponse = {
         success: true,
@@ -770,15 +772,23 @@ export class AuthController {
    * Logout (mainly for providers using Supabase Auth)
    * @deprecated Use signout instead
    */
-  async logout(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  async logout(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      // Extract JWT token from request
+      const token = req.headers.authorization?.split(' ')[1];
+      
+      if (token && req.user?.id) {
+        // Blacklist the current JWT token to prevent reuse
+        await tokenBlacklist.blacklistToken(token, req.user.id, 'logout');
+        
+        // Revoke all refresh tokens for the user
+        await refreshTokenManager.revokeAllUserTokens(req.user.id);
+        
+        logger.info(`User ${req.user.id} tokens blacklisted and refresh tokens revoked on logout`);
+      }
+
       // Sign out from Supabase (if using Supabase session)
       await auth.signOut();
-
-      // In production, you might want to:
-      // 1. Blacklist the JWT token
-      // 2. Clear any server-side sessions
-      // 3. Revoke refresh tokens
 
       const response: ApiResponse = {
         success: true,

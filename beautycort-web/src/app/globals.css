@@ -1,0 +1,312 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Font families based on locale */
+  html[lang="ar"] {
+    font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
+  }
+  
+  html[lang="en"] {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* RTL support */
+  html[dir="rtl"] {
+    direction: rtl;
+  }
+  
+  html[dir="ltr"] {
+    direction: ltr;
+  }
+}
+
+@layer components {
+  /* RTL-aware utilities */
+  .rtl\:text-right {
+    text-align: right;
+  }
+  
+  .rtl\:text-left {
+    text-align: left;
+  }
+  
+  .rtl\:float-right {
+    float: right;
+  }
+  
+  .rtl\:float-left {
+    float: left;
+  }
+  
+  .rtl\:clear-right {
+    clear: right;
+  }
+  
+  .rtl\:clear-left {
+    clear: left;
+  }
+  
+  /* Custom components */
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .content-transition {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .fade-in {
+    @apply animate-fade-in;
+  }
+  
+  .slide-up {
+    @apply animate-slide-up;
+  }
+  
+  .slide-down {
+    @apply animate-slide-down;
+  }
+  
+  /* Form inputs with RTL support */
+  .form-input {
+    @apply w-full px-3 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+  }
+  
+  .form-input[dir="rtl"] {
+    @apply text-right;
+  }
+  
+  .form-input[dir="ltr"] {
+    @apply text-left;
+  }
+  
+  /* Button variants with RTL support */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary;
+  }
+  
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive;
+  }
+  
+  /* Card components */
+  .card {
+    @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+  }
+  
+  .card-header {
+    @apply p-6 pb-3;
+  }
+  
+  .card-content {
+    @apply p-6 pt-0;
+  }
+  
+  .card-footer {
+    @apply p-6 pt-3;
+  }
+  
+  /* Navigation components */
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground;
+  }
+  
+  .nav-link.active {
+    @apply bg-accent text-accent-foreground;
+  }
+  
+  /* Table components */
+  .table-container {
+    @apply w-full overflow-auto;
+  }
+  
+  .table {
+    @apply w-full border-collapse border-spacing-0;
+  }
+  
+  .table-header {
+    @apply border-b bg-muted/50;
+  }
+  
+  .table-row {
+    @apply border-b hover:bg-muted/50;
+  }
+  
+  .table-cell {
+    @apply p-4 text-left align-middle;
+  }
+  
+  .table-cell[dir="rtl"] {
+    @apply text-right;
+  }
+  
+  /* Loading states */
+  .loading-skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-primary border-t-transparent;
+  }
+  
+  /* Alert components */
+  .alert {
+    @apply relative w-full rounded-lg border p-4;
+  }
+  
+  .alert-success {
+    @apply border-green-200 bg-green-50 text-green-800;
+  }
+  
+  .alert-error {
+    @apply border-red-200 bg-red-50 text-red-800;
+  }
+  
+  .alert-warning {
+    @apply border-yellow-200 bg-yellow-50 text-yellow-800;
+  }
+  
+  .alert-info {
+    @apply border-blue-200 bg-blue-50 text-blue-800;
+  }
+}
+
+@layer utilities {
+  /* RTL-specific utilities */
+  .rtl\:mr-auto {
+    margin-right: auto;
+  }
+  
+  .rtl\:ml-auto {
+    margin-left: auto;
+  }
+  
+  .rtl\:pr-0 {
+    padding-right: 0;
+  }
+  
+  .rtl\:pl-0 {
+    padding-left: 0;
+  }
+  
+  /* Responsive utilities */
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+  
+  .desktop-only {
+    @apply hidden sm:block;
+  }
+  
+  /* Accessibility utilities */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden clip-rect(0,0,0,0) whitespace-nowrap border-0;
+  }
+  
+  .focus-visible {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+  
+  /* Custom scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground));
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    @apply hidden;
+  }
+  
+  .print-only {
+    @apply block;
+  }
+  
+  * {
+    @apply text-black bg-white;
+  }
+}

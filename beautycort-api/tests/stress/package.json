@@ -1,0 +1,51 @@
+{
+  "name": "beautycort-stress-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive stress testing suite for BeautyCort booking system",
+  "main": "stress-runner.js",
+  "scripts": {
+    "stress": "node stress-runner.js",
+    "stress:list": "node stress-runner.js list",
+    "stress:concurrent": "node stress-runner.js run concurrent-booking",
+    "stress:rate-limit": "node stress-runner.js run rate-limiting",
+    "stress:availability": "node stress-runner.js run availability",
+    "stress:database": "node stress-runner.js run database",
+    "stress:notification": "node stress-runner.js run notification",
+    "stress:mixed": "node stress-runner.js run mixed-workload",
+    "stress:all": "node stress-runner.js run-all",
+    "stress:all-parallel": "node stress-runner.js run-all --parallel",
+    "stress:benchmark": "node stress-runner.js benchmark",
+    "stress:report": "node stress-runner.js run-all --report json",
+    "test": "jest --testPathPattern=stress --verbose",
+    "test:watch": "jest --testPathPattern=stress --watch"
+  },
+  "bin": {
+    "stress-runner": "./stress-runner.js"
+  },
+  "keywords": [
+    "stress-testing",
+    "performance",
+    "load-testing",
+    "beautycort",
+    "booking-system",
+    "jordan",
+    "arabic"
+  ],
+  "author": "BeautyCort Team",
+  "license": "MIT",
+  "dependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/*.test.js"
+    ],
+    "testTimeout": 60000,
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "verbose": true,
+    "detectOpenHandles": true,
+    "forceExit": true
+  }
+}

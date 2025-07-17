@@ -3,7 +3,7 @@ import { body } from 'express-validator';
 import { authController } from '../controllers/auth.controller';
 import { validate } from '../middleware/validation.middleware';
 import { authenticate } from '../middleware/auth.middleware';
-import { otpRateLimiter, authRateLimiter } from '../middleware/rate-limit.middleware';
+import { otpRateLimiter, authRateLimiter, otpVerifyRateLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -27,6 +27,7 @@ router.post(
 // Verify OTP and create/login customer account
 router.post(
   '/customer/verify-otp',
+  otpVerifyRateLimiter, // Rate limit OTP verification attempts to prevent brute force
   validate([
     body('phone')
       .notEmpty().withMessage('Phone number is required')
@@ -64,6 +65,7 @@ router.post(
 // Verify provider phone number
 router.post(
   '/provider/verify-otp',
+  otpVerifyRateLimiter, // Rate limit OTP verification attempts to prevent brute force
   validate([
     body('phone')
       .notEmpty().withMessage('Phone number is required')
@@ -162,6 +164,7 @@ router.post(
 // Provider reset password
 router.post(
   '/provider/reset-password',
+  authRateLimiter, // Rate limit password reset attempts
   validate([
     body('token')
       .notEmpty().withMessage('Reset token is required')
@@ -194,6 +197,7 @@ router.post(
 // Refresh JWT token
 router.post(
   '/refresh',
+  authRateLimiter, // Rate limit token refresh attempts
   validate([
     body('refreshToken')
       .notEmpty().withMessage('Refresh token is required')

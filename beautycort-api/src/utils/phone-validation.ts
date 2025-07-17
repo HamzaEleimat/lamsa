@@ -141,25 +141,7 @@ export function validateTestPhoneNumber(phone: string): PhoneValidationResult {
     return jordanResult;
   }
   
-  // Check for test numbers (US and Spain)
-  const testUSRegex = /^\+1\d{10}$/;
-  const testSpainRegex = /^\+34\d{9}$/;
-  
-  if (testUSRegex.test(phone)) {
-    return {
-      isValid: true,
-      normalizedPhone: phone,
-      isTestNumber: true
-    };
-  }
-  
-  if (testSpainRegex.test(phone)) {
-    return {
-      isValid: true,
-      normalizedPhone: phone,
-      isTestNumber: true
-    };
-  }
+  // Security: Only Jordan phone numbers allowed (removed test number bypass)
   
   // Return original Jordan validation error
   return jordanResult;

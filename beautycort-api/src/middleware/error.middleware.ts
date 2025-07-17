@@ -15,7 +15,7 @@ export class AppError extends Error {
 
 export const errorHandler = (
   err: Error | AppError,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
@@ -27,7 +27,18 @@ export const errorHandler = (
     message = err.message;
   }
 
-  console.error('Error:', err);
+  // Redact sensitive data from error logs
+  const sanitizedError = {
+    message: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method,
+    user: (req as any).user?.id,
+    // Do not log request body to prevent payment data exposure
+    timestamp: new Date().toISOString()
+  };
+  
+  console.error('Error:', sanitizedError);
 
   res.status(statusCode).json({
     success: false,

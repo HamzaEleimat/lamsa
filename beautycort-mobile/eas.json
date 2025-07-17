@@ -1,0 +1,79 @@
+{
+  "cli": {
+    "version": ">= 8.0.0"
+  },
+  "build": {
+    "development": {
+      "channel": "development",
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "resourceClass": "medium"
+      }
+    },
+    "staging": {
+      "channel": "staging",
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium",
+        "bundleIdentifier": "com.beautycort.mobile.staging",
+        "buildNumber": "1.0.0"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "applicationId": "com.beautycort.mobile.staging",
+        "versionCode": 1
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "staging"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium",
+        "bundleIdentifier": "com.beautycort.mobile",
+        "buildNumber": "1.0.0"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "applicationId": "com.beautycort.mobile",
+        "versionCode": 1
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      }
+    }
+  },
+  "submit": {
+    "staging": {
+      "ios": {
+        "appleId": "your-apple-id@beautycort.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    },
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@beautycort.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "production"
+      }
+    }
+  },
+  "update": {
+    "url": "https://u.expo.dev/your-project-id"
+  }
+}

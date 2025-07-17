@@ -14,7 +14,13 @@
     "api:dev": "cd beautycort-api && npm run dev",
     "mobile:start": "cd beautycort-mobile && npm start",
     "web:dev": "cd beautycort-web && npm run dev",
-    "install:all": "npm install && cd beautycort-api && npm install && cd ../beautycort-mobile && npm install && cd ../beautycort-web && npm install"
+    "install:all": "npm install && cd beautycort-api && npm install && cd ../beautycort-mobile && npm install && cd ../beautycort-web && npm install",
+    "test": "node run-bilingual-tests.js",
+    "test:mobile": "cd beautycort-mobile && npm test",
+    "test:api": "cd beautycort-api && npm test",
+    "test:web": "cd beautycort-web && npm test",
+    "test:bilingual": "node run-bilingual-tests.js",
+    "language-qa": "node run-bilingual-tests.js --report-only"
   },
   "devDependencies": {
     "husky": "^8.0.0"
@@ -33,5 +39,12 @@
     "nextjs"
   ],
   "author": "BeautyCort Development Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@react-native-community/cli-server-api": "^18.0.0",
+    "@types/react": "~19.0.10",
+    "@types/react-native": "^0.73.0",
+    "expo": "^53.0.19",
+    "typescript": "~5.8.3"
+  }
 }

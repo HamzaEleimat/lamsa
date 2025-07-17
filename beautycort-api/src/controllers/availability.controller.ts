@@ -4,7 +4,7 @@ import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase-simple';
 import { availabilityService } from '../services/availability.service';
 import { prayerTimeService } from '../services/prayer-time.service';
-import { format, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns/index.js';
+import { format, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns';
 
 export class AvailabilityController {
   /**
@@ -478,8 +478,8 @@ export class AvailabilityController {
         const daySchedule = {
           date: format(currentDate, 'yyyy-MM-dd'),
           dayOfWeek,
-          shifts: schedule?.provider_schedule_shifts?.filter(s => s.day_of_week === dayOfWeek) || [],
-          breaks: schedule?.provider_breaks?.filter(b => b.day_of_week === dayOfWeek) || [],
+          shifts: schedule?.provider_schedule_shifts?.filter((s: any) => s.day_of_week === dayOfWeek) || [],
+          breaks: schedule?.provider_breaks?.filter((b: any) => b.day_of_week === dayOfWeek) || [],
           timeOff: timeOff?.filter(t => 
             currentDate >= parseISO(t.start_date) && 
             currentDate <= parseISO(t.end_date)

@@ -48,7 +48,7 @@ class EnvironmentValidator {
     // Required variables
     const config: Partial<EnvironmentConfig> = {
       JWT_SECRET: this.validateRequired('JWT_SECRET'),
-      JWT_EXPIRES_IN: this.validateWithDefault('JWT_EXPIRES_IN', '7d'),
+      JWT_EXPIRES_IN: this.validateWithDefault('JWT_EXPIRES_IN', '15m'),
       REFRESH_TOKEN_EXPIRES_IN: this.validateWithDefault('REFRESH_TOKEN_EXPIRES_IN', '30d'),
       
       SUPABASE_URL: this.validateRequired('SUPABASE_URL'),

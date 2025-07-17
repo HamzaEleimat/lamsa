@@ -3,6 +3,7 @@ import { body, query } from 'express-validator';
 import { reviewController } from '../controllers/review.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { validate } from '../middleware/validation.middleware';
+import { authRateLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.get(
 router.put(
   '/:id',
   authenticate,
+  authRateLimiter, // Rate limit review updates to prevent spam
   validate([
     body('rating').optional().isInt({ min: 1, max: 5 }),
     body('comment').optional().isString(),

@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest, UserRole } from '../types';
 import jwt from 'jsonwebtoken';
 import { getEnvironmentConfig } from '../utils/environment-validation';
+import { tokenBlacklist } from '../utils/token-blacklist';
 
 interface JWTPayload {
   id: string;
@@ -24,6 +25,16 @@ export const authenticate = async (
       res.status(401).json({
         success: false,
         error: 'No token provided',
+      });
+      return;
+    }
+
+    // Check if token is blacklisted (revoked)
+    const isBlacklisted = await tokenBlacklist.isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      res.status(401).json({
+        success: false,
+        error: 'Token has been revoked',
       });
       return;
     }

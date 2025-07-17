@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeautyCort QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #6B46C1 0%, #9F7AEA 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: #6B46C1;
+            border-radius: 16px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #2D3748;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .form-section {
+            background: #F7FAFC;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6B46C1;
+            box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .generate-btn {
+            background: #6B46C1;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .generate-btn:hover {
+            background: #553C9A;
+            transform: translateY(-1px);
+        }
+
+        .generate-btn:disabled {
+            background: #A0AEC0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview-section {
+            text-align: center;
+            padding: 24px;
+            border: 2px dashed #E2E8F0;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .preview-section.active {
+            border-color: #6B46C1;
+            background: #F7FAFC;
+        }
+
+        #qrcode {
+            margin: 20px auto;
+            max-width: 300px;
+        }
+
+        .download-section {
+            display: none;
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .download-section.active {
+            display: block;
+        }
+
+        .download-btn {
+            background: #ED8936;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #DD6B20;
+        }
+
+        .url-display {
+            background: #EDF2F7;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 16px;
+            word-break: break-all;
+        }
+
+        .instructions {
+            background: #E6FFFA;
+            border-left: 4px solid #38B2AC;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+        }
+
+        .instructions h3 {
+            color: #285E61;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            color: #2C7A7B;
+            line-height: 1.5;
+        }
+
+        .error {
+            background: #FED7D7;
+            border: 1px solid #F56565;
+            color: #C53030;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .success {
+            background: #C6F6D5;
+            border: 1px solid #48BB78;
+            color: #276749;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">BC</div>
+            <h1>QR Code Generator</h1>
+            <p class="subtitle">Generate custom QR codes for your BeautyCort provider profile</p>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use</h3>
+            <p>Enter your provider information below to generate a custom QR code that links directly to your BeautyCort profile. Customers can scan this code to view your services and book appointments instantly.</p>
+        </div>
+
+        <form id="qrForm">
+            <div class="form-section">
+                <h3 style="margin-bottom: 16px; color: #2D3748;">Provider Information</h3>
+                
+                <div class="form-group">
+                    <label for="providerId">Provider ID *</label>
+                    <input type="text" id="providerId" name="providerId" required 
+                           placeholder="e.g., salon-nour-123 or your unique provider ID">
+                    <small style="color: #718096;">Find this in your BeautyCort provider dashboard</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="businessName">Business Name</label>
+                        <input type="text" id="businessName" name="businessName" 
+                               placeholder="e.g., Salon Nour">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessNameAr">Business Name (Arabic)</label>
+                        <input type="text" id="businessNameAr" name="businessNameAr" 
+                               placeholder="صالون نور" dir="rtl">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <select id="city" name="city">
+                            <option value="">Select City</option>
+                            <option value="amman">Amman</option>
+                            <option value="irbid">Irbid</option>
+                            <option value="zarqa">Zarqa</option>
+                            <option value="aqaba">Aqaba</option>
+                            <option value="madaba">Madaba</option>
+                            <option value="karak">Karak</option>
+                            <option value="mafraq">Mafraq</option>
+                            <option value="tafilah">Tafilah</option>
+                            <option value="maan">Ma'an</option>
+                            <option value="ajloun">Ajloun</option>
+                            <option value="jerash">Jerash</option>
+                            <option value="balqa">Balqa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceType">Primary Service</label>
+                        <select id="serviceType" name="serviceType">
+                            <option value="">Select Service Type</option>
+                            <option value="hair">Hair Services</option>
+                            <option value="nails">Nail Services</option>
+                            <option value="makeup">Makeup</option>
+                            <option value="spa">Spa & Wellness</option>
+                            <option value="skincare">Skincare</option>
+                            <option value="lashes">Lashes & Brows</option>
+                            <option value="mobile">Mobile Services</option>
+                            <option value="bridal">Bridal Services</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 style="margin-bottom: 16px; color: #2D3748;">QR Code Settings</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="qrSize">QR Code Size</label>
+                        <select id="qrSize" name="qrSize">
+                            <option value="200">Small (200x200px) - Business Cards</option>
+                            <option value="300" selected>Medium (300x300px) - Stickers</option>
+                            <option value="500">Large (500x500px) - Posters</option>
+                            <option value="800">Extra Large (800x800px) - Banners</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="errorLevel">Error Correction</label>
+                        <select id="errorLevel" name="errorLevel">
+                            <option value="L">Low (7%)</option>
+                            <option value="M" selected>Medium (15%) - Recommended</option>
+                            <option value="Q">Quartile (25%)</option>
+                            <option value="H">High (30%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="foregroundColor">QR Code Color</label>
+                        <select id="foregroundColor" name="foregroundColor">
+                            <option value="#000000">Black (Recommended)</option>
+                            <option value="#6B46C1">BeautyCort Purple</option>
+                            <option value="#2D3748">Dark Gray</option>
+                            <option value="#1A202C">Very Dark Gray</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="backgroundColor">Background Color</label>
+                        <select id="backgroundColor" name="backgroundColor">
+                            <option value="#FFFFFF">White (Recommended)</option>
+                            <option value="#F7FAFC">Light Gray</option>
+                            <option value="transparent">Transparent</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="generate-btn" id="generateBtn">
+                Generate QR Code
+            </button>
+        </form>
+
+        <div class="preview-section" id="previewSection">
+            <h3 style="color: #718096; margin-bottom: 16px;">QR Code Preview</h3>
+            <p style="color: #A0AEC0;">Fill in the form above and click "Generate QR Code" to see your preview</p>
+            <div id="qrcode"></div>
+            <div class="url-display" id="urlDisplay" style="display: none;"></div>
+        </div>
+
+        <div class="download-section" id="downloadSection">
+            <h3 style="margin-bottom: 16px; color: #2D3748;">Download Your QR Code</h3>
+            <button type="button" class="download-btn" id="downloadPNG">Download PNG</button>
+            <button type="button" class="download-btn" id="downloadSVG">Download SVG</button>
+            <button type="button" class="download-btn" id="downloadPDF">Download PDF</button>
+            
+            <div style="margin-top: 20px; padding: 16px; background: #F0FFF4; border-radius: 8px;">
+                <h4 style="color: #276749; margin-bottom: 8px;">Next Steps:</h4>
+                <ol style="text-align: left; color: #2F855A; line-height: 1.6;">
+                    <li>Test your QR code by scanning it with your phone</li>
+                    <li>Add it to your window stickers, business cards, or marketing materials</li>
+                    <li>Share the URL directly with customers via WhatsApp or social media</li>
+                    <li>Track scans and bookings in your BeautyCort dashboard</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class QRCodeGenerator {
+            constructor() {
+                this.form = document.getElementById('qrForm');
+                this.previewSection = document.getElementById('previewSection');
+                this.downloadSection = document.getElementById('downloadSection');
+                this.urlDisplay = document.getElementById('urlDisplay');
+                this.currentQRCode = null;
+                this.currentURL = '';
+                
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+                document.getElementById('downloadPNG').addEventListener('click', () => this.downloadQR('png'));
+                document.getElementById('downloadSVG').addEventListener('click', () => this.downloadQR('svg'));
+                document.getElementById('downloadPDF').addEventListener('click', () => this.downloadQR('pdf'));
+            }
+
+            async handleFormSubmit(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this.form);
+                const data = Object.fromEntries(formData);
+                
+                // Validate required fields
+                if (!data.providerId) {
+                    this.showError('Provider ID is required');
+                    return;
+                }
+
+                try {
+                    await this.generateQRCode(data);
+                    this.showSuccess('QR Code generated successfully!');
+                } catch (error) {
+                    this.showError('Failed to generate QR Code: ' + error.message);
+                }
+            }
+
+            async generateQRCode(data) {
+                // Build the URL
+                const baseURL = 'https://beautycort.com/provider';
+                const params = new URLSearchParams();
+                
+                params.append('id', data.providerId);
+                if (data.businessName) params.append('name', data.businessName);
+                if (data.city) params.append('city', data.city);
+                if (data.serviceType) params.append('service', data.serviceType);
+                params.append('src', 'qr'); // Track that this came from QR code
+
+                this.currentURL = `${baseURL}/${data.providerId}?${params.toString()}`;
+
+                // QR Code options
+                const options = {
+                    width: parseInt(data.qrSize) || 300,
+                    margin: 2,
+                    color: {
+                        dark: data.foregroundColor || '#000000',
+                        light: data.backgroundColor || '#FFFFFF'
+                    },
+                    errorCorrectionLevel: data.errorLevel || 'M'
+                };
+
+                // Clear previous QR code
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = '';
+
+                // Generate QR code
+                await QRCode.toCanvas(qrContainer, this.currentURL, options);
+                this.currentQRCode = qrContainer.querySelector('canvas');
+
+                // Update UI
+                this.previewSection.classList.add('active');
+                this.downloadSection.classList.add('active');
+                this.urlDisplay.style.display = 'block';
+                this.urlDisplay.textContent = this.currentURL;
+
+                // Scroll to preview
+                this.previewSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            async downloadQR(format) {
+                if (!this.currentQRCode) {
+                    this.showError('Please generate a QR code first');
+                    return;
+                }
+
+                const formData = new FormData(this.form);
+                const data = Object.fromEntries(formData);
+                const filename = this.generateFilename(data, format);
+
+                try {
+                    switch (format) {
+                        case 'png':
+                            this.downloadCanvas(this.currentQRCode, filename);
+                            break;
+                        case 'svg':
+                            await this.downloadSVG(filename);
+                            break;
+                        case 'pdf':
+                            await this.downloadPDF(filename);
+                            break;
+                    }
+                } catch (error) {
+                    this.showError('Failed to download: ' + error.message);
+                }
+            }
+
+            downloadCanvas(canvas, filename) {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+
+            async downloadSVG(filename) {
+                const formData = new FormData(this.form);
+                const data = Object.fromEntries(formData);
+                
+                const svgString = await QRCode.toString(this.currentURL, {
+                    type: 'svg',
+                    width: parseInt(data.qrSize) || 300,
+                    margin: 2,
+                    color: {
+                        dark: data.foregroundColor || '#000000',
+                        light: data.backgroundColor || '#FFFFFF'
+                    },
+                    errorCorrectionLevel: data.errorLevel || 'M'
+                });
+
+                this.downloadString(svgString, filename, 'image/svg+xml');
+            }
+
+            async downloadPDF(filename) {
+                // For PDF, we'll use the canvas and create a simple PDF
+                const canvas = this.currentQRCode;
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Simple PDF creation (in a real app, you'd use a library like jsPDF)
+                const pdfContent = `
+                    <div style="text-align: center; padding: 40px;">
+                        <h2 style="margin-bottom: 20px;">BeautyCort QR Code</h2>
+                        <img src="${imgData}" style="max-width: 400px;">
+                        <p style="margin-top: 20px; font-size: 12px; color: #666;">
+                            Scan this code to view the provider profile
+                        </p>
+                        <p style="font-size: 10px; color: #999;">
+                            ${this.currentURL}
+                        </p>
+                    </div>
+                `;
+                
+                this.showError('PDF download feature requires additional setup. Please use PNG or SVG format.');
+            }
+
+            downloadString(content, filename, mimeType) {
+                const blob = new Blob([content], { type: mimeType });
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+
+            generateFilename(data, format) {
+                const businessName = data.businessName || data.providerId || 'qrcode';
+                const cleanName = businessName.toLowerCase()
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                
+                const timestamp = new Date().toISOString().slice(0, 10);
+                return `beautycort-${cleanName}-${timestamp}.${format}`;
+            }
+
+            showError(message) {
+                this.removeMessages();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                this.form.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 5000);
+            }
+
+            showSuccess(message) {
+                this.removeMessages();
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.textContent = message;
+                this.form.appendChild(successDiv);
+                setTimeout(() => successDiv.remove(), 3000);
+            }
+
+            removeMessages() {
+                document.querySelectorAll('.error, .success').forEach(el => el.remove());
+            }
+        }
+
+        // Initialize the QR Code Generator when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new QRCodeGenerator();
+        });
+    </script>
+</body>
+</html>

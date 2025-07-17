@@ -590,14 +590,18 @@ export class ServiceController {
         .eq('provider.verified', true)
         .eq('provider.active', true);
       
-      // Search query
+      // Search query (SQL injection safe)
       if (q) {
-        query = query.or(`
-          name_ar.ilike.%${q}%,
-          name_en.ilike.%${q}%,
-          description_ar.ilike.%${q}%,
-          description_en.ilike.%${q}%
-        `);
+        // Sanitize input to prevent SQL injection
+        const sanitizedQuery = String(q).replace(/[%_\\]/g, '\\$&');
+        const searchPattern = `%${sanitizedQuery}%`;
+        
+        query = query.or(
+          `name_ar.ilike."${searchPattern}",` +
+          `name_en.ilike."${searchPattern}",` +
+          `description_ar.ilike."${searchPattern}",` +
+          `description_en.ilike."${searchPattern}"`
+        );
       }
       
       // Category filter

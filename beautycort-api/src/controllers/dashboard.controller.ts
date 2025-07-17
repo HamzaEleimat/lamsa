@@ -5,7 +5,7 @@ import { AppError } from '../middleware/error.middleware';
 import { DashboardService } from '../services/dashboard.service';
 import { AnalyticsService } from '../services/analytics.service';
 import { performanceInsightsService } from '../services/performance-insights.service';
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subMonths } from 'date-fns/index.js';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subMonths } from 'date-fns';
 
 export class DashboardController {
   private dashboardService: DashboardService;

@@ -4,6 +4,7 @@ import { providerController } from '../controllers/provider.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { validate } from '../middleware/validation.middleware';
 import { searchRateLimiter } from '../middleware/rate-limit.middleware';
+import { validateProviderOwnership, validateOwnershipWithAdminBypass } from '../middleware/resource-ownership.middleware';
 import { UserRole } from '../types';
 import multer from 'multer';
 
@@ -123,6 +124,7 @@ router.put(
   '/:id',
   authenticate,
   authorize(UserRole.PROVIDER),
+  validateProviderOwnership('id'), // Ensure provider can only update own profile
   upload.single('license_image'),
   validate([
     param('id').notEmpty().withMessage('Provider ID is required'),
@@ -151,6 +153,7 @@ router.delete(
   '/:id',
   authenticate,
   authorize(UserRole.PROVIDER, UserRole.ADMIN),
+  validateOwnershipWithAdminBypass('id'), // Providers can only delete own profile, admins can delete any
   validate([
     param('id').notEmpty().withMessage('Provider ID is required'),
   ]),
@@ -162,6 +165,7 @@ router.get(
   '/:id/stats',
   authenticate,
   authorize(UserRole.PROVIDER, UserRole.ADMIN),
+  validateOwnershipWithAdminBypass('id'), // Providers can only view own stats, admins can view any
   validate([
     param('id').notEmpty().withMessage('Provider ID is required'),
   ]),

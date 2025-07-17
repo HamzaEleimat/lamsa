@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase-simple';
-import { format } from 'date-fns/index.js';
+import { format } from 'date-fns';
 import { RevenueService } from './revenue.service';
 import { CustomerAnalyticsService } from './customer-analytics.service';
 import { ReviewAnalyticsService } from './review-analytics.service';
