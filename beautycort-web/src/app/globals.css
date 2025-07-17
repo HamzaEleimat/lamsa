@@ -55,11 +55,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-[color:hsl(var(--border))];
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[color:hsl(var(--background))] text-[color:hsl(var(--foreground))];
   }
   
   /* Font families based on locale */
@@ -109,28 +109,28 @@
   
   /* Custom components */
   .sidebar-transition {
-    @apply transition-all duration-300 ease-in-out;
+    transition: all 300ms ease-in-out;
   }
   
   .content-transition {
-    @apply transition-all duration-200 ease-in-out;
+    transition: all 200ms ease-in-out;
   }
   
   .fade-in {
-    @apply animate-fade-in;
+    animation: fadeIn 0.5s ease-in-out;
   }
   
   .slide-up {
-    @apply animate-slide-up;
+    animation: slideUp 0.3s ease-out;
   }
   
   .slide-down {
-    @apply animate-slide-down;
+    animation: slideDown 0.3s ease-out;
   }
   
   /* Form inputs with RTL support */
   .form-input {
-    @apply w-full px-3 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+    @apply w-full px-3 py-2 border border-[color:hsl(var(--input))] rounded-md bg-[color:hsl(var(--background))] text-[color:hsl(var(--foreground))] placeholder:text-[color:hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[color:hsl(var(--ring))] focus:border-transparent;
   }
   
   .form-input[dir="rtl"] {
@@ -143,20 +143,20 @@
   
   /* Button variants with RTL support */
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary;
+    @apply bg-[color:hsl(var(--primary))] text-[color:hsl(var(--primary-foreground))] hover:bg-[color:hsl(var(--primary)/.9)] focus:ring-[color:hsl(var(--primary))];
   }
   
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary;
+    @apply bg-[color:hsl(var(--secondary))] text-[color:hsl(var(--secondary-foreground))] hover:bg-[color:hsl(var(--secondary)/.8)] focus:ring-[color:hsl(var(--secondary))];
   }
   
   .btn-destructive {
-    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive;
+    @apply bg-[color:hsl(var(--destructive))] text-[color:hsl(var(--destructive-foreground))] hover:bg-[color:hsl(var(--destructive)/.9)] focus:ring-[color:hsl(var(--destructive))];
   }
   
   /* Card components */
   .card {
-    @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+    @apply bg-[color:hsl(var(--card))] text-[color:hsl(var(--card-foreground))] rounded-lg border shadow-sm;
   }
   
   .card-header {
@@ -173,11 +173,11 @@
   
   /* Navigation components */
   .nav-link {
-    @apply flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground;
+    @apply flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-[color:hsl(var(--accent))] hover:text-[color:hsl(var(--accent-foreground))] focus:bg-[color:hsl(var(--accent))] focus:text-[color:hsl(var(--accent-foreground))];
   }
   
   .nav-link.active {
-    @apply bg-accent text-accent-foreground;
+    @apply bg-[color:hsl(var(--accent))] text-[color:hsl(var(--accent-foreground))];
   }
   
   /* Table components */
@@ -190,11 +190,11 @@
   }
   
   .table-header {
-    @apply border-b bg-muted/50;
+    @apply border-b bg-[color:hsl(var(--muted)/.5)];
   }
   
   .table-row {
-    @apply border-b hover:bg-muted/50;
+    @apply border-b hover:bg-[color:hsl(var(--muted)/.5)];
   }
   
   .table-cell {
@@ -207,11 +207,11 @@
   
   /* Loading states */
   .loading-skeleton {
-    @apply animate-pulse bg-muted rounded;
+    @apply animate-pulse bg-[color:hsl(var(--muted))] rounded;
   }
   
   .loading-spinner {
-    @apply animate-spin rounded-full border-2 border-primary border-t-transparent;
+    @apply animate-spin rounded-full border-2 border-[color:hsl(var(--primary))] border-t-transparent;
   }
   
   /* Alert components */
@@ -269,7 +269,7 @@
   }
   
   .focus-visible {
-    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-[color:hsl(var(--ring))] focus:ring-offset-2;
   }
   
   /* Custom scrollbar */

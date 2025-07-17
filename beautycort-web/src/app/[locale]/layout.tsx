@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import { locales, localeConfig, type Locale } from '../../i18n/request';
 import '../globals.css';
 
@@ -13,17 +14,21 @@ export function generateStaticParams() {
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
 export default async function RootLayout({
   children,
-  params: { locale }
+  params
 }: RootLayoutProps) {
+  const { locale } = await params;
   // Validate locale
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
+  
+  // Enable static rendering for this locale
+  setRequestLocale(locale);
 
   const messages = await getMessages();
   const currentLocale = locale as Locale;

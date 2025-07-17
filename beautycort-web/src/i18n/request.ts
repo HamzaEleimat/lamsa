@@ -94,6 +94,7 @@ export default getRequestConfig(async ({ locale }) => {
     const messages = await import(`./messages/${locale}.json`);
     
     return {
+      locale,
       messages: messages.default,
       timeZone: 'Asia/Amman', // Jordan timezone
       now: new Date(),

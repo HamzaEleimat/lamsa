@@ -42,15 +42,9 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
 
-  // Redirects
+  // Redirects handled by next-intl and vercel.json
   async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/dashboard',
-        permanent: false,
-      },
-    ];
+    return [];
   },
 
   // API proxy rewrites (optional)

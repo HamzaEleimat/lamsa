@@ -1,7 +1,15 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 
-export default function ProviderLoginPage() {
-  const t = useTranslations('provider.login');
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function ProviderLoginPage({ params }: PageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  
+  const t = await getTranslations('provider.login');
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">

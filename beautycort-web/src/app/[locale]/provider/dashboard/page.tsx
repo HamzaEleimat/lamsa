@@ -1,7 +1,15 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 
-export default function ProviderDashboardPage() {
-  const t = useTranslations('provider.dashboard');
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function ProviderDashboardPage({ params }: PageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  
+  const t = await getTranslations('provider.dashboard');
   
   return (
     <div className="min-h-screen bg-gray-50">
