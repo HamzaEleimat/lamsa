@@ -1,8 +1,8 @@
-# BeautyCort App Permissions Documentation
+# Lamsa App Permissions Documentation
 
 ## Overview
 
-This document explains all permissions requested by the BeautyCort mobile application, why each permission is needed, and how user data is protected.
+This document explains all permissions requested by the Lamsa mobile application, why each permission is needed, and how user data is protected.
 
 ## iOS Permissions (Info.plist)
 
@@ -10,7 +10,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 1. Camera Access (NSCameraUsageDescription)
 **Permission:** `NSCameraUsageDescription`  
-**Purpose:** "BeautyCort needs access to your camera to take photos of your beauty services and profile."
+**Purpose:** "Lamsa needs access to your camera to take photos of your beauty services and profile."
 
 **Why We Need This:**
 - **Profile Photos:** Users can take profile pictures directly in the app
@@ -33,7 +33,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 2. Photo Library Access (NSPhotoLibraryUsageDescription)
 **Permission:** `NSPhotoLibraryUsageDescription`  
-**Purpose:** "BeautyCort needs access to your photo library to select photos for your profile and services."
+**Purpose:** "Lamsa needs access to your photo library to select photos for your profile and services."
 
 **Why We Need This:**
 - **Profile Setup:** Select existing photos for user profiles
@@ -55,7 +55,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 3. Location Services (NSLocationWhenInUseUsageDescription)
 **Permission:** `NSLocationWhenInUseUsageDescription` & `NSLocationAlwaysAndWhenInUseUsageDescription`  
-**Purpose:** "BeautyCort needs access to your location to find nearby beauty service providers."
+**Purpose:** "Lamsa needs access to your location to find nearby beauty service providers."
 
 **Why We Need This:**
 - **Provider Search:** Find beauty services near user's current location
@@ -77,7 +77,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 4. Push Notifications (NSUserNotificationsUsageDescription)
 **Permission:** `NSUserNotificationsUsageDescription`  
-**Purpose:** "BeautyCort needs to send you notifications about your bookings and appointments."
+**Purpose:** "Lamsa needs to send you notifications about your bookings and appointments."
 
 **Why We Need This:**
 - **Booking Confirmations:** Confirm when appointments are scheduled
@@ -100,7 +100,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 5. Contacts Access (NSContactsUsageDescription)
 **Permission:** `NSContactsUsageDescription`  
-**Purpose:** "BeautyCort needs access to your contacts to help you share services with friends."
+**Purpose:** "Lamsa needs access to your contacts to help you share services with friends."
 
 **Why We Need This:**
 - **Referral System:** Easily invite friends to try the app
@@ -122,7 +122,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 6. Calendar Access (NSCalendarsUsageDescription)
 **Permission:** `NSCalendarsUsageDescription`  
-**Purpose:** "BeautyCort needs access to your calendar to schedule your beauty appointments."
+**Purpose:** "Lamsa needs access to your calendar to schedule your beauty appointments."
 
 **Why We Need This:**
 - **Appointment Scheduling:** Add confirmed bookings to user's calendar
@@ -144,7 +144,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ### 7. Microphone Access (NSMicrophoneUsageDescription)
 **Permission:** `NSMicrophoneUsageDescription`  
-**Purpose:** "BeautyCort needs access to your microphone for voice messages and video calls with providers."
+**Purpose:** "Lamsa needs access to your microphone for voice messages and video calls with providers."
 
 **Why We Need This:**
 - **Voice Messages:** Send voice notes to providers for better communication
@@ -228,7 +228,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 #### 11. INTERNET
 **Purpose:** Core app functionality requiring internet access
 **Justification:**
-- Connect to BeautyCort API services
+- Connect to Lamsa API services
 - Load provider information and photos
 - Process bookings and payments
 - Send notifications and messages
@@ -314,7 +314,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 #### Location Permission
 **Title:** "Find Beauty Services Near You"
-**Message:** "BeautyCort uses your location to show nearby beauty providers and calculate accurate distances. Your location is only used when the app is active."
+**Message:** "Lamsa uses your location to show nearby beauty providers and calculate accurate distances. Your location is only used when the app is active."
 **Options:** "Allow While Using App" / "Don't Allow"
 
 #### Camera Permission
@@ -331,7 +331,7 @@ Based on the app.json configuration analysis, here are the iOS permissions and t
 
 ```
 Permissions
-Manage how BeautyCort uses your device features:
+Manage how Lamsa uses your device features:
 
 📍 Location: Enabled
 Find nearby beauty providers
@@ -346,7 +346,7 @@ Get booking reminders and updates
 > Manage in Settings
 
 📞 Contacts: Not Enabled
-Easily invite friends to BeautyCort
+Easily invite friends to Lamsa
 > Enable in Settings
 
 📅 Calendar: Enabled

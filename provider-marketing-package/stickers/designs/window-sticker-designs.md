@@ -1,4 +1,4 @@
-# BeautyCort Window Sticker Designs
+# Lamsa Window Sticker Designs
 
 ## Design Specifications
 
@@ -18,13 +18,13 @@
 
 ### Small Sticker (15cm x 10cm)
 ```
-[BeautyCort Logo] احجز على بيوتي كورت | Book on BeautyCort [QR Code]
+[Lamsa Logo] احجز على بيوتي كورت | Book on Lamsa [QR Code]
                  Professional Beauty Booking
                  خدمة حجز التجميل الاحترافية
 ```
 
 **English Text:**
-- Main: "Book on BeautyCort"
+- Main: "Book on Lamsa"
 - Subtitle: "Professional Beauty Booking"
 - CTA: "Scan to Book"
 
@@ -36,8 +36,8 @@
 ### Medium Sticker (25cm x 15cm)
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ [BeautyCort Logo]     احجز على بيوتي كورت                │
-│                      Book on BeautyCort                │
+│ [Lamsa Logo]     احجز على بيوتي كورت                │
+│                      Book on Lamsa                │
 │                                               [QR Code] │
 │ ✓ Verified Professionals  ✓ Instant Booking           │
 │ ✓ خبراء معتمدون          ✓ حجز فوري                     │
@@ -50,7 +50,7 @@
 ### Large Sticker (40cm x 25cm)
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│                    [BeautyCort Logo]                                          │
+│                    [Lamsa Logo]                                          │
 │                                                                               │
 │         احجز مواعيدك للتجميل بطريقة احترافية                                      │
 │         Book Your Beauty Appointments Professionally                          │
@@ -63,7 +63,7 @@
 │           امسح الرمز لتحميل التطبيق والحجز معنا                                 │
 │           Scan to Download App & Book With Us                                │
 │                                                                               │
-│                    beautycort.com/provider/[PROVIDER_ID]                     │
+│                    lamsa.com/provider/[PROVIDER_ID]                     │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -72,10 +72,10 @@
 ### Medium Vertical (15cm x 25cm)
 ```
 ┌─────────────────────────────┐
-│     [BeautyCort Logo]       │
+│     [Lamsa Logo]       │
 │                             │
 │      احجز على بيوتي كورت      │
-│     Book on BeautyCort      │
+│     Book on Lamsa      │
 │                             │
 │        [QR Code]            │
 │         5cm x 5cm           │
@@ -103,7 +103,7 @@
 ```
     ┌─────────────────────────┐
   ┌─┘                         └─┐
- ┌┘     [BeautyCort Logo]       └┐
+ ┌┘     [Lamsa Logo]       └┐
 ┌┘                               └┐
 │         احجز معنا                │
 │        Book With Us            │
@@ -132,7 +132,7 @@
 1. **Standard**: Purple background, white text
 2. **Inverted**: White background, purple text
 3. **Gold Accent**: Purple + gold for premium providers
-4. **Provider Brand**: Custom colors while maintaining BeautyCort logo
+4. **Provider Brand**: Custom colors while maintaining Lamsa logo
 
 ## Technical Specifications
 
@@ -159,7 +159,7 @@
 ```
 sticker-template-small.ai
 ├── Background Layer
-├── BeautyCort Logo Layer
+├── Lamsa Logo Layer
 ├── Text Layer (Arabic)
 ├── Text Layer (English)  
 ├── QR Code Placeholder Layer
@@ -186,13 +186,13 @@ sticker-template-small.ai
 
 **Do:**
 - Use high-contrast colors for QR code visibility
-- Maintain BeautyCort brand consistency
+- Maintain Lamsa brand consistency
 - Test QR code scanning before printing
 - Include both Arabic and English text
 - Leave sufficient white space around elements
 
 **Don't:**
-- Alter BeautyCort logo proportions or colors
+- Alter Lamsa logo proportions or colors
 - Use fonts other than specified brand fonts
 - Make QR codes smaller than minimum size
 - Overcrowd design with too much information

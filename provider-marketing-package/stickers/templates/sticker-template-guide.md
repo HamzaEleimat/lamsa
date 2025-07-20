@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-This guide helps beauty providers customize their BeautyCort window stickers while maintaining brand consistency.
+This guide helps beauty providers customize their Lamsa window stickers while maintaining brand consistency.
 
 ## Template Files Included
 
@@ -33,7 +33,7 @@ Select the template size that best fits your window or door space:
 #### For Adobe Illustrator Users:
 1. Open the .ai template file
 2. All layers are organized and labeled
-3. Lock the "BeautyCort Branding" layer
+3. Lock the "Lamsa Branding" layer
 4. Only edit the "Provider Customization" layer
 
 #### For Canva Users:
@@ -67,7 +67,7 @@ Special Offer: [Launch Special - 20% Off]
 ### Step 4: Add Your QR Code
 
 #### Getting Your QR Code:
-1. Go to your BeautyCort provider dashboard
+1. Go to your Lamsa provider dashboard
 2. Navigate to "Marketing Tools"
 3. Click "Generate QR Code"
 4. Download high-resolution version (minimum 300 DPI)
@@ -84,7 +84,7 @@ Special Offer: [Launch Special - 20% Off]
 
 #### Approved Color Schemes:
 
-**Standard BeautyCort:**
+**Standard Lamsa:**
 - Background: #6B46C1 (Purple)
 - Text: #FFFFFF (White)
 - Accent: #ED8936 (Orange)
@@ -100,7 +100,7 @@ Special Offer: [Launch Special - 20% Off]
 - Accent: #6B46C1 (Purple)
 
 **Provider Brand Integration:**
-- Keep BeautyCort logo unchanged
+- Keep Lamsa logo unchanged
 - Use your brand colors for accent elements
 - Maintain text readability
 
@@ -159,7 +159,7 @@ Specialty: "متوفر في عمان | Available in Amman"
 ## Quality Check Before Printing
 
 ### Design Review Checklist:
-- [ ] BeautyCort logo is unaltered and clear
+- [ ] Lamsa logo is unaltered and clear
 - [ ] Arabic text reads right-to-left correctly
 - [ ] English text is grammatically correct
 - [ ] QR code is high-resolution and scannable
@@ -184,7 +184,7 @@ Specialty: "متوفر في عمان | Available in Amman"
 ❌ **Font Substitution**: Using different fonts
 ✅ **Correct**: Only use Tajawal (Arabic) and Inter (English)
 
-❌ **Logo Modification**: Changing BeautyCort logo colors
+❌ **Logo Modification**: Changing Lamsa logo colors
 ✅ **Correct**: Keep logo exactly as provided
 
 ❌ **Poor Contrast**: Light text on light background
@@ -215,7 +215,7 @@ AmmanSpa_Small_English_v1.pdf
 ## Getting Help
 
 ### Design Support:
-- **Email**: design@beautycort.com
+- **Email**: design@lamsa.com
 - **WhatsApp**: +962 XX XXX XXXX
 - **Response Time**: Within 24 hours
 - **Service**: Free design review and suggestions
@@ -255,7 +255,7 @@ AmmanSpa_Small_English_v1.pdf
 4. **Review and test** before final printing
 5. **Print professionally** for best results
 6. **Install strategically** for maximum visibility
-7. **Track performance** through your BeautyCort dashboard
+7. **Track performance** through your Lamsa dashboard
 
 ## Updates and New Designs
 
@@ -265,4 +265,4 @@ We regularly release new sticker designs and templates. Check your provider dash
 - **Updated QR codes** if your profile URL changes
 - **New sizes** based on provider feedback
 
-For the latest templates and updates, visit: **beautycort.com/provider-resources**
+For the latest templates and updates, visit: **lamsa.com/provider-resources**

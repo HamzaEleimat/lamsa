@@ -1,5 +1,5 @@
--- BeautyCort Database Schema
--- This file creates the complete database schema for the BeautyCort platform
+-- Lamsa Database Schema
+-- This file creates the complete database schema for the Lamsa platform
 -- It handles both fresh installations and existing databases gracefully
 
 -- Enable necessary extensions

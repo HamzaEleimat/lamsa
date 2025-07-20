@@ -1,0 +1,64 @@
+  /**
+   * Complete provider login after MFA verification
+   */
+  async providerLoginMFA(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { providerId, mfaToken }: { providerId: string; mfaToken: string } = req.body;
+
+      // Verify MFA token
+      const { mfaService } = await import('../services/mfa.service');
+      const result = await mfaService.verifyToken(providerId, mfaToken);
+
+      if (!result.verified) {
+        throw new AppError(result.error || 'Invalid MFA code', 401);
+      }
+
+      // Get provider details
+      const { data: provider, error } = await supabaseAdmin
+        .from('providers')
+        .select('*')
+        .eq('id', providerId)
+        .single();
+
+      if (error || !provider) {
+        throw new AppError('Provider not found', 404);
+      }
+
+      // Generate JWT token after successful MFA
+      const token = this.generateToken({
+        id: provider.id,
+        type: 'provider',
+        email: provider.email,
+      });
+
+      const refreshTokenData = await this.generateRefreshToken({
+        id: provider.id,
+        type: 'provider',
+        email: provider.email,
+      });
+
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          provider: {
+            id: provider.id,
+            business_name_ar: provider.business_name_ar,
+            business_name_en: provider.business_name_en,
+            owner_name: provider.owner_name,
+            phone: provider.phone,
+            email: provider.email,
+            rating: provider.rating,
+            total_reviews: provider.total_reviews,
+          },
+          token,
+          refreshToken: refreshTokenData.refreshToken,
+          type: 'provider',
+          mfaVerified: true,
+        }
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }

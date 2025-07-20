@@ -4,16 +4,16 @@ on:
   push:
     branches: [main]
     paths:
-      - 'beautycort-web/**'
+      - 'lamsa-web/**'
       - '.github/workflows/web-deployment.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'beautycort-web/**'
+      - 'lamsa-web/**'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/beautycort-web
+  IMAGE_NAME: ${{ github.repository }}/lamsa-web
 
 jobs:
   test:
@@ -28,33 +28,33 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: beautycort-web/package-lock.json
+          cache-dependency-path: lamsa-web/package-lock.json
           
       - name: Install dependencies
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm ci
           
       - name: Run TypeScript check
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm run type-check
           
       - name: Run linting
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm run lint
           
       - name: Run tests
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm test
         env:
           NODE_ENV: test
           
       - name: Build application
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm run build
         env:
           NODE_ENV: production
@@ -75,16 +75,16 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: beautycort-web/package-lock.json
+          cache-dependency-path: lamsa-web/package-lock.json
           
       - name: Install dependencies
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm ci
           
       - name: Run security audit
         run: |
-          cd beautycort-web
+          cd lamsa-web
           npm audit --audit-level=moderate
           
       - name: Run CodeQL Analysis
@@ -134,8 +134,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v5
         with:
-          context: ./beautycort-web
-          file: ./beautycort-web/Dockerfile
+          context: ./lamsa-web
+          file: ./lamsa-web/Dockerfile
           target: production
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -169,7 +169,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: beautycort-web
+          working-directory: lamsa-web
           scope: ${{ secrets.VERCEL_TEAM_ID }}
           
   deploy-vercel-production:
@@ -189,7 +189,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
-          working-directory: beautycort-web
+          working-directory: lamsa-web
           scope: ${{ secrets.VERCEL_TEAM_ID }}
 
   lighthouse:
@@ -204,7 +204,7 @@ jobs:
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10
         with:
-          configPath: './beautycort-web/.lighthouserc.json'
+          configPath: './lamsa-web/.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
           

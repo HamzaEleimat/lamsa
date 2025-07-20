@@ -2,12 +2,12 @@
 
 ## Overview
 
-This guide helps BeautyCort providers integrate QR codes into their marketing materials to drive more bookings and improve customer experience.
+This guide helps Lamsa providers integrate QR codes into their marketing materials to drive more bookings and improve customer experience.
 
 ## QR Code Basics
 
 ### What is a QR Code?
-A QR (Quick Response) code is a two-dimensional barcode that customers can scan with their smartphone cameras to instantly access your BeautyCort provider profile.
+A QR (Quick Response) code is a two-dimensional barcode that customers can scan with their smartphone cameras to instantly access your Lamsa provider profile.
 
 ### Benefits for Providers:
 - **Instant Access**: Customers reach your profile in 2 seconds
@@ -26,7 +26,7 @@ A QR (Quick Response) code is a two-dimensional barcode that customers can scan 
 5. Download in your preferred format
 
 ### Method 2: Provider Dashboard
-1. Log into your BeautyCort provider account
+1. Log into your Lamsa provider account
 2. Navigate to **Marketing Tools**
 3. Click **Generate QR Code**
 4. Choose size and download format
@@ -35,7 +35,7 @@ A QR (Quick Response) code is a two-dimensional barcode that customers can scan 
 ### Method 3: API Integration (Advanced)
 ```javascript
 // For developers integrating QR generation
-const qrEndpoint = 'https://api.beautycort.com/v1/providers/{providerId}/qr';
+const qrEndpoint = 'https://api.lamsa.com/v1/providers/{providerId}/qr';
 const response = await fetch(qrEndpoint, {
   method: 'POST',
   headers: {
@@ -80,7 +80,7 @@ const response = await fetch(qrEndpoint, {
 
 Your QR codes link to URLs with this structure:
 ```
-https://beautycort.com/provider/{providerId}?[tracking_parameters]
+https://lamsa.com/provider/{providerId}?[tracking_parameters]
 ```
 
 ### Tracking Parameters:
@@ -91,7 +91,7 @@ https://beautycort.com/provider/{providerId}?[tracking_parameters]
 
 Example:
 ```
-https://beautycort.com/provider/salon-nour-123?src=qr&campaign=launch&medium=sticker&location=window
+https://lamsa.com/provider/salon-nour-123?src=qr&campaign=launch&medium=sticker&location=window
 ```
 
 ## Integration Options
@@ -209,7 +209,7 @@ https://beautycort.com/provider/salon-nour-123?src=qr&campaign=launch&medium=sti
 ## Analytics and Tracking
 
 ### Dashboard Metrics:
-Your BeautyCort provider dashboard shows:
+Your Lamsa provider dashboard shows:
 - **QR Scans**: Total scans by date
 - **Conversion Rate**: Scans to actual bookings
 - **Traffic Sources**: Which QR codes perform best
@@ -254,10 +254,10 @@ Events: ?campaign=wedding_expo
 4. Confirm contact details
 
 ### Support Resources:
-- **Email**: qr-support@beautycort.com
+- **Email**: qr-support@lamsa.com
 - **WhatsApp**: +962 XX XXX XXXX
-- **Video Tutorials**: beautycort.com/help/qr-codes
-- **FAQ**: beautycort.com/provider-faq
+- **Video Tutorials**: lamsa.com/help/qr-codes
+- **FAQ**: lamsa.com/provider-faq
 
 ## Advanced Features
 

@@ -1,10 +1,10 @@
 # Redis Production Setup Guide
 
-This guide walks you through setting up Redis for production deployment of BeautyCort.
+This guide walks you through setting up Redis for production deployment of Lamsa.
 
 ## Why Redis is Required
 
-BeautyCort uses Redis for:
+Lamsa uses Redis for:
 - **Session management** - User authentication sessions
 - **Caching** - API response caching for better performance
 - **Rate limiting** - Request throttling and abuse prevention
@@ -132,7 +132,7 @@ After setting up Redis, test the connection:
 
 ```bash
 # Test Redis connection
-cd beautycort-api
+cd lamsa-api
 npm run test:redis
 ```
 
@@ -242,7 +242,7 @@ redis-cli --pipe < backup.rdb
 5. Configure monitoring and alerts
 6. Set up backup procedures
 
-## Recommended Choice for BeautyCort
+## Recommended Choice for Lamsa
 
 For a Jordan-based beauty booking platform, I recommend:
 

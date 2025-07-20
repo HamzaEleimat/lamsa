@@ -1,4 +1,4 @@
--- BeautyCort Edge Cases and Performance Testing Data
+-- Lamsa Edge Cases and Performance Testing Data
 -- Advanced scenarios for comprehensive testing
 -- Run after both part 1 and part 2 seeding scripts
 
@@ -379,7 +379,7 @@ BEGIN
     
     total_records := provider_count + service_count + user_count + booking_count + review_count;
     
-    RAISE NOTICE 'BeautyCort Edge Cases and Performance Data Seeding Complete!';
+    RAISE NOTICE 'Lamsa Edge Cases and Performance Data Seeding Complete!';
     RAISE NOTICE '=======================================================';
     RAISE NOTICE 'Data Summary:';
     RAISE NOTICE '  Providers: % (including % edge cases)', provider_count, 4;

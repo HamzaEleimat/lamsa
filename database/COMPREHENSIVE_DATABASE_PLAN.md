@@ -1,8 +1,8 @@
-# BeautyCort Comprehensive Database Requirements & Design
+# Lamsa Comprehensive Database Requirements & Design
 
 ## Executive Summary
 
-This document provides a complete database requirements analysis for BeautyCort, including entity relationships, performance optimization, security policies, and future-proofing for planned features like promotions and loyalty programs.
+This document provides a complete database requirements analysis for Lamsa, including entity relationships, performance optimization, security policies, and future-proofing for planned features like promotions and loyalty programs.
 
 ## 1. Entity Relationship Analysis
 

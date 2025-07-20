@@ -1,4 +1,4 @@
--- Verify BeautyCort Database Schema
+-- Verify Lamsa Database Schema
 -- Run this query to check if all tables, views, and functions were created successfully
 
 -- Check tables

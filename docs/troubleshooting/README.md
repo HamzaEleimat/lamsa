@@ -1,8 +1,8 @@
-# BeautyCort Troubleshooting Guide
+# Lamsa Troubleshooting Guide
 
 ## Quick Reference
 
-This guide provides comprehensive solutions for common issues encountered in the BeautyCort platform. Use the quick navigation below to find solutions fast.
+This guide provides comprehensive solutions for common issues encountered in the Lamsa platform. Use the quick navigation below to find solutions fast.
 
 ### 🔥 Most Common Issues
 1. [OTP SMS not received](#otp-sms-not-received)
@@ -52,7 +52,7 @@ curl -X POST http://localhost:3000/api/auth/customer/send-otp \
   -d '{"phone": "0791234567"}'  # Local format should work
 
 # Verify normalization in logs
-tail -f /var/log/beautycort-api/app.log | grep "phone_normalized"
+tail -f /var/log/lamsa-api/app.log | grep "phone_normalized"
 ```
 
 **Fix**: Ensure phone number validation accepts all Jordan formats:
@@ -484,9 +484,9 @@ npx jetify
 #### iOS (Info.plist)
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>BeautyCort needs location access to find nearby beauty providers</string>
+<string>Lamsa needs location access to find nearby beauty providers</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>BeautyCort needs location access to find nearby beauty providers</string>
+<string>Lamsa needs location access to find nearby beauty providers</string>
 ```
 
 #### Android (AndroidManifest.xml)
@@ -534,15 +534,15 @@ const requestLocationPermission = async () => {
 
 ```bash
 # API server logs
-tail -f /var/log/beautycort-api/app.log
-tail -f /var/log/beautycort-api/error.log
+tail -f /var/log/lamsa-api/app.log
+tail -f /var/log/lamsa-api/error.log
 
 # Database logs (Supabase)
 # Access through Supabase dashboard -> Logs
 
 # Mobile app logs
 # iOS: Xcode Console
-# Android: adb logcat | grep BeautyCort
+# Android: adb logcat | grep Lamsa
 ```
 
 ### Monitoring and Alerts
@@ -552,4 +552,4 @@ tail -f /var/log/beautycort-api/error.log
 - **Error Tracking**: Sentry for runtime errors
 - **Uptime Monitoring**: Pingdom or similar service
 
-This troubleshooting guide covers the most common issues encountered in the BeautyCort platform. Keep this document updated as new issues are discovered and resolved.
+This troubleshooting guide covers the most common issues encountered in the Lamsa platform. Keep this document updated as new issues are discovered and resolved.

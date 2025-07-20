@@ -1,6 +1,6 @@
 # Supabase Production Setup Guide
 
-This guide walks you through setting up Supabase for production deployment of BeautyCort.
+This guide walks you through setting up Supabase for production deployment of Lamsa.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ This guide walks you through setting up Supabase for production deployment of Be
    # Visit https://supabase.com/dashboard
    # Click "New Project"
    # Organization: Your Organization
-   # Name: beautycort-production
+   # Name: lamsa-production
    # Database Password: Generate strong password
    # Region: Singapore (closest to Jordan)
    ```
@@ -56,7 +56,7 @@ ALTER DATABASE postgres SET timezone TO 'Asia/Amman';
 
 ```bash
 # From project root
-cd beautycort-api
+cd lamsa-api
 
 # Set environment variables
 export SUPABASE_URL="https://your-project-id.supabase.co"
@@ -291,7 +291,7 @@ GRANT SELECT ON reviews TO anon;
 
 ```bash
 # Test connection from API
-cd beautycort-api
+cd lamsa-api
 npm run test:connection
 
 # Test from different environments

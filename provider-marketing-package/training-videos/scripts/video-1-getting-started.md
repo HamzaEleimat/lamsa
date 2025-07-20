@@ -1,8 +1,8 @@
-# Training Video 1: Getting Started with BeautyCort
+# Training Video 1: Getting Started with Lamsa
 
-**Video Title:** "Setting Up Your BeautyCort Provider Profile"  
+**Video Title:** "Setting Up Your Lamsa Provider Profile"  
 **Duration:** 4 minutes  
-**Target Audience:** New beauty providers joining BeautyCort  
+**Target Audience:** New beauty providers joining Lamsa  
 **Objective:** Guide providers through initial account setup and profile creation
 
 ---
@@ -11,15 +11,15 @@
 
 ### INTRO (0:00 - 0:30)
 
-**[SCENE: Animation of BeautyCort logo with upbeat music]**
+**[SCENE: Animation of Lamsa logo with upbeat music]**
 
 **VOICEOVER (English):**
-"Welcome to BeautyCort, Jordan's first professional beauty booking platform! I'm Sarah, and I'll guide you through setting up your provider profile in just a few minutes."
+"Welcome to Lamsa, Jordan's first professional beauty booking platform! I'm Sarah, and I'll guide you through setting up your provider profile in just a few minutes."
 
 **VOICEOVER (Arabic):**
 "أهلاً وسهلاً بكم في بيوتي كورت، أول منصة احترافية لحجز التجميل في الأردن! أنا سارة، وسأرشدكم خلال إعداد ملف مقدم الخدمة في دقائق قليلة."
 
-**[ON-SCREEN TEXT: "BeautyCort Provider Setup - 4 Minutes to Success"]**
+**[ON-SCREEN TEXT: "Lamsa Provider Setup - 4 Minutes to Success"]**
 
 ---
 
@@ -28,7 +28,7 @@
 **[SCENE: Screen recording of app store download process]**
 
 **VOICEOVER (English):**
-"First, download the BeautyCort Provider app from the App Store or Google Play. Search for 'BeautyCort Provider' and tap install."
+"First, download the Lamsa Provider app from the App Store or Google Play. Search for 'Lamsa Provider' and tap install."
 
 **[SCREEN: Show app store search and download]**
 
@@ -37,7 +37,7 @@
 **[SCREEN: Show app opening and provider selection]**
 
 **VOICEOVER (Arabic):**
-"أولاً، حملوا تطبيق بيوتي كورت للمقدمين من متجر التطبيقات أو جوجل بلاي. ابحثوا عن 'BeautyCort Provider' واضغطوا تحميل."
+"أولاً، حملوا تطبيق بيوتي كورت للمقدمين من متجر التطبيقات أو جوجل بلاي. ابحثوا عن 'Lamsa Provider' واضغطوا تحميل."
 
 "بعد التحميل، افتحوا التطبيق واضغطوا 'ابدأ'. ستروا خيارين - تأكدوا من اختيار 'أنا مقدم خدمة' لإنشاء حساب تجاري."
 
@@ -74,7 +74,7 @@
 - **Business Type:** "Hair Salon"
 - **Owner Name:** "Sarah Ahmed"
 
-"Add your email address for important notifications. This won't be shared with customers - it's just for BeautyCort to contact you about your account."
+"Add your email address for important notifications. This won't be shared with customers - it's just for Lamsa to contact you about your account."
 
 **VOICEOVER (Arabic):**
 "الآن، لنعد ملف مؤسستكم التجاري. أدخلوا اسم مؤسستكم بالإنجليزية والعربية - هذا ما سيراه العملاء. اختاروا نوع مؤسستكم من القائمة المنسدلة."
@@ -134,14 +134,14 @@
 **[SCENE: Completed profile overview with celebration animation]**
 
 **VOICEOVER (English):**
-"Congratulations! Your BeautyCort provider profile is now set up. In our next video, we'll show you how to add your services and set your pricing. Ready to start accepting bookings? Let's grow your beauty business together!"
+"Congratulations! Your Lamsa provider profile is now set up. In our next video, we'll show you how to add your services and set your pricing. Ready to start accepting bookings? Let's grow your beauty business together!"
 
 **VOICEOVER (Arabic):**
 "تهانينا! ملف بيوتي كورت لمقدم الخدمة جاهز الآن. في الفيديو القادم، سنوضح لكم كيفية إضافة خدماتكم وتحديد أسعاركم. جاهزون لبدء قبول الحجوزات؟ لننمي عملكم في التجميل معاً!"
 
 **[ON-SCREEN TEXT: "Next: Adding Your Services" with thumbnail of next video]**
 
-**[END SCREEN: BeautyCort logo with social media links and website]**
+**[END SCREEN: Lamsa logo with social media links and website]**
 
 ---
 
@@ -149,7 +149,7 @@
 
 ### Visual Style:
 - **Clean, Modern Interface**: Focus on app screens with minimal distractions
-- **Consistent Branding**: BeautyCort purple (#6B46C1) and orange (#ED8936) colors
+- **Consistent Branding**: Lamsa purple (#6B46C1) and orange (#ED8936) colors
 - **Professional Look**: High-quality screen recordings with smooth transitions
 
 ### Technical Requirements:
@@ -192,4 +192,4 @@
 - **Clear Contrast**: High contrast text overlays for readability
 - **Font Size**: Large enough to read on mobile devices
 
-This script provides a comprehensive foundation for creating an engaging, informative training video that will help new providers successfully set up their BeautyCort accounts and start their journey on the platform.
+This script provides a comprehensive foundation for creating an engaging, informative training video that will help new providers successfully set up their Lamsa accounts and start their journey on the platform.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-These storyboard templates provide visual guidance for producing BeautyCort provider training videos. Each template includes scene descriptions, timing, visual elements, and production notes.
+These storyboard templates provide visual guidance for producing Lamsa provider training videos. Each template includes scene descriptions, timing, visual elements, and production notes.
 
 ---
 
@@ -18,13 +18,13 @@ These storyboard templates provide visual guidance for producing BeautyCort prov
 ┌─────────────────────────────────────────────────────────────┐
 │ FRAME 1.1 (0:00-0:10)                                      │
 ├─────────────────────────────────────────────────────────────┤
-│ [BeautyCort Logo Animation]                                 │
+│ [Lamsa Logo Animation]                                 │
 │                                                             │
-│     🌟 BeautyCort 🌟                                       │
+│     🌟 Lamsa 🌟                                       │
 │   Jordan's #1 Beauty Platform                              │
 │                                                             │
 │ AUDIO: Upbeat intro music                                   │
-│ VOICEOVER: "Welcome to BeautyCort..."                      │
+│ VOICEOVER: "Welcome to Lamsa..."                      │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -33,7 +33,7 @@ These storyboard templates provide visual guidance for producing BeautyCort prov
 │ [Host Introduction]                                         │
 │                                                             │
 │  👩‍💼 Sarah Ahmed                                           │
-│    BeautyCort Trainer                                       │
+│    Lamsa Trainer                                       │
 │                                                             │
 │ "I'll guide you through setup in 4 minutes"                │
 │                                                             │
@@ -62,10 +62,10 @@ These storyboard templates provide visual guidance for producing BeautyCort prov
 ├─────────────────────────────────────────────────────────────┤
 │ [App Store Screen Recording]                                │
 │                                                             │
-│  🔍 Search: "BeautyCort Provider"                          │
+│  🔍 Search: "Lamsa Provider"                          │
 │                                                             │
 │  [App Store Results]                                        │
-│  📱 BeautyCort Provider ⭐⭐⭐⭐⭐                            │
+│  📱 Lamsa Provider ⭐⭐⭐⭐⭐                            │
 │      Beauty & Business                                      │
 │      [GET] ← HIGHLIGHT                                      │
 │                                                             │
@@ -77,7 +77,7 @@ These storyboard templates provide visual guidance for producing BeautyCort prov
 ├─────────────────────────────────────────────────────────────┤
 │ [App Opening Screen]                                        │
 │                                                             │
-│           BeautyCort                                        │
+│           Lamsa                                        │
 │                                                             │
 │    [Get Started] ← HIGHLIGHT                               │
 │                                                             │
@@ -526,7 +526,7 @@ These storyboard templates provide visual guidance for producing BeautyCort prov
 ### Visual Consistency:
 
 #### Color Scheme:
-- **Primary**: BeautyCort Purple (#6B46C1)
+- **Primary**: Lamsa Purple (#6B46C1)
 - **Secondary**: Orange (#ED8936) for accents
 - **Success**: Green (#48BB78) for completed actions
 - **Warning**: Yellow (#F6AD55) for important notices
@@ -553,4 +553,4 @@ These storyboard templates provide visual guidance for producing BeautyCort prov
 - **Realistic Data**: Use Jordan-appropriate names and locations
 - **Error-Free**: No typos or incorrect information
 
-This comprehensive storyboard framework ensures consistent, professional video production that effectively guides providers through BeautyCort platform usage while maintaining engagement and clarity.
+This comprehensive storyboard framework ensures consistent, professional video production that effectively guides providers through Lamsa platform usage while maintaining engagement and clarity.

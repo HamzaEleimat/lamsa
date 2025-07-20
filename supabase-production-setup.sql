@@ -1,4 +1,4 @@
--- BeautyCort Production Database Setup
+-- Lamsa Production Database Setup
 -- Execute this SQL in your Supabase SQL Editor
 -- Go to: https://supabase.com/dashboard/project/libwbqgceovhknljmuvh/sql
 

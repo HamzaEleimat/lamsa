@@ -1,6 +1,6 @@
 # Twilio SMS Setup for Jordan (+962) - Production Guide
 
-This guide provides step-by-step instructions for setting up Twilio SMS service for Jordan market in the BeautyCort application.
+This guide provides step-by-step instructions for setting up Twilio SMS service for Jordan market in the Lamsa application.
 
 ## Prerequisites
 
@@ -67,8 +67,8 @@ TWILIO_SHORT_CODE=xxxxx
 ```javascript
 // OTP message template for Jordan
 const jordanOTPTemplate = {
-  en: "Your BeautyCort verification code is: {code}. Valid for 5 minutes.",
-  ar: "رمز التحقق الخاص بك في BeautyCort هو: {code}. صالح لمدة 5 دقائق."
+  en: "Your Lamsa verification code is: {code}. Valid for 5 minutes.",
+  ar: "رمز التحقق الخاص بك في Lamsa هو: {code}. صالح لمدة 5 دقائق."
 };
 
 // Booking confirmation template
@@ -83,7 +83,7 @@ const bookingConfirmationTemplate = {
 ### Phone Number Formatting
 
 ```javascript
-// BeautyCort API - Phone number validation for Jordan
+// Lamsa API - Phone number validation for Jordan
 const jordanPhoneRegex = /^\+962[7-9]\d{8}$/;
 
 // Valid Jordan mobile prefixes
@@ -146,7 +146,7 @@ const twilioConfig = {
 ### Create SMS Service Class
 
 ```javascript
-// beautycort-api/src/services/smsService.js
+// lamsa-api/src/services/smsService.js
 class SMSService {
   constructor() {
     this.client = require('twilio')(
@@ -191,8 +191,8 @@ class SMSService {
 
   formatOTPMessage(code, language) {
     const messages = {
-      en: `Your BeautyCort verification code is: ${code}. Valid for 5 minutes.`,
-      ar: `رمز التحقق الخاص بك في BeautyCort هو: ${code}. صالح لمدة 5 دقائق.`
+      en: `Your Lamsa verification code is: ${code}. Valid for 5 minutes.`,
+      ar: `رمز التحقق الخاص بك في Lamsa هو: ${code}. صالح لمدة 5 دقائق.`
     };
     
     return messages[language] || messages.en;
@@ -240,7 +240,7 @@ module.exports = new SMSService();
 ### Set up Status Webhooks
 
 ```javascript
-// beautycort-api/src/routes/webhooks/twilio.js
+// lamsa-api/src/routes/webhooks/twilio.js
 const express = require('express');
 const router = express.Router();
 
@@ -333,7 +333,7 @@ TWILIO_CONTENT_SID_AR=HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_CONTENT_SID_EN=HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Webhook URL
-TWILIO_WEBHOOK_URL=https://api.beautycort.com/api/webhooks/twilio/status
+TWILIO_WEBHOOK_URL=https://api.lamsa.com/api/webhooks/twilio/status
 ```
 
 ## Step 9: Cost Optimization
@@ -385,7 +385,7 @@ const smsGuidelines = {
   
   // Required elements
   required: {
-    senderName: 'BeautyCort',
+    senderName: 'Lamsa',
     optOut: 'Reply STOP to unsubscribe',
     validity: 'Valid for 5 minutes' // For OTP
   },

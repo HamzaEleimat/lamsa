@@ -1,4 +1,4 @@
--- BeautyCort Production Database Setup (Safe Version)
+-- Lamsa Production Database Setup (Safe Version)
 -- This version handles existing objects gracefully
 -- Execute this SQL in your Supabase SQL Editor
 

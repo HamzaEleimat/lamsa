@@ -1,8 +1,8 @@
 # Training Video 2: Adding Your Services and Pricing
 
-**Video Title:** "Creating Your Service Menu on BeautyCort"  
+**Video Title:** "Creating Your Service Menu on Lamsa"  
 **Duration:** 5 minutes  
-**Target Audience:** BeautyCort providers setting up their service offerings  
+**Target Audience:** Lamsa providers setting up their service offerings  
 **Objective:** Guide providers through adding services, setting prices, and optimizing their service menu
 
 ---
@@ -11,10 +11,10 @@
 
 ### INTRO (0:00 - 0:30)
 
-**[SCENE: BeautyCort app showing services section with gentle background music]**
+**[SCENE: Lamsa app showing services section with gentle background music]**
 
 **VOICEOVER (English):**
-"Welcome back! Now that your profile is set up, let's create your service menu - the heart of your BeautyCort business. I'm Sarah, and I'll show you how to add services that attract customers and showcase your expertise."
+"Welcome back! Now that your profile is set up, let's create your service menu - the heart of your Lamsa business. I'm Sarah, and I'll show you how to add services that attract customers and showcase your expertise."
 
 **VOICEOVER (Arabic):**
 "أهلاً وسهلاً مرة أخرى! الآن بعد إعداد ملفكم الشخصي، لننشئ قائمة خدماتكم - قلب عملكم في بيوتي كورت. أنا سارة، وسأوضح لكم كيفية إضافة خدمات تجذب العملاء وتُظهر خبرتكم."
@@ -44,7 +44,7 @@
 **[SCENE: Service category selection screen]**
 
 **VOICEOVER (English):**
-"First, choose your service categories. BeautyCort offers Hair Services, Nail Care, Makeup, Skincare, Spa & Wellness, and more. Select all categories that apply to your business - you can add services to each category."
+"First, choose your service categories. Lamsa offers Hair Services, Nail Care, Makeup, Skincare, Spa & Wellness, and more. Select all categories that apply to your business - you can add services to each category."
 
 **[SCREEN: Show category selection with checkmarks]**
 
@@ -100,7 +100,7 @@
 **[SCENE: Pricing examples and competitive analysis visualization]**
 
 **VOICEOVER (English):**
-"Pricing is crucial for your success. Research local competitors but don't undervalue your work. Consider your experience, location, and the quality of products you use. BeautyCort shows you the average price range for each service type to help you stay competitive."
+"Pricing is crucial for your success. Research local competitors but don't undervalue your work. Consider your experience, location, and the quality of products you use. Lamsa shows you the average price range for each service type to help you stay competitive."
 
 **[SCREEN: Show pricing guidance interface]**
 
@@ -204,7 +204,7 @@
 
 **[ON-SCREEN TEXT: "Next: Managing Your Calendar & Availability" with next video thumbnail]**
 
-**[END SCREEN: BeautyCort logo, subscribe button, and related video suggestions]**
+**[END SCREEN: Lamsa logo, subscribe button, and related video suggestions]**
 
 ---
 
@@ -259,4 +259,4 @@
 - **Success Moments**: Celebratory animations when services are added
 - **Clear CTAs**: Obvious next steps and action items
 
-This script provides comprehensive guidance for creating an engaging tutorial that helps providers successfully set up their service offerings on BeautyCort while maximizing their earning potential through strategic pricing and presentation.
+This script provides comprehensive guidance for creating an engaging tutorial that helps providers successfully set up their service offerings on Lamsa while maximizing their earning potential through strategic pricing and presentation.

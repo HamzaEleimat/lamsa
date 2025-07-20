@@ -1,9 +1,9 @@
-# BeautyCort - Day 1 Development Summary
+# Lamsa - Day 1 Development Summary
 
 ## Date: January 10, 2025
 
 ## Overview
-Day 1 focused on establishing the foundation for the BeautyCort mobile application, implementing core authentication screens, navigation structure, and internationalization support.
+Day 1 focused on establishing the foundation for the Lamsa mobile application, implementing core authentication screens, navigation structure, and internationalization support.
 
 ## Major Accomplishments
 
@@ -23,7 +23,7 @@ Day 1 focused on establishing the foundation for the BeautyCort mobile applicati
 ### 3. Authentication Screens ✅
 
 #### Welcome Screen (`src/screens/auth/WelcomeScreen.tsx`)
-- BeautyCort logo placeholder with flower icon
+- Lamsa logo placeholder with flower icon
 - Bilingual tagline "Book beauty in seconds" / "احجزي جلسة جمالك في ثوانٍ"
 - Language selector with modal popup
 - "Get Started" button leading to phone authentication
@@ -94,7 +94,7 @@ RootNavigator
 ## File Structure Created
 
 ```
-beautycort-mobile/
+lamsa-mobile/
 ├── src/
 │   ├── components/
 │   │   └── LanguageSelector.tsx
@@ -181,4 +181,4 @@ beautycort-mobile/
 ---
 
 ## Summary
-Day 1 successfully established a solid foundation for the BeautyCort mobile application with proper architecture, internationalization, and authentication screens. The app is now ready for backend integration and feature expansion.
+Day 1 successfully established a solid foundation for the Lamsa mobile application with proper architecture, internationalization, and authentication screens. The app is now ready for backend integration and feature expansion.

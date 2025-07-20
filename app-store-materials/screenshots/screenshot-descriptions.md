@@ -1,4 +1,4 @@
-# BeautyCort App Store Screenshots
+# Lamsa App Store Screenshots
 
 ## Key Features to Showcase
 

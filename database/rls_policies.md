@@ -1,4 +1,4 @@
-# RLS Policies for BeautyCort Database
+# RLS Policies for Lamsa Database
 
 ## Instructions
 Create these policies in Supabase Dashboard under Authentication > Policies

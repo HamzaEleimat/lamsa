@@ -2,7 +2,7 @@
 
 ## Overview
 
-These story templates provide quick, engaging content for BeautyCort providers to maintain regular social media presence and drive app downloads and bookings.
+These story templates provide quick, engaging content for Lamsa providers to maintain regular social media presence and drive app downloads and bookings.
 
 ---
 
@@ -23,7 +23,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │                Book this look:                      │
 │               احجزي هذه الإطلالة:                    │
 │                                                     │
-│              BeautyCort 📱 Swipe Up                 │
+│              Lamsa 📱 Swipe Up                 │
 │                                                     │
 │  [Swipe up arrow animation]                         │
 │                                                     │
@@ -34,7 +34,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 
 **Text Overlay**: 
 - Top: "Hair Color Transformation"
-- Bottom: "Book on BeautyCort"
+- Bottom: "Book on Lamsa"
 - Price sticker: "45 JOD"
 
 **Stickers**:
@@ -92,7 +92,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │               3. Choose time                        │
 │               4. Book instantly!                    │
 │                                                     │
-│              Download BeautyCort                    │
+│              Download Lamsa                    │
 │               حملي بيوتي كورت                       │
 └─────────────────────────────────────────────────────┘
 ```
@@ -114,7 +114,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │                                                     │
 │           [Customer photo/video]                    │
 │                                                     │
-│  "The BeautyCort app made booking so simple!        │
+│  "The Lamsa app made booking so simple!        │
 │   I'll never go back to calling salons!"            │
 │                                                     │
 │  "تطبيق بيوتي كورت جعل الحجز بسيط جداً!             │
@@ -150,7 +150,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │           Getting ready for our clients              │
 │            نستعد لاستقبال عملائنا                   │
 │                                                     │
-│        Check our availability on BeautyCort!        │
+│        Check our availability on Lamsa!        │
 │         تحققي من توفرنا في بيوتي كورت!             │
 │                                                     │
 │              [Link sticker]                         │
@@ -183,7 +183,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │          Specializes in color & cuts                │
 │          متخصصة في الألوان والقص                   │
 │                                                     │
-│           Book with Sarah on BeautyCort!            │
+│           Book with Sarah on Lamsa!            │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -216,7 +216,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │          Want professional makeup tips?             │
 │           تريدين نصائح مكياج احترافية؟               │
 │                                                     │
-│           Book consultation: BeautyCort             │
+│           Book consultation: Lamsa             │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -279,7 +279,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │              30% off Eid packages                   │
 │              خصم 30% على باقات العيد                │
 │                                                     │
-│              BeautyCort App                         │
+│              Lamsa App                         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -341,7 +341,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │              Book yours today!                      │
 │               احجزي إطلالتك اليوم!                  │
 │                                                     │
-│              BeautyCort App                         │
+│              Lamsa App                         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -362,7 +362,7 @@ These story templates provide quick, engaging content for BeautyCort providers t
 │                                                     │
 │          [Screenshot of 5-star review]              │
 │                                                     │
-│        "Booked through BeautyCort and the          │
+│        "Booked through Lamsa and the          │
 │         experience was amazing! Professional,       │
 │         clean, and exactly what I wanted!"          │
 │                                                     │
@@ -410,9 +410,9 @@ These story templates provide quick, engaging content for BeautyCort providers t
 ### Story Highlights Categories:
 1. **Services** - Showcase all your offerings
 2. **Reviews** - Customer testimonials and ratings
-3. **BeautyCort** - App download and booking info
+3. **Lamsa** - App download and booking info
 4. **Tips** - Educational beauty content
 5. **Team** - Staff introductions and behind-scenes
 6. **Offers** - Current promotions and deals
 
-These story templates provide a comprehensive framework for maintaining active, engaging social media presence while driving BeautyCort app adoption and bookings.
+These story templates provide a comprehensive framework for maintaining active, engaging social media presence while driving Lamsa app adoption and bookings.

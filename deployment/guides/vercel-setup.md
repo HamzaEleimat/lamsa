@@ -1,10 +1,10 @@
-# Vercel Setup Guide for BeautyCort Web Dashboard
+# Vercel Setup Guide for Lamsa Web Dashboard
 
-This guide walks you through deploying the BeautyCort web dashboard (Next.js) to Vercel.
+This guide walks you through deploying the Lamsa web dashboard (Next.js) to Vercel.
 
 ## Overview
 
-The BeautyCort web dashboard is a Next.js application for service providers to manage their bookings, services, and profile. Vercel provides:
+The Lamsa web dashboard is a Next.js application for service providers to manage their bookings, services, and profile. Vercel provides:
 
 - **Automatic deployments** from Git
 - **Global CDN** for fast content delivery
@@ -35,7 +35,7 @@ Let's first check the current state of your web dashboard:
 ### Check Package.json
 
 ```bash
-cd beautycort-web
+cd lamsa-web
 cat package.json
 ```
 
@@ -68,16 +68,16 @@ npm run dev
 
 3. **Deploy from web dashboard directory**:
    ```bash
-   cd beautycort-web
+   cd lamsa-web
    vercel
    ```
 
 4. **Follow the prompts**:
    ```
-   ? Set up and deploy "beautycort-web"? [Y/n] y
+   ? Set up and deploy "lamsa-web"? [Y/n] y
    ? Which scope do you want to deploy to? [Your username]
    ? Link to existing project? [y/N] n
-   ? What's your project's name? beautycort-web
+   ? What's your project's name? lamsa-web
    ? In which directory is your code located? ./
    ```
 
@@ -89,14 +89,14 @@ npm run dev
 
 2. **Import Git Repository**:
    - Select your GitHub repository
-   - Choose the `beautycort-web` directory
+   - Choose the `lamsa-web` directory
    - Click "Import"
 
 3. **Configure Project Settings**:
    ```
-   Project Name: beautycort-web
+   Project Name: lamsa-web
    Framework: Next.js
-   Root Directory: beautycort-web
+   Root Directory: lamsa-web
    Build Command: npm run build
    Output Directory: .next
    Install Command: npm install
@@ -120,12 +120,12 @@ REDIS_PASSWORD=your_redis_password_here
 REDIS_TLS=true
 
 # App Configuration
-NEXT_PUBLIC_APP_URL=https://beautycort-web.vercel.app
+NEXT_PUBLIC_APP_URL=https://lamsa-web.vercel.app
 NEXT_PUBLIC_API_URL=https://your-api-domain.com
 NODE_ENV=production
 
 # Authentication
-NEXTAUTH_URL=https://beautycort-web.vercel.app
+NEXTAUTH_URL=https://lamsa-web.vercel.app
 NEXTAUTH_SECRET=your_nextauth_secret_here
 
 # Optional: Analytics
@@ -148,12 +148,12 @@ For each variable, set the appropriate environment:
 
 2. **Add Domain**:
    ```
-   Domain: dashboard.beautycort.com
+   Domain: dashboard.lamsa.com
    ```
 
 3. **Configure DNS**:
-   - Add CNAME record: `dashboard.beautycort.com` → `cname.vercel-dns.com`
-   - Or A record: `dashboard.beautycort.com` → `76.76.19.19`
+   - Add CNAME record: `dashboard.lamsa.com` → `cname.vercel-dns.com`
+   - Or A record: `dashboard.lamsa.com` → `76.76.19.19`
 
 ### SSL Certificate
 
@@ -305,7 +305,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'x-client-info': 'beautycort-web@1.0.0',
+      'x-client-info': 'lamsa-web@1.0.0',
     },
   },
 });
@@ -543,7 +543,7 @@ Production (large): $50-200/month (Pro + overages)
 7. ✅ Test functionality
 8. ✅ Update mobile app URLs
 
-Your BeautyCort web dashboard will be live at: `https://beautycort-web.vercel.app`
+Your Lamsa web dashboard will be live at: `https://lamsa-web.vercel.app`
 
 ## Manual Actions Required
 

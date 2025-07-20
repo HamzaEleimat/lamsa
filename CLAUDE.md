@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BeautyCort is a mobile-first beauty booking platform for the Jordan market, featuring:
+Lamsa is a mobile-first beauty booking platform for the Jordan market, featuring:
 - Multi-language support (Arabic/English) with RTL
 - Phone-based authentication
 - Service provider marketplace
@@ -12,7 +12,7 @@ BeautyCort is a mobile-first beauty booking platform for the Jordan market, feat
 
 ## Development Commands
 
-### API (beautycort-api/)
+### API (lamsa-api/)
 ```bash
 npm run dev          # Start development server with hot reload (nodemon + ts-node)
 npm run build        # Compile TypeScript to JavaScript
@@ -20,7 +20,7 @@ npm run start        # Start production server
 npm run start:prod   # Start with NODE_ENV=production
 ```
 
-### Mobile App (beautycort-mobile/)
+### Mobile App (lamsa-mobile/)
 ```bash
 npm start           # Start Expo development server
 npm run android     # Run on Android device/emulator
@@ -28,7 +28,7 @@ npm run ios         # Run on iOS simulator
 npm run web         # Run in web browser
 ```
 
-### Web Dashboard (beautycort-web/)
+### Web Dashboard (lamsa-web/)
 ```bash
 npm run dev         # Start Next.js development server
 npm run build       # Create production build

@@ -4,16 +4,16 @@ on:
   push:
     branches: [main]
     paths:
-      - 'beautycort-api/**'
+      - 'lamsa-api/**'
       - '.github/workflows/api-deployment.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'beautycort-api/**'
+      - 'lamsa-api/**'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/beautycort-api
+  IMAGE_NAME: ${{ github.repository }}/lamsa-api
 
 jobs:
   test:
@@ -39,26 +39,26 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: beautycort-api/package-lock.json
+          cache-dependency-path: lamsa-api/package-lock.json
           
       - name: Install dependencies
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm ci
           
       - name: Run TypeScript check
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm run typecheck
           
       - name: Run linting
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm run lint
           
       - name: Run tests
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm run test:ci
         env:
           NODE_ENV: test
@@ -67,9 +67,9 @@ jobs:
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         with:
-          file: ./beautycort-api/coverage/lcov.info
+          file: ./lamsa-api/coverage/lcov.info
           flags: api
-          name: beautycort-api
+          name: lamsa-api
           fail_ci_if_error: true
 
   security:
@@ -85,16 +85,16 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: beautycort-api/package-lock.json
+          cache-dependency-path: lamsa-api/package-lock.json
           
       - name: Install dependencies
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm ci
           
       - name: Run security audit
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm audit --audit-level=moderate
           
       - name: Run CodeQL Analysis
@@ -144,8 +144,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v5
         with:
-          context: ./beautycort-api
-          file: ./beautycort-api/Dockerfile
+          context: ./lamsa-api
+          file: ./lamsa-api/Dockerfile
           target: production
           push: true
           tags: ${{ steps.meta.outputs.tags }}

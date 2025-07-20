@@ -1,8 +1,8 @@
-# BeautyCort Comprehensive Integration Testing Plan
+# Lamsa Comprehensive Integration Testing Plan
 
 ## Overview
 
-This document outlines a comprehensive integration testing strategy for the BeautyCort platform, covering all user types, critical paths, and system integrations across the mobile app, API backend, and database layers.
+This document outlines a comprehensive integration testing strategy for the Lamsa platform, covering all user types, critical paths, and system integrations across the mobile app, API backend, and database layers.
 
 ## Table of Contents
 
@@ -602,7 +602,7 @@ describe('Service Discovery', () => {
 ```bash
 # Artillery.js configuration for load testing
 config:
-  target: 'https://api.beautycort.com'
+  target: 'https://api.lamsa.com'
   phases:
     - duration: 60
       arrivalRate: 10
@@ -648,7 +648,7 @@ export let options = {
 };
 
 export default function() {
-  let response = http.post('https://api.beautycort.com/api/bookings', {
+  let response = http.post('https://api.lamsa.com/api/bookings', {
     providerId: 'test-provider-id',
     serviceId: 'test-service-id',
     date: '2024-01-15',
@@ -706,8 +706,8 @@ LIMIT 20;
 ```javascript
 // Application Performance Monitoring setup
 const apm = require('elastic-apm-node').start({
-  serviceName: 'beautycort-api',
-  serverUrl: 'https://apm.beautycort.com',
+  serviceName: 'lamsa-api',
+  serverUrl: 'https://apm.lamsa.com',
   environment: process.env.NODE_ENV
 });
 
@@ -1067,7 +1067,7 @@ PORT=3001
 JWT_SECRET=test-jwt-secret-key-2024
 
 # Database
-DATABASE_URL=postgresql://test_user:test_pass@localhost:5432/beautycort_test
+DATABASE_URL=postgresql://test_user:test_pass@localhost:5432/lamsa_test
 SUPABASE_URL=https://test-project.supabase.co
 SUPABASE_ANON_KEY=test_anon_key
 SUPABASE_SERVICE_KEY=test_service_key
@@ -1086,8 +1086,8 @@ GOOGLE_MAPS_API_KEY=test_maps_key
 ```json
 {
   "expo": {
-    "name": "BeautyCort Test",
-    "slug": "beautycort-test",
+    "name": "Lamsa Test",
+    "slug": "lamsa-test",
     "version": "1.0.0",
     "extra": {
       "apiUrl": "http://localhost:3001/api",
@@ -1120,7 +1120,7 @@ jobs:
         image: postgis/postgis:13-3.1
         env:
           POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: beautycort_test
+          POSTGRES_DB: lamsa_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -1135,31 +1135,31 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: beautycort-api/package-lock.json
+        cache-dependency-path: lamsa-api/package-lock.json
     
     - name: Install dependencies
       run: |
-        cd beautycort-api
+        cd lamsa-api
         npm ci
     
     - name: Setup test database
       run: |
-        cd beautycort-api
+        cd lamsa-api
         npm run db:test:setup
     
     - name: Run integration tests
       run: |
-        cd beautycort-api
+        cd lamsa-api
         npm run test:integration
       env:
-        DATABASE_URL: postgresql://postgres:testpass@localhost:5432/beautycort_test
+        DATABASE_URL: postgresql://postgres:testpass@localhost:5432/lamsa_test
         NODE_ENV: test
     
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
         name: test-results
-        path: beautycort-api/test-results/
+        path: lamsa-api/test-results/
 
   mobile-tests:
     runs-on: ubuntu-latest
@@ -1172,16 +1172,16 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: beautycort-mobile/package-lock.json
+        cache-dependency-path: lamsa-mobile/package-lock.json
     
     - name: Install dependencies
       run: |
-        cd beautycort-mobile
+        cd lamsa-mobile
         npm ci
     
     - name: Run mobile integration tests
       run: |
-        cd beautycort-mobile
+        cd lamsa-mobile
         npm run test:integration
 ```
 
@@ -1275,4 +1275,4 @@ jobs:
 - Performance regression analysis
 - Risk assessment and mitigation plans
 
-This comprehensive integration testing plan ensures thorough validation of the BeautyCort platform across all user types, technical components, and business scenarios. The combination of automated testing, manual validation, and continuous monitoring provides confidence in the platform's reliability and user experience.
+This comprehensive integration testing plan ensures thorough validation of the Lamsa platform across all user types, technical components, and business scenarios. The combination of automated testing, manual validation, and continuous monitoring provides confidence in the platform's reliability and user experience.

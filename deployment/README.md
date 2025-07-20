@@ -1,13 +1,13 @@
-# BeautyCort Deployment Guide
+# Lamsa Deployment Guide
 
-Complete deployment infrastructure and documentation for the BeautyCort beauty booking platform targeting the Jordan market.
+Complete deployment infrastructure and documentation for the Lamsa beauty booking platform targeting the Jordan market.
 
 ## 🚀 Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/beautycort.git
-cd beautycort
+git clone https://github.com/your-org/lamsa.git
+cd lamsa
 
 # Run deployment script
 ./deployment/scripts/deploy.sh --environment production --platform aws
@@ -35,7 +35,7 @@ docker-compose up -d
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    BeautyCort Platform                     │
+│                    Lamsa Platform                     │
 ├─────────────────────────────────────────────────────────────┤
 │  Mobile App (React Native + Expo)                         │
 │  ├─ iOS App Store                                          │
@@ -67,10 +67,10 @@ docker-compose up -d
 ## 📁 Project Structure
 
 ```
-beautycort/
-├── beautycort-api/           # Node.js API backend
-├── beautycort-mobile/        # React Native mobile app
-├── beautycort-web/           # Next.js web dashboard
+lamsa/
+├── lamsa-api/           # Node.js API backend
+├── lamsa-mobile/        # React Native mobile app
+├── lamsa-web/           # Next.js web dashboard
 ├── deployment/               # Deployment configurations
 │   ├── aws/                 # AWS CloudFormation templates
 │   ├── gcp/                 # Google Cloud Terraform
@@ -104,7 +104,7 @@ docker-compose -f docker-compose.dev.yml up -d
 cd deployment/aws
 aws cloudformation deploy \
   --template-file cloudformation.yaml \
-  --stack-name beautycort-production \
+  --stack-name lamsa-production \
   --parameter-overrides Environment=production \
   --capabilities CAPABILITY_IAM
 ```
@@ -139,7 +139,7 @@ terraform apply -var="environment=production"
 
 ### iOS App Store
 ```bash
-cd beautycort-mobile
+cd lamsa-mobile
 
 # Build for production
 eas build --platform ios --profile production
@@ -150,7 +150,7 @@ eas submit --platform ios --profile production
 
 ### Google Play Store
 ```bash
-cd beautycort-mobile
+cd lamsa-mobile
 
 # Build for production
 eas build --platform android --profile production
@@ -182,7 +182,7 @@ TAP_SECRET_KEY=your_tap_secret_key
 TAP_PUBLIC_KEY=your_tap_public_key
 
 # Application Settings
-APP_NAME=BeautyCort
+APP_NAME=Lamsa
 DEFAULT_LANGUAGE=ar
 CURRENCY=JOD
 TIMEZONE=Asia/Amman
@@ -201,8 +201,8 @@ TIMEZONE=Asia/Amman
 # Generate SSL certificate
 certbot certonly --webroot \
   -w /var/www/html \
-  -d api.beautycort.com \
-  -d dashboard.beautycort.com
+  -d api.lamsa.com \
+  -d dashboard.lamsa.com
 ```
 
 ### Database Security
@@ -243,15 +243,15 @@ export LOG_DESTINATION=datadog
 ### Unit Tests
 ```bash
 # API tests
-cd beautycort-api
+cd lamsa-api
 npm run test
 
 # Mobile tests
-cd beautycort-mobile
+cd lamsa-mobile
 npm run test
 
 # Web tests
-cd beautycort-web
+cd lamsa-web
 npm run test
 ```
 
@@ -264,7 +264,7 @@ npm run test:integration
 ### Load Testing
 ```bash
 # API load testing
-cd beautycort-api
+cd lamsa-api
 npm run test:load
 
 # Performance testing
@@ -298,7 +298,7 @@ npm run test:performance
 1. **Database Connection Issues**
    ```bash
    # Check database connectivity
-   psql -h your-host -U postgres -d beautycort
+   psql -h your-host -U postgres -d lamsa
    
    # Verify environment variables
    echo $SUPABASE_URL
@@ -340,7 +340,7 @@ curl http://localhost:3000/api/health/redis
 
 ### API Documentation
 - **Swagger UI**: http://localhost:3000/api-docs
-- **Postman Collection**: `/postman/BeautyCort.postman_collection.json`
+- **Postman Collection**: `/postman/Lamsa.postman_collection.json`
 
 ### Setup Guides
 - [Supabase Production Setup](./guides/supabase-production-setup.md)
@@ -359,7 +359,7 @@ curl http://localhost:3000/api/health/redis
 ### Contact Information
 - **Project Lead**: [Your Name] - [email@example.com]
 - **DevOps**: [DevOps Lead] - [devops@example.com]
-- **Support**: [Support Team] - [support@beautycort.com]
+- **Support**: [Support Team] - [support@lamsa.com]
 
 ## 📄 License
 

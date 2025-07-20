@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# BeautyCort Minimal Production Deployment
+# Lamsa Minimal Production Deployment
 # Uses a simplified server for stable production deployment
 
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_DIR="$PROJECT_ROOT/beautycort-api"
+API_DIR="$PROJECT_ROOT/lamsa-api"
 
-echo "🚀 Deploying BeautyCort Minimal Production Server"
+echo "🚀 Deploying Lamsa Minimal Production Server"
 echo "================================================="
 
 # Create Dockerfile for minimal deployment
@@ -36,11 +36,11 @@ RUN npm install ts-node typescript @types/node
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S beautycort -u 1001
+    adduser -S lamsa -u 1001
 
 # Change ownership
-RUN chown -R beautycort:nodejs /app
-USER beautycort
+RUN chown -R lamsa:nodejs /app
+USER lamsa
 
 # Expose port
 EXPOSE 3000
@@ -64,21 +64,21 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD:-beautycort123}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-lamsa123}
     volumes:
       - redis_data:/data
     networks:
-      - beautycort_network
+      - lamsa_network
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 30s
       timeout: 5s
       retries: 3
 
-  # BeautyCort API (Minimal)
+  # Lamsa API (Minimal)
   api:
     build:
-      context: ./beautycort-api
+      context: ./lamsa-api
       dockerfile: Dockerfile.minimal
     restart: unless-stopped
     ports:
@@ -93,8 +93,8 @@ services:
       - JWT_EXPIRES_IN=15m
       - REFRESH_TOKEN_EXPIRES_IN=7d
       - REDIS_URL=redis://redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-beautycort123}
-      - APP_NAME=${APP_NAME:-BeautyCort}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-lamsa123}
+      - APP_NAME=${APP_NAME:-Lamsa}
       - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-ar}
       - CURRENCY=${CURRENCY:-JOD}
       - TIMEZONE=${TIMEZONE:-Asia/Amman}
@@ -102,7 +102,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - beautycort_network
+      - lamsa_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -115,13 +115,13 @@ volumes:
     driver: local
 
 networks:
-  beautycort_network:
+  lamsa_network:
     driver: bridge
 EOF
 
 # Create production environment file
 cat > "$PROJECT_ROOT/.env.minimal" << 'EOF'
-# BeautyCort Minimal Production Environment
+# Lamsa Minimal Production Environment
 NODE_ENV=production
 PORT=3000
 
@@ -137,10 +137,10 @@ REFRESH_TOKEN_EXPIRES_IN=7d
 
 # Redis
 REDIS_URL=redis://redis:6379
-REDIS_PASSWORD=beautycort_production_password_123
+REDIS_PASSWORD=lamsa_production_password_123
 
 # Application
-APP_NAME=BeautyCort
+APP_NAME=Lamsa
 DEFAULT_LANGUAGE=ar
 CURRENCY=JOD
 TIMEZONE=Asia/Amman
@@ -252,7 +252,7 @@ cat > "$PROJECT_ROOT/monitor-production.sh" << 'EOF'
 #!/bin/bash
 # Production monitoring script
 
-echo "BeautyCort Production Status"
+echo "Lamsa Production Status"
 echo "==========================="
 echo "Timestamp: $(date)"
 echo ""

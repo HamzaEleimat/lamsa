@@ -1,6 +1,6 @@
 # Upstash Redis Setup Guide
 
-This guide walks you through setting up Upstash Redis for BeautyCort production deployment.
+This guide walks you through setting up Upstash Redis for Lamsa production deployment.
 
 ## Why Upstash Redis?
 
@@ -26,7 +26,7 @@ Upstash is a serverless Redis service that offers:
 
 2. **Configure Database**:
    ```
-   Database Name: beautycort-production
+   Database Name: lamsa-production
    Type: Regional
    Region: Europe (Frankfurt) - Closest to Jordan
    TLS: Enabled (recommended)
@@ -69,7 +69,7 @@ UPSTASH_REDIS_REST_TOKEN=AAAIyODMxN...your-actual-token...
 Run the Redis connection test:
 
 ```bash
-cd beautycort-api
+cd lamsa-api
 npm run test:redis:prod
 ```
 
@@ -85,7 +85,7 @@ Expected output:
 
 ## Step 6: Configure Application
 
-### API Configuration (beautycort-api)
+### API Configuration (lamsa-api)
 
 Update your Redis client configuration:
 
@@ -114,7 +114,7 @@ const RedisStore = require('rate-limit-redis');
 const limiter = rateLimit({
   store: new RedisStore({
     client: redisClient,
-    prefix: 'beautycort:rate-limit:'
+    prefix: 'lamsa:rate-limit:'
   }),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs

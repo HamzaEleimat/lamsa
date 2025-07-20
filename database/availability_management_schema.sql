@@ -1,4 +1,4 @@
--- Availability Management Schema for BeautyCort
+-- Availability Management Schema for Lamsa
 -- This schema handles provider availability with Jordan-specific considerations
 -- including prayer times, Ramadan schedules, and cultural business practices
 

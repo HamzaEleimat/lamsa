@@ -3,13 +3,13 @@ name: Mobile App Release Workflow
 on:
   push:
     branches: [ main, beta, staging ]
-    paths: [ 'beautycort-mobile/**' ]
+    paths: [ 'lamsa-mobile/**' ]
   pull_request:
     branches: [ main, beta, staging ]
-    paths: [ 'beautycort-mobile/**' ]
+    paths: [ 'lamsa-mobile/**' ]
 
 env:
-  WORKING_DIRECTORY: beautycort-mobile
+  WORKING_DIRECTORY: lamsa-mobile
 
 jobs:
   version-check:

@@ -1,4 +1,4 @@
-# BeautyCort App Store Materials
+# Lamsa App Store Materials
 
 This directory contains all materials needed for app store submissions and marketing.
 
@@ -14,7 +14,7 @@ app-store-materials/
 ├── app-icon-design/
 │   └── icon-design-brief.md           # App icon design specifications
 ├── privacy-policy/
-│   └── beautycort-privacy-policy.md   # Comprehensive privacy policy
+│   └── lamsa-privacy-policy.md   # Comprehensive privacy policy
 ├── promotional-content/
 │   └── launch-offers.md               # Launch campaign materials
 ├── permissions/
@@ -114,7 +114,7 @@ app-store-materials/
 #### Technical Setup:
 - [ ] App Store Connect account setup
 - [ ] Google Play Console account setup
-- [ ] Bundle ID registration (com.beautycort.mobile)
+- [ ] Bundle ID registration (com.lamsa.mobile)
 - [ ] Signing certificates and provisioning profiles
 - [ ] App store review preparation
 
@@ -210,10 +210,10 @@ app-store-materials/
 ## Contact Information
 
 For questions about app store materials:
-- **Technical Issues:** dev@beautycort.com
-- **Marketing Content:** marketing@beautycort.com
-- **Legal/Privacy:** legal@beautycort.com
-- **General Inquiries:** hello@beautycort.com
+- **Technical Issues:** dev@lamsa.com
+- **Marketing Content:** marketing@lamsa.com
+- **Legal/Privacy:** legal@lamsa.com
+- **General Inquiries:** hello@lamsa.com
 
 ---
 

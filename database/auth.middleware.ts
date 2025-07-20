@@ -15,8 +15,11 @@ declare global {
   }
 }
 
-// Get JWT secret from environment
-const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key'
+// Get JWT secret from environment - MUST be set for security
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required for security')
+}
 
 // Token payload interface
 interface TokenPayload {
@@ -46,7 +49,7 @@ export function generateToken(id: string, type: 'customer' | 'provider'): string
   }
 
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: '1h', // Reduced from 30d for better security
     issuer: 'beautycort-api',
     audience: 'beautycort-app'
   })

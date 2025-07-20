@@ -1,0 +1,22 @@
+{
+  "settings": {
+    "biometric": {
+      "title": "Biometric Authentication",
+      "description": "Use {method} to quickly and securely access BeautyCort",
+      "use_for_login": "Use for app login",
+      "use_for_login_description": "Unlock BeautyCort with your biometric",
+      "face_recognition": "Face Recognition",
+      "fingerprint": "Fingerprint",
+      "enabled_title": "Biometric Enabled",
+      "enabled_message": "You can now use biometric authentication to access BeautyCort",
+      "disabled_title": "Biometric Disabled",
+      "disabled_message": "Biometric authentication has been disabled",
+      "error_title": "Setup Failed",
+      "enable_error": "Could not enable biometric authentication. Please try again.",
+      "toggle_error": "Failed to update biometric settings",
+      "not_available": "Biometric Not Available",
+      "not_available_description": "Your device doesn't support biometric authentication or no biometric data is enrolled",
+      "security_info": "Your biometric data is stored securely on your device and never sent to our servers"
+    }
+  }
+}

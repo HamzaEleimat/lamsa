@@ -1,0 +1,157 @@
+{
+  "expo": {
+    "name": "Lamsa",
+    "slug": "lamsa-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "runtimeVersion": "1.0.0",
+    "owner": "your-expo-username",
+    "scheme": "lamsa",
+    "primaryColor": "#E91E63",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "buildNumber": "1",
+      "bundleIdentifier": "com.lamsa.mobile",
+      "appStoreUrl": "https://apps.apple.com/app/lamsa/id123456789",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDisplayName": "Lamsa",
+        "NSCameraUsageDescription": "Lamsa needs access to your camera to take photos of your beauty services and profile.",
+        "NSPhotoLibraryUsageDescription": "Lamsa needs access to your photo library to select photos for your profile and services.",
+        "NSLocationWhenInUseUsageDescription": "Lamsa needs access to your location to find nearby beauty service providers.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Lamsa needs access to your location to find nearby beauty service providers.",
+        "NSUserNotificationsUsageDescription": "Lamsa needs to send you notifications about your bookings and appointments.",
+        "NSContactsUsageDescription": "Lamsa needs access to your contacts to help you share services with friends.",
+        "NSCalendarsUsageDescription": "Lamsa needs access to your calendar to schedule your beauty appointments.",
+        "NSMicrophoneUsageDescription": "Lamsa needs access to your microphone for voice messages and video calls with providers.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["tel", "mailto", "maps", "comgooglemaps"],
+        "CFBundleLocalizations": ["en", "ar"],
+        "CFBundleDevelopmentRegion": "ar"
+      },
+      "associatedDomains": ["applinks:lamsa.com"]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "versionCode": 1,
+      "package": "com.lamsa.mobile",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.lamsa.mobile",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "READ_CONTACTS",
+        "WRITE_CONTACTS",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFI_STATE",
+        "INTERNET",
+        "SYSTEM_ALERT_WINDOW"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "lamsa.com"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#E91E63",
+      "sounds": ["./assets/notification-sound.wav"]
+    },
+    "locales": {
+      "en": "./locales/en.json",
+      "ar": "./locales/ar.json"
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-notifications",
+      "expo-location",
+      "expo-camera",
+      "expo-image-picker",
+      "expo-contacts",
+      "expo-calendar",
+      "expo-av",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0",
+            "proguardMinifyEnabled": true,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "useLegacyPackaging": false
+          },
+          "ios": {
+            "deploymentTarget": "13.0",
+            "newArchEnabled": true,
+            "flipper": false
+          }
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Tajawal-Regular.ttf",
+            "./assets/fonts/Tajawal-Bold.ttf",
+            "./assets/fonts/Inter-Regular.ttf",
+            "./assets/fonts/Inter-Bold.ttf"
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
+  }
+}

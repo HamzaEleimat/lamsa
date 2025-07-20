@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'BeautyCort Infrastructure - AWS CloudFormation Template'
+Description: 'Lamsa Infrastructure - AWS CloudFormation Template'
 
 Parameters:
   Environment:
@@ -43,7 +43,7 @@ Resources:
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-vpc
+          Value: !Sub ${Environment}-lamsa-vpc
 
   # Internet Gateway
   InternetGateway:
@@ -51,7 +51,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-igw
+          Value: !Sub ${Environment}-lamsa-igw
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -69,7 +69,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-public-subnet-1
+          Value: !Sub ${Environment}-lamsa-public-subnet-1
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
@@ -80,7 +80,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-public-subnet-2
+          Value: !Sub ${Environment}-lamsa-public-subnet-2
 
   # Private Subnets
   PrivateSubnet1:
@@ -91,7 +91,7 @@ Resources:
       CidrBlock: !Ref PrivateSubnet1CIDR
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-private-subnet-1
+          Value: !Sub ${Environment}-lamsa-private-subnet-1
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -101,7 +101,7 @@ Resources:
       CidrBlock: !Ref PrivateSubnet2CIDR
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-private-subnet-2
+          Value: !Sub ${Environment}-lamsa-private-subnet-2
 
   # NAT Gateways
   NatGateway1EIP:
@@ -123,7 +123,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-public-routes
+          Value: !Sub ${Environment}-lamsa-public-routes
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -151,7 +151,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-private-routes-1
+          Value: !Sub ${Environment}-lamsa-private-routes-1
 
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
@@ -189,7 +189,7 @@ Resources:
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-alb-sg
+          Value: !Sub ${Environment}-lamsa-alb-sg
 
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -203,7 +203,7 @@ Resources:
           SourceSecurityGroupId: !Ref ALBSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-ecs-sg
+          Value: !Sub ${Environment}-lamsa-ecs-sg
 
   # ElastiCache Security Group
   ElastiCacheSecurityGroup:
@@ -218,7 +218,7 @@ Resources:
           SourceSecurityGroupId: !Ref ECSSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-redis-sg
+          Value: !Sub ${Environment}-lamsa-redis-sg
 
   # ElastiCache Redis Cluster
   ElastiCacheSubnetGroup:
@@ -240,13 +240,13 @@ Resources:
       CacheSubnetGroupName: !Ref ElastiCacheSubnetGroup
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-redis
+          Value: !Sub ${Environment}-lamsa-redis
 
   # Application Load Balancer
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub ${Environment}-beautycort-alb
+      Name: !Sub ${Environment}-lamsa-alb
       Scheme: internet-facing
       Type: application
       Subnets:
@@ -256,13 +256,13 @@ Resources:
         - !Ref ALBSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-alb
+          Value: !Sub ${Environment}-lamsa-alb
 
   # ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub ${Environment}-beautycort-cluster
+      ClusterName: !Sub ${Environment}-lamsa-cluster
       CapacityProviders:
         - FARGATE
         - FARGATE_SPOT
@@ -273,13 +273,13 @@ Resources:
           Weight: 4
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-cluster
+          Value: !Sub ${Environment}-lamsa-cluster
 
   # ECS Task Definition
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub ${Environment}-beautycort-api
+      Family: !Sub ${Environment}-lamsa-api
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -288,8 +288,8 @@ Resources:
       ExecutionRoleArn: !Ref ECSTaskExecutionRole
       TaskRoleArn: !Ref ECSTaskRole
       ContainerDefinitions:
-        - Name: beautycort-api
-          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/beautycort-api:latest
+        - Name: lamsa-api
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/lamsa-api:latest
           Essential: true
           Memory: 1024
           PortMappings:
@@ -321,7 +321,7 @@ Resources:
     DependsOn: 
       - ALBListener
     Properties:
-      ServiceName: !Sub ${Environment}-beautycort-api-service
+      ServiceName: !Sub ${Environment}-lamsa-api-service
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
       DesiredCount: 2
@@ -335,19 +335,19 @@ Resources:
             - !Ref PrivateSubnet1
             - !Ref PrivateSubnet2
       LoadBalancers:
-        - ContainerName: beautycort-api
+        - ContainerName: lamsa-api
           ContainerPort: 3000
           TargetGroupArn: !Ref ALBTargetGroup
       HealthCheckGracePeriodSeconds: 300
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-api-service
+          Value: !Sub ${Environment}-lamsa-api-service
 
   # Target Group
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub ${Environment}-beautycort-tg
+      Name: !Sub ${Environment}-lamsa-tg
       Port: 3000
       Protocol: HTTP
       VpcId: !Ref VPC
@@ -360,7 +360,7 @@ Resources:
       UnhealthyThresholdCount: 3
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-tg
+          Value: !Sub ${Environment}-lamsa-tg
 
   # ALB Listener
   ALBListener:
@@ -422,14 +422,14 @@ Resources:
   CloudWatchLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /ecs/${Environment}-beautycort-api
+      LogGroupName: !Sub /ecs/${Environment}-lamsa-api
       RetentionInDays: 30
 
   # ECR Repository
   ECRRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: beautycort-api
+      RepositoryName: lamsa-api
       ImageScanningConfiguration:
         ScanOnPush: true
       LifecyclePolicy:
@@ -452,14 +452,14 @@ Resources:
           }
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-api-ecr
+          Value: !Sub ${Environment}-lamsa-api-ecr
 
   # Secrets Manager
   AppSecrets:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub ${Environment}-beautycort-secrets
-      Description: BeautyCort application secrets
+      Name: !Sub ${Environment}-lamsa-secrets
+      Description: Lamsa application secrets
       SecretString: !Sub |
         {
           "SUPABASE_URL": "https://your-project.supabase.co",
@@ -470,7 +470,7 @@ Resources:
         }
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-beautycort-secrets
+          Value: !Sub ${Environment}-lamsa-secrets
 
   # Auto Scaling
   ECSAutoScalingTarget:
@@ -486,7 +486,7 @@ Resources:
   ECSAutoScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
-      PolicyName: !Sub ${Environment}-beautycort-cpu-scaling
+      PolicyName: !Sub ${Environment}-lamsa-cpu-scaling
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref ECSAutoScalingTarget
       TargetTrackingScalingPolicyConfiguration:
@@ -501,22 +501,22 @@ Outputs:
     Description: VPC ID
     Value: !Ref VPC
     Export:
-      Name: !Sub ${Environment}-beautycort-vpc
+      Name: !Sub ${Environment}-lamsa-vpc
 
   ApplicationLoadBalancerDNS:
     Description: Application Load Balancer DNS Name
     Value: !GetAtt ApplicationLoadBalancer.DNSName
     Export:
-      Name: !Sub ${Environment}-beautycort-alb-dns
+      Name: !Sub ${Environment}-lamsa-alb-dns
 
   ECRRepository:
     Description: ECR Repository URI
     Value: !GetAtt ECRRepository.RepositoryUri
     Export:
-      Name: !Sub ${Environment}-beautycort-ecr-uri
+      Name: !Sub ${Environment}-lamsa-ecr-uri
 
   RedisEndpoint:
     Description: Redis Endpoint
     Value: !GetAtt ElastiCacheCluster.RedisEndpoint.Address
     Export:
-      Name: !Sub ${Environment}-beautycort-redis-endpoint
+      Name: !Sub ${Environment}-lamsa-redis-endpoint

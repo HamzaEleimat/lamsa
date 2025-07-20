@@ -1,6 +1,6 @@
-# BeautyCort Provider Quick Start Guide
+# Lamsa Provider Quick Start Guide
 
-## Welcome to BeautyCort! 🌟
+## Welcome to Lamsa! 🌟
 
 **Your complete guide to getting started on Jordan's first professional beauty booking platform**
 
@@ -21,17 +21,17 @@
 
 ## Account Setup
 
-### Step 1: Download BeautyCort Provider App
+### Step 1: Download Lamsa Provider App
 
 **For iOS:**
 1. Open App Store
-2. Search "BeautyCort Provider"
+2. Search "Lamsa Provider"
 3. Tap "Install"
 4. Open app when download completes
 
 **For Android:**
 1. Open Google Play Store
-2. Search "BeautyCort Provider"
+2. Search "Lamsa Provider"
 3. Tap "Install"
 4. Open app when download completes
 
@@ -392,7 +392,7 @@ Thank you for your feedback. We take all comments seriously and look forward to 
 ### Pricing Strategy
 
 #### Competitive Analysis:
-1. **Research local competitors** on BeautyCort and other platforms
+1. **Research local competitors** on Lamsa and other platforms
 2. **Price competitively** but don't undervalue your work
 3. **Offer package deals** for multiple services
 4. **Create loyalty pricing** for repeat customers
@@ -462,7 +462,7 @@ Thank you for your feedback. We take all comments seriously and look forward to 
 
 ## Getting Support
 
-### BeautyCort Support Channels
+### Lamsa Support Channels
 
 #### In-App Help:
 - **Help Center**: FAQ and tutorials
@@ -471,7 +471,7 @@ Thank you for your feedback. We take all comments seriously and look forward to 
 
 #### Contact Information:
 - **WhatsApp**: +962 XX XXX XXXX
-- **Email**: providers@beautycort.com
+- **Email**: providers@lamsa.com
 - **Phone**: +962 X XXXX XXXX (9 AM - 6 PM, Sunday-Thursday)
 
 #### Community Resources:
@@ -488,9 +488,9 @@ Thank you for your feedback. We take all comments seriously and look forward to 
 - **Digital Marketing**: Promoting your services online
 
 #### Certification Programs:
-- **BeautyCort Verified Provider**: Complete verification process
+- **Lamsa Verified Provider**: Complete verification process
 - **Premium Partner**: Advanced features and priority support
-- **Ambassador Program**: Represent BeautyCort at events
+- **Ambassador Program**: Represent Lamsa at events
 
 ---
 
@@ -518,7 +518,7 @@ Thank you for your feedback. We take all comments seriously and look forward to 
 - [ ] Plan promotional campaigns
 
 ### Month 1 Goals:
-- **10+ completed services** through BeautyCort
+- **10+ completed services** through Lamsa
 - **5+ customer reviews** with 4+ star average
 - **Complete profile** with verification badge
 - **Active social media** promotion
@@ -528,7 +528,7 @@ Thank you for your feedback. We take all comments seriously and look forward to 
 
 ## Conclusion
 
-Congratulations on joining BeautyCort! 🎉
+Congratulations on joining Lamsa! 🎉
 
 You now have all the tools needed to:
 - **Attract new customers** through our platform
@@ -536,7 +536,7 @@ You now have all the tools needed to:
 - **Grow your business** with marketing features
 - **Provide excellent service** with communication templates
 
-**Remember:** Success on BeautyCort comes from:
+**Remember:** Success on Lamsa comes from:
 1. **Complete, attractive profiles** with great photos
 2. **Professional communication** with customers
 3. **Consistent quality service** that earns great reviews

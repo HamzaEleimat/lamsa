@@ -2,14 +2,14 @@
 
 ## Overview
 
-This guide provides step-by-step instructions for migrating from the current BeautyCort database schemas to the optimized unified schema.
+This guide provides step-by-step instructions for migrating from the current Lamsa database schemas to the optimized unified schema.
 
 ## Pre-Migration Checklist
 
 ### 1. Backup Current Database
 ```sql
 -- Create backup
-pg_dump beautycort_db > backup_$(date +%Y%m%d_%H%M%S).sql
+pg_dump lamsa_db > backup_$(date +%Y%m%d_%H%M%S).sql
 
 -- Or using Supabase CLI
 supabase db dump --local > backup_$(date +%Y%m%d_%H%M%S).sql
@@ -447,7 +447,7 @@ ORDER BY avg_rating DESC;
 
 ```sql
 -- 1. Restore from backup
-psql beautycort_db < backup_YYYYMMDD_HHMMSS.sql
+psql lamsa_db < backup_YYYYMMDD_HHMMSS.sql
 
 -- 2. Or drop new tables and revert schema
 DROP TABLE IF EXISTS notifications CASCADE;

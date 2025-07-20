@@ -1,4 +1,4 @@
-# BeautyCort App Icon Design Brief
+# Lamsa App Icon Design Brief
 
 ## Design Requirements
 
@@ -18,7 +18,7 @@
 
 ### Brand Guidelines
 
-**App Name:** BeautyCort  
+**App Name:** Lamsa  
 **Tagline:** Beauty Booking Jordan
 
 **Primary Colors:**
@@ -97,7 +97,7 @@
 
 ### Design Elements to Include
 
-1. **Letter Elements:** "B" or "BC" for BeautyCort
+1. **Letter Elements:** "B" or "BC" for Lamsa
 2. **Technology Indicator:** Subtle phone/app visual cue
 3. **Beauty Reference:** Elegant, not cliché beauty element
 4. **Location Hint:** Subtle geographic/Jordan reference

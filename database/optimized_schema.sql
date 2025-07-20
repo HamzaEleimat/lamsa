@@ -1,4 +1,4 @@
--- BeautyCort Optimized Database Schema
+-- Lamsa Optimized Database Schema
 -- Comprehensive schema implementing all performance optimizations,
 -- security policies, and future feature support
 
@@ -884,7 +884,7 @@ WHERE NOT EXISTS (SELECT 1 FROM service_categories);
 -- Success message
 DO $$ 
 BEGIN
-    RAISE NOTICE 'BeautyCort optimized database schema created successfully!';
+    RAISE NOTICE 'Lamsa optimized database schema created successfully!';
     RAISE NOTICE 'Schema includes: % tables, % indexes, % functions, % triggers', 
         (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'),
         (SELECT COUNT(*) FROM pg_indexes WHERE schemaname = 'public'),

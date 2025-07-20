@@ -2,7 +2,7 @@
 
 ## Getting Started with WhatsApp Templates
 
-This guide helps BeautyCort providers customize professional WhatsApp message templates to enhance customer communication and bookings.
+This guide helps Lamsa providers customize professional WhatsApp message templates to enhance customer communication and bookings.
 
 ## Benefits of Using Templates
 
@@ -23,7 +23,7 @@ This guide helps BeautyCort providers customize professional WhatsApp message te
 
 ### 1. **New Customer Welcome** (2 templates)
 - First-time visitor greeting
-- BeautyCort platform introduction
+- Lamsa platform introduction
 
 ### 2. **Appointment Confirmations** (2 templates)
 - Standard service confirmation
@@ -144,7 +144,7 @@ Set up common responses:
 - **Business Description**: Beauty services in Arabic/English
 - **Business Hours**: Clear operating times
 - **Location**: Accurate address for GPS navigation
-- **Website**: Link to BeautyCort profile
+- **Website**: Link to Lamsa profile
 
 ## Industry-Specific Customizations
 
@@ -255,7 +255,7 @@ if (serviceType === 'hair_color') {
 
 #### New Customers:
 - More detailed explanations
-- BeautyCort platform introduction
+- Lamsa platform introduction
 - First-time visitor perks
 
 #### Regular Customers:
@@ -268,10 +268,10 @@ if (serviceType === 'hair_color') {
 - Priority booking mentions
 - Exclusive service access
 
-## Integration with BeautyCort Platform
+## Integration with Lamsa Platform
 
 ### Automatic Data Population:
-The BeautyCort provider dashboard can automatically fill template fields:
+The Lamsa provider dashboard can automatically fill template fields:
 - Customer name from booking system
 - Service details from provider catalog
 - Appointment times from calendar
@@ -280,15 +280,15 @@ The BeautyCort provider dashboard can automatically fill template fields:
 ### Booking Link Integration:
 Include direct booking links in messages:
 ```
-احجزي مرة أخرى: beautycort.com/salon-nour
-Book again: beautycort.com/salon-nour
+احجزي مرة أخرى: lamsa.com/salon-nour
+Book again: lamsa.com/salon-nour
 ```
 
 ### Review Request Automation:
 Automatically include review links after completed appointments:
 ```
-قيمي تجربتك: beautycort.com/review/appointment-123
-Rate your experience: beautycort.com/review/appointment-123
+قيمي تجربتك: lamsa.com/review/appointment-123
+Rate your experience: lamsa.com/review/appointment-123
 ```
 
 ## Legal and Compliance Considerations
@@ -354,7 +354,7 @@ Template Version 2.0 - New service categories
 
 ## Getting Help and Support
 
-### BeautyCort Support Resources:
+### Lamsa Support Resources:
 - **Template Library**: Ready-to-use templates
 - **Customization Workshop**: Live training sessions
 - **Best Practices Guide**: Industry-specific tips
@@ -362,8 +362,8 @@ Template Version 2.0 - New service categories
 
 ### Contact Information:
 - **WhatsApp Support**: +962 XX XXX XXXX
-- **Email**: templates@beautycort.com
+- **Email**: templates@lamsa.com
 - **Live Chat**: Available in provider dashboard
-- **Video Tutorials**: beautycort.com/provider-help
+- **Video Tutorials**: lamsa.com/provider-help
 
 Start with 2-3 templates that match your most common customer interactions, then gradually expand your template library based on business needs and customer feedback.

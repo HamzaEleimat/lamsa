@@ -1,16 +1,16 @@
-# Instagram Launch Templates for BeautyCort Providers
+# Instagram Launch Templates for Lamsa Providers
 
 ## Overview
 
-These Instagram templates help BeautyCort providers announce their platform launch, attract customers, and build their social media presence with professional, branded content.
+These Instagram templates help Lamsa providers announce their platform launch, attract customers, and build their social media presence with professional, branded content.
 
 ---
 
-## Template 1: "Now on BeautyCort" Announcement
+## Template 1: "Now on Lamsa" Announcement
 
 ### Post Design Specifications:
 - **Dimensions**: 1080 x 1080 pixels (square)
-- **Style**: Modern, professional with BeautyCort branding
+- **Style**: Modern, professional with Lamsa branding
 - **Colors**: Purple gradient background (#6B46C1 to #9F7AEA)
 - **Typography**: Tajawal (Arabic), Inter (English)
 
@@ -18,11 +18,11 @@ These Instagram templates help BeautyCort providers announce their platform laun
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
-│                 [BeautyCort Logo]                   │
+│                 [Lamsa Logo]                   │
 │                                                     │
 │               🌟 BIG NEWS! 🌟                      │
 │                                                     │
-│           We're now on BeautyCort!                  │
+│           We're now on Lamsa!                  │
 │         نحن الآن على بيوتي كورت!                   │
 │                                                     │
 │              [QR Code - Center]                     │
@@ -32,13 +32,13 @@ These Instagram templates help BeautyCort providers announce their platform laun
 │                                                     │
 │    [Business Logo]    [Business Name]              │
 │                                                     │
-│  #BeautyCort #BookNow #JordanBeauty                │
+│  #Lamsa #BookNow #JordanBeauty                │
 └─────────────────────────────────────────────────────┘
 ```
 
 ### Caption Template (English):
 ```
-🌟 EXCITING NEWS! We're officially on BeautyCort! 🌟
+🌟 EXCITING NEWS! We're officially on Lamsa! 🌟
 
 Say goodbye to complicated booking and hello to instant appointments! 
 
@@ -51,11 +51,11 @@ Say goodbye to complicated booking and hello to instant appointments!
 
 No more back-and-forth messages - just professional, reliable booking!
 
-👆 Scan the QR code or search "{Business Name}" on BeautyCort
+👆 Scan the QR code or search "{Business Name}" on Lamsa
 
 Ready to experience the future of beauty booking? 💅
 
-#BeautyCort #BeautyBooking #Jordan #BeautyServices #{BusinessName} #ProfessionalService #InstantBooking #BeautyTech #Amman
+#Lamsa #BeautyBooking #Jordan #BeautyServices #{BusinessName} #ProfessionalService #InstantBooking #BeautyTech #Amman
 ```
 
 ### Caption Template (Arabic):
@@ -100,7 +100,7 @@ Ready to experience the future of beauty booking? 💅
 │    Makeup Glam       │      Spa Treatment           │
 │                      │                              │
 ├─────────────────────────────────────────────────────┤
-│              📱 BOOK NOW ON BEAUTYCORT              │
+│              📱 BOOK NOW ON LAMSA              │
 │               احجزي الآن على بيوتي كورت              │
 │                                                     │
 │        Starting from 15 JOD | ابتداءً من 15 دينار  │
@@ -121,7 +121,7 @@ From stunning hair transformations to flawless nails, we've got everything you n
 • Nail Art & Care - 20 JOD
 • Relaxing Spa Treatments - 45 JOD
 
-📱 Book instantly on BeautyCort:
+📱 Book instantly on Lamsa:
 1. Download the app
 2. Search "{Business Name}"
 3. Choose your service
@@ -136,7 +136,7 @@ Why choose us?
 
 Ready for your transformation? Book now! 👆
 
-#BeautyCort #{BusinessName} #HairStyling #Makeup #NailArt #SpaDay #BeautyTransformation #Amman #Jordan #BookNow
+#Lamsa #{BusinessName} #HairStyling #Makeup #NailArt #SpaDay #BeautyTransformation #Amman #Jordan #BookNow
 ```
 
 ### Caption Template (Arabic):
@@ -194,7 +194,7 @@ Ready for your transformation? Book now! 👆
 │    │               امسحي لحجز موعد              │  │
 │    │               التجميل!                     │  │
 │    │                                             │  │
-│    │  BeautyCort.com/{BusinessHandle}           │  │
+│    │  Lamsa.com/{BusinessHandle}           │  │
 │    └─────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
 ```
@@ -211,15 +211,15 @@ This is where the magic happens - our fully equipped studio where we create stun
 🪑 Comfortable, clean workspace
 💡 Perfect lighting for flawless results
 
-We've joined BeautyCort to make booking with us easier than ever! No more phone tag or missed calls - just scan the QR code and book your perfect time slot instantly! 📱
+We've joined Lamsa to make booking with us easier than ever! No more phone tag or missed calls - just scan the QR code and book your perfect time slot instantly! 📱
 
 Ready to experience our professional service? 
 
-👆 Scan the QR code or search "{Business Name}" on BeautyCort
+👆 Scan the QR code or search "{Business Name}" on Lamsa
 
 Can't wait to pamper you! 💅
 
-#BehindTheScenes #BeautyCort #{BusinessName} #ProfessionalTools #QualityService #BookEasy #BeautyStudio #Amman #Jordan
+#BehindTheScenes #Lamsa #{BusinessName} #ProfessionalTools #QualityService #BookEasy #BeautyStudio #Amman #Jordan
 ```
 
 ### Caption Template (Arabic):
@@ -263,7 +263,7 @@ Can't wait to pamper you! 💅
 ├─────────────────────────────────────────────────────┤
 │                  ⭐⭐⭐⭐⭐                          │
 │                                                     │
-│  "Amazing service! I booked through BeautyCort     │
+│  "Amazing service! I booked through Lamsa     │
 │   and the experience was flawless from start       │
 │   to finish. Highly recommend!"                    │
 │                                                     │
@@ -272,7 +272,7 @@ Can't wait to pamper you! 💅
 │                                                     │
 │              - Sarah M. (verified customer)        │
 │                                                     │
-│           📱 Book on BeautyCort                     │
+│           📱 Book on Lamsa                     │
 │             احجزي على بيوتي كورت                   │
 └─────────────────────────────────────────────────────┘
 ```
@@ -281,11 +281,11 @@ Can't wait to pamper you! 💅
 ```
 ⭐⭐⭐⭐⭐ Another happy customer! ⭐⭐⭐⭐⭐
 
-Sarah booked her hair transformation through BeautyCort and look at these incredible results! 😍
+Sarah booked her hair transformation through Lamsa and look at these incredible results! 😍
 
-💬 "The booking process was so easy - I found {Business Name} on BeautyCort, picked my service and time, and everything went perfectly! The results speak for themselves!" - Sarah M.
+💬 "The booking process was so easy - I found {Business Name} on Lamsa, picked my service and time, and everything went perfectly! The results speak for themselves!" - Sarah M.
 
-This is exactly why we love being on BeautyCort:
+This is exactly why we love being on Lamsa:
 ✅ Easy booking for customers
 ✅ Professional service guarantee  
 ✅ Verified reviews from real customers
@@ -293,14 +293,14 @@ This is exactly why we love being on BeautyCort:
 ✅ Automatic appointment reminders
 
 Want your own transformation? 
-📱 Download BeautyCort
+📱 Download Lamsa
 🔍 Search "{Business Name}"
 ⏰ Pick your perfect time
 ✨ Get ready to shine!
 
 Book now and join our family of satisfied customers! 💅
 
-#CustomerLove #BeautyCort #Transformation #HappyCustomer #{BusinessName} #FiveStars #BeautyResults #BookNow #Jordan #Amman
+#CustomerLove #Lamsa #Transformation #HappyCustomer #{BusinessName} #FiveStars #BeautyResults #BookNow #Jordan #Amman
 ```
 
 ### Caption Template (Arabic):
@@ -351,11 +351,11 @@ Book now and join our family of satisfied customers! 💅
 │                                                     │
 │  ┌─────────────────────────────────────────────┐   │
 │  │                                             │   │
-│  │  Book through BeautyCort and save!          │   │
+│  │  Book through Lamsa and save!          │   │
 │  │  احجزي عبر بيوتي كورت ووفري!               │   │
 │  │                                             │   │
-│  │  Use code: BEAUTYCORT50                     │   │
-│  │  استخدمي الرمز: BEAUTYCORT50               │   │
+│  │  Use code: LAMSA50                     │   │
+│  │  استخدمي الرمز: LAMSA50               │   │
 │  │                                             │   │
 │  │  [QR Code]                                  │   │
 │  │                                             │   │
@@ -370,11 +370,11 @@ Book now and join our family of satisfied customers! 💅
 ```
 🎉 HUGE LAUNCH SPECIAL! 50% OFF YOUR FIRST BOOKING! 🎉
 
-We're celebrating our launch on BeautyCort with an amazing offer just for you! 
+We're celebrating our launch on Lamsa with an amazing offer just for you! 
 
 💅 What's included:
 ✅ 50% off ANY service (up to 50 JOD value)
-✅ Valid for new BeautyCort customers
+✅ Valid for new Lamsa customers
 ✅ Easy booking process
 ✅ Professional service guarantee
 
@@ -385,17 +385,17 @@ We're celebrating our launch on BeautyCort with an amazing offer just for you!
 • Spa Facial: Was 40 JOD → Now 20 JOD
 
 📱 How to claim:
-1. Download BeautyCort app
+1. Download Lamsa app
 2. Search "{Business Name}"
 3. Book your service
-4. Enter code: BEAUTYCORT50
+4. Enter code: LAMSA50
 5. Enjoy 50% savings!
 
 ⏰ Hurry! Offer ends {Date}
 
 Don't miss out on this incredible deal! Book now! 👆
 
-#LaunchSpecial #50PercentOff #BeautyCort #{BusinessName} #LimitedTime #BookNow #SpecialOffer #BeautyDeals #Save #Jordan #Amman
+#LaunchSpecial #50PercentOff #Lamsa #{BusinessName} #LimitedTime #BookNow #SpecialOffer #BeautyDeals #Save #Jordan #Amman
 ```
 
 ### Caption Template (Arabic):
@@ -420,7 +420,7 @@ Don't miss out on this incredible deal! Book now! 👆
 1. حملي تطبيق بيوتي كورت
 2. ابحثي عن "{اسم المؤسسة}"
 3. احجزي خدمتك
-4. أدخلي الرمز: BEAUTYCORT50
+4. أدخلي الرمز: LAMSA50
 5. استمتعي بتوفير 50%!
 
 ⏰ أسرعي! العرض ينتهي في {التاريخ}
@@ -436,8 +436,8 @@ Don't miss out on this incredible deal! Book now! 👆
 
 ### Story Template 1: Quick Announcement
 ```
-Background: BeautyCort purple gradient
-Text: "We're on BeautyCort!"
+Background: Lamsa purple gradient
+Text: "We're on Lamsa!"
        "نحن في بيوتي كورت!"
 Elements: 
 - Swipe up arrow
@@ -477,12 +477,12 @@ Elements:
 1. **Replace Placeholders:**
    - `{Business Name}` → Your business name
    - `{اسم المؤسسة}` → Your business name in Arabic
-   - `{BusinessHandle}` → Your BeautyCort username
+   - `{BusinessHandle}` → Your Lamsa username
    - `{Date}` → Actual offer expiration date
 
 2. **Add Your Branding:**
    - Include your logo/business colors as accent
-   - Maintain BeautyCort purple as primary color
+   - Maintain Lamsa purple as primary color
    - Use your actual service photos
    - Include your business location tag
 
@@ -493,7 +493,7 @@ Elements:
    - Add your unique selling points
 
 4. **Generate QR Code:**
-   - Use BeautyCort QR generator
+   - Use Lamsa QR generator
    - Link to your specific provider profile
    - Test QR code before posting
    - Ensure high contrast for scanning
@@ -515,7 +515,7 @@ Elements:
    - Respond to comments promptly
    - Use Instagram Stories for behind-the-scenes content
    - Share customer posts in your Stories
-   - Run polls and Q&As about BeautyCort
+   - Run polls and Q&As about Lamsa
 
 4. **Cross-Promotion:**
    - Share posts to Facebook and WhatsApp
@@ -523,4 +523,4 @@ Elements:
    - Print QR codes for physical locations
    - Partner with other local businesses
 
-These templates provide a comprehensive foundation for providers to successfully launch and promote their BeautyCort presence on Instagram while maintaining brand consistency and driving bookings.
+These templates provide a comprehensive foundation for providers to successfully launch and promote their Lamsa presence on Instagram while maintaining brand consistency and driving bookings.

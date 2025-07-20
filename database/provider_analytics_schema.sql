@@ -616,9 +616,9 @@ INSERT INTO provider_achievements (
 SELECT 
     p.id,
     'welcome',
-    'Welcome to BeautyCort',
-    'Joined the BeautyCort family',
-    'انضم إلى عائلة BeautyCort',
+    'Welcome to Lamsa',
+    'Joined the Lamsa family',
+    'انضم إلى عائلة Lamsa',
     '/icons/welcome.png',
     50
 FROM providers p

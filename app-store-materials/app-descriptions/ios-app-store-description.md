@@ -1,7 +1,7 @@
-# iOS App Store Description - BeautyCort
+# iOS App Store Description - Lamsa
 
 ## App Name
-BeautyCort - Beauty Booking Jordan
+Lamsa - Beauty Booking Jordan
 
 ## Subtitle (30 characters max)
 Find & book beauty services
@@ -12,9 +12,9 @@ Find & book beauty services
 
 **Finally, a better way to book beauty services in Jordan!**
 
-Say goodbye to endless WhatsApp groups and unreliable booking systems. BeautyCort connects you with verified beauty professionals across Amman and Jordan, making it easier than ever to look and feel your best.
+Say goodbye to endless WhatsApp groups and unreliable booking systems. Lamsa connects you with verified beauty professionals across Amman and Jordan, making it easier than ever to look and feel your best.
 
-**🌟 Why Choose BeautyCort?**
+**🌟 Why Choose Lamsa?**
 
 ✅ **Verified Professionals** - All providers are licensed and verified
 ✅ **Real-Time Availability** - See exactly when providers are free
@@ -44,7 +44,7 @@ Say goodbye to endless WhatsApp groups and unreliable booking systems. BeautyCor
 
 **Serving:** Amman, Irbid, Zarqa, and expanding across Jordan.
 
-Join thousands of satisfied customers who've made the switch from chaotic WhatsApp groups to professional beauty booking with BeautyCort.
+Join thousands of satisfied customers who've made the switch from chaotic WhatsApp groups to professional beauty booking with Lamsa.
 
 Download now and book your next beauty appointment in under 60 seconds!
 

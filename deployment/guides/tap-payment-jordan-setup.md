@@ -1,6 +1,6 @@
 # Tap Payment Gateway Setup for Jordan - Production Guide
 
-This guide provides comprehensive instructions for integrating Tap Payment Gateway for the Jordan market in the BeautyCort application.
+This guide provides comprehensive instructions for integrating Tap Payment Gateway for the Jordan market in the Lamsa application.
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ const jordanCurrency = {
 ### Create Payment Service Class
 
 ```javascript
-// beautycort-api/src/services/paymentService.js
+// lamsa-api/src/services/paymentService.js
 const axios = require('axios');
 
 class TapPaymentService {
@@ -117,7 +117,7 @@ class TapPaymentService {
         currency: 'JOD',
         threeDSecure: true,
         save_card: false,
-        description: paymentData.description || 'BeautyCort Service Payment',
+        description: paymentData.description || 'Lamsa Service Payment',
         
         // Customer information
         customer: {
@@ -210,7 +210,7 @@ class TapPaymentService {
         charge_id: chargeId,
         amount: amount ? this.formatAmount(amount) : undefined,
         currency: 'JOD',
-        description: 'BeautyCort Service Refund',
+        description: 'Lamsa Service Refund',
         metadata: {
           refund_reason: 'service_cancellation'
         }
@@ -268,7 +268,7 @@ module.exports = new TapPaymentService();
 ### Payment Webhook Implementation
 
 ```javascript
-// beautycort-api/src/routes/payments/webhook.js
+// lamsa-api/src/routes/payments/webhook.js
 const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
@@ -380,7 +380,7 @@ module.exports = router;
 ### Mobile App Integration (React Native)
 
 ```javascript
-// beautycort-mobile/src/services/paymentService.js
+// lamsa-mobile/src/services/paymentService.js
 import { WebView } from 'react-native-webview';
 
 class PaymentService {
@@ -440,7 +440,7 @@ class PaymentService {
 ### Web Dashboard Integration
 
 ```javascript
-// beautycort-web/src/components/PaymentForm.tsx
+// lamsa-web/src/components/PaymentForm.tsx
 import { useEffect } from 'react';
 
 declare global {

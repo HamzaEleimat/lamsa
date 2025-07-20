@@ -1,4 +1,4 @@
-# BeautyCort Launch Promotional Content
+# Lamsa Launch Promotional Content
 
 ## Launch Campaign Overview
 
@@ -82,7 +82,7 @@ Complete your profile in 24 hours and receive:
 
 #### Post 1: App Launch Announcement
 **English:**
-🎉 **BeautyCort is LIVE!** 🎉
+🎉 **Lamsa is LIVE!** 🎉
 
 Say goodbye to WhatsApp chaos! Jordan's first professional beauty booking app is here.
 
@@ -93,7 +93,7 @@ Say goodbye to WhatsApp chaos! Jordan's first professional beauty booking app is
 
 Download now and get 50% OFF your first booking!
 
-#BeautyCort #BeautyJordan #AppLaunch #Beauty #Jordan
+#Lamsa #BeautyJordan #AppLaunch #Beauty #Jordan
 
 **Arabic:**
 🎉 **بيوتي كورت متاح الآن!** 🎉
@@ -136,7 +136,7 @@ No more driving around looking for appointments!
 
 #### Welcome Message Template
 **English:**
-👋 Welcome to BeautyCort!
+👋 Welcome to Lamsa!
 
 Ready to ditch WhatsApp chaos for professional beauty booking?
 
@@ -158,7 +158,7 @@ Ready to ditch WhatsApp chaos for professional beauty booking?
 ### Welcome Email Series
 
 #### Email 1: Welcome & First Booking Incentive
-**Subject:** Welcome to BeautyCort - Your 50% OFF is waiting! 🎉
+**Subject:** Welcome to Lamsa - Your 50% OFF is waiting! 🎉
 **Subject (Arabic):** أهلاً بك في بيوتي كورت - خصم الـ 50% في انتظارك! 🎉
 
 **Content:**
@@ -181,7 +181,7 @@ Your exclusive 50% discount is ready to use. Here's how to get started:
 
 #### Launch Announcement SMS
 **English:**
-🌟 BeautyCort is live! Professional beauty booking is here. Get 50% OFF your first service with code LAUNCH50. Download: [link]
+🌟 Lamsa is live! Professional beauty booking is here. Get 50% OFF your first service with code LAUNCH50. Download: [link]
 
 **Arabic:**
 🌟 بيوتي كورت متاح! حجز التجميل الاحترافي هنا. احصل على خصم 50% على خدمتك الأولى بالرمز LAUNCH50. حمل: [رابط]
@@ -192,10 +192,10 @@ Your exclusive 50% discount is ready to use. Here's how to get started:
 
 #### Content Guidelines
 **Theme:** "From WhatsApp to Professional"
-**Hashtags:** #BeautyCortPartner #BeautyRevolution #ProfessionalBooking
+**Hashtags:** #LamsaPartner #BeautyRevolution #ProfessionalBooking
 
 **Caption Template:**
-"I'm so tired of WhatsApp group chaos for beauty appointments! 😩 Finally found the solution with @beautycort - Jordan's first professional beauty booking app!
+"I'm so tired of WhatsApp group chaos for beauty appointments! 😩 Finally found the solution with @lamsa - Jordan's first professional beauty booking app!
 
 ✨ What I love:
 • Verified professionals only
@@ -205,7 +205,7 @@ Your exclusive 50% discount is ready to use. Here's how to get started:
 
 Try it with my code: [INFLUENCER_CODE] for 50% off! 
 
-#ad #BeautyCortPartner #BeautyJordan"
+#ad #LamsaPartner #BeautyJordan"
 
 ## Launch Event Content
 
@@ -215,7 +215,7 @@ Try it with my code: [INFLUENCER_CODE] for 50% off!
 
 #### Event Invitation Text
 **English:**
-🎉 **You're Invited: BeautyCort Launch Party!**
+🎉 **You're Invited: Lamsa Launch Party!**
 
 Join us for Jordan's biggest beauty tech launch event!
 
@@ -274,7 +274,7 @@ Share your code: [USER_CODE]
 ## Press Release Content
 
 ### Launch Press Release
-**Headline (English):** BeautyCort Launches as Jordan's First Professional Beauty Booking Platform, Revolutionizing How Customers Connect with Verified Beauty Providers
+**Headline (English):** Lamsa Launches as Jordan's First Professional Beauty Booking Platform, Revolutionizing How Customers Connect with Verified Beauty Providers
 
 **Headline (Arabic):** بيوتي كورت تطلق كأول منصة احترافية لحجز التجميل في الأردن، تحدث ثورة في طريقة ربط العملاء بمقدمي خدمات التجميل المعتمدين
 

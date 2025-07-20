@@ -1,8 +1,8 @@
-# BeautyCort Database Documentation
+# Lamsa Database Documentation
 
 ## Overview
 
-BeautyCort uses a PostgreSQL database with PostGIS extension for geospatial operations. The database is hosted on Supabase and implements comprehensive business logic through triggers, functions, and Row Level Security (RLS) policies.
+Lamsa uses a PostgreSQL database with PostGIS extension for geospatial operations. The database is hosted on Supabase and implements comprehensive business logic through triggers, functions, and Row Level Security (RLS) policies.
 
 ## Quick Reference
 
@@ -369,4 +369,4 @@ SELECT schemaname, tablename, indexname, indexdef
 FROM pg_indexes WHERE schemaname = 'public' ORDER BY tablename;
 ```
 
-This database architecture provides a robust foundation for the BeautyCort platform, ensuring data consistency, performance, and security while supporting the complex business logic of a beauty booking marketplace.
+This database architecture provides a robust foundation for the Lamsa platform, ensuring data consistency, performance, and security while supporting the complex business logic of a beauty booking marketplace.

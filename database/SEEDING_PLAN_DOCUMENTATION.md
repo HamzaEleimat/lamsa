@@ -1,8 +1,8 @@
-# BeautyCort Data Seeding Plan - Complete Documentation
+# Lamsa Data Seeding Plan - Complete Documentation
 
 ## Overview
 
-This comprehensive data seeding plan provides realistic, culturally appropriate test data for the BeautyCort platform, covering all business scenarios, edge cases, and performance testing requirements.
+This comprehensive data seeding plan provides realistic, culturally appropriate test data for the Lamsa platform, covering all business scenarios, edge cases, and performance testing requirements.
 
 ## File Structure
 
@@ -333,4 +333,4 @@ provider_earnings = total_price - (total_price * 0.15)
 - **Amman Suburbs:** 25% of providers
 - **Other Cities:** 15% of providers
 
-This comprehensive seeding plan ensures that BeautyCort is tested against realistic, diverse, and edge-case scenarios while maintaining cultural authenticity and business logic accuracy.
+This comprehensive seeding plan ensures that Lamsa is tested against realistic, diverse, and edge-case scenarios while maintaining cultural authenticity and business logic accuracy.

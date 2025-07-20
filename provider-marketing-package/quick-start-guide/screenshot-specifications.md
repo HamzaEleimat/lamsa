@@ -1,7 +1,7 @@
 # Screenshot Specifications for Provider Quick Start Guide
 
 ## Overview
-This document specifies the required screenshots for the BeautyCort Provider Quick Start Guide, ensuring comprehensive visual documentation of the onboarding and platform usage process.
+This document specifies the required screenshots for the Lamsa Provider Quick Start Guide, ensuring comprehensive visual documentation of the onboarding and platform usage process.
 
 ## Screenshot Requirements
 
@@ -11,7 +11,7 @@ This document specifies the required screenshots for the BeautyCort Provider Qui
 **File Name:** `welcome-screen.png`
 **Description:** Initial app welcome screen with "Get Started" button
 **Elements to Show:**
-- BeautyCort logo and branding
+- Lamsa logo and branding
 - Welcome message in Arabic and English
 - "Get Started" primary button
 - "I'm a Customer" / "I'm a Provider" selection
@@ -377,7 +377,7 @@ Overall Rating: 4.8/5 (24 reviews)
 ### Visual Guidelines:
 - **Real Data:** Use realistic Arabic and English names, addresses
 - **Professional Photos:** High-quality salon/beauty service images
-- **Consistent Branding:** BeautyCort colors and fonts throughout
+- **Consistent Branding:** Lamsa colors and fonts throughout
 - **Clean Interface:** Remove any debug information or test data
 
 ### Annotation Standards:
@@ -446,4 +446,4 @@ screenshots/
 - Bridal Makeup / مكياج العروس
 - Deep Facial Cleansing / تنظيف عميق للوجه
 
-This comprehensive screenshot specification ensures consistent, professional documentation that effectively guides new providers through the BeautyCort platform setup and usage.
+This comprehensive screenshot specification ensures consistent, professional documentation that effectively guides new providers through the Lamsa platform setup and usage.

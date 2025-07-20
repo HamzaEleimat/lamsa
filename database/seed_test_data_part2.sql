@@ -1,4 +1,4 @@
--- BeautyCort Test Data Seeding Script - Part 2
+-- Lamsa Test Data Seeding Script - Part 2
 -- Bookings, Reviews, Loyalty Data, and Edge Cases
 -- Run after seed_test_data.sql
 
@@ -513,4 +513,4 @@ ON CONFLICT (id) DO UPDATE SET
 
 COMMIT;
 
-RAISE NOTICE 'BeautyCort test data seeding completed successfully! Part 2: Bookings, Reviews, Loyalty, and Promotions created.';
+RAISE NOTICE 'Lamsa test data seeding completed successfully! Part 2: Bookings, Reviews, Loyalty, and Promotions created.';

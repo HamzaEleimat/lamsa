@@ -1,4 +1,4 @@
-# BeautyCort Performance Testing Configuration
+# Lamsa Performance Testing Configuration
 # 
 # This configuration defines load testing scenarios for all critical API endpoints
 # using Artillery.js for comprehensive performance validation.
@@ -55,13 +55,13 @@ config:
           arrivalRate: 10
     
     staging:
-      target: 'https://staging-api.beautycort.com'
+      target: 'https://staging-api.lamsa.com'
       phases:
         - duration: 180
           arrivalRate: 50
     
     production:
-      target: 'https://api.beautycort.com'
+      target: 'https://api.lamsa.com'
       phases:
         - duration: 300
           arrivalRate: 100

@@ -42,3 +42,25 @@ dist/
 # Temporary
 *.tmp
 *.temp
+*.backup
+
+# Security - Never commit secrets
+.env.secrets
+.env.production
+.env.production.template
+.env.staging
+.env.local.*
+
+# Additional security files
+**/customer_token.txt
+**/provider_token.txt
+**/otp.txt
+**/*secret*
+**/*key*.pem
+**/*key*.key
+**/*token*.txt
+
+# Database dumps and backups
+*.sql.gz
+*.dump
+*backup*

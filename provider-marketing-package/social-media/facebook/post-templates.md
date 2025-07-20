@@ -1,8 +1,8 @@
-# Facebook Post Templates for BeautyCort Providers
+# Facebook Post Templates for Lamsa Providers
 
 ## Overview
 
-These Facebook post templates are optimized for the platform's algorithm and audience engagement patterns, helping BeautyCort providers reach customers and build their local business presence.
+These Facebook post templates are optimized for the platform's algorithm and audience engagement patterns, helping Lamsa providers reach customers and build their local business presence.
 
 ---
 
@@ -20,7 +20,7 @@ These Facebook post templates are optimized for the platform's algorithm and aud
 │                                                     │
 │        [Business Logo/Photo]                        │
 │                                                     │
-│         We're now on BeautyCort!                    │
+│         We're now on Lamsa!                    │
 │        نحن الآن على بيوتي كورت!                    │
 │                                                     │
 │    Jordan's #1 Professional Beauty Booking App     │
@@ -35,7 +35,7 @@ These Facebook post templates are optimized for the platform's algorithm and aud
 
 ### Post Text (English):
 ```
-🌟 BIG ANNOUNCEMENT! We've officially joined BeautyCort! 🌟
+🌟 BIG ANNOUNCEMENT! We've officially joined Lamsa! 🌟
 
 After months of serving our amazing customers, we're excited to make booking with us even easier through Jordan's first professional beauty booking platform!
 
@@ -47,19 +47,19 @@ After months of serving our amazing customers, we're excited to make booking wit
 📝 Easy rescheduling if plans change
 ⭐ Leave reviews to help others
 
-🎉 LAUNCH SPECIAL: Use code BEAUTYCORT50 for 50% off your first booking!
+🎉 LAUNCH SPECIAL: Use code LAMSA50 for 50% off your first booking!
 
 No more playing phone tag or waiting for WhatsApp replies. Professional beauty booking is finally here in Jordan! 
 
 How to book:
-1. Download "BeautyCort" from App Store or Google Play
+1. Download "Lamsa" from App Store or Google Play
 2. Search for "{Business Name}"
 3. Choose your service and time
 4. Book instantly!
 
 We can't wait to serve you through this amazing new platform! 💅
 
-#BeautyCort #LaunchSpecial #ProfessionalBooking #BeautyServices #{BusinessName} #Jordan #Amman #BookingMadeEasy #BeautyTech #NewTechnology
+#Lamsa #LaunchSpecial #ProfessionalBooking #BeautyServices #{BusinessName} #Jordan #Amman #BookingMadeEasy #BeautyTech #NewTechnology
 ```
 
 ### Post Text (Arabic):
@@ -76,12 +76,12 @@ We can't wait to serve you through this amazing new platform! 💅
 📝 إعادة جدولة سهلة إذا تغيرت الخطط
 ⭐ ترك المراجعات لمساعدة الآخرين
 
-🎉 عرض الإطلاق: استخدموا الرمز BEAUTYCORT50 لخصم 50% على حجزكم الأول!
+🎉 عرض الإطلاق: استخدموا الرمز LAMSA50 لخصم 50% على حجزكم الأول!
 
 لا مزيد من المطاردة الهاتفية أو انتظار ردود الواتساب. حجز التجميل الاحترافي وصل أخيراً للأردن!
 
 كيفية الحجز:
-1. حملوا "BeautyCort" من متجر التطبيقات أو جوجل بلاي
+1. حملوا "Lamsa" من متجر التطبيقات أو جوجل بلاي
 2. ابحثوا عن "{اسم المؤسسة}"
 3. اختاروا خدمتكم ووقتكم
 4. احجزوا فوراً!
@@ -103,7 +103,7 @@ We can't wait to serve you through this amazing new platform! 💅
 1. **Image 1**: Before photo (with customer permission)
 2. **Image 2**: During service (process shot)
 3. **Image 3**: Final result (after photo)
-4. **Image 4**: BeautyCort booking CTA with QR code
+4. **Image 4**: Lamsa booking CTA with QR code
 
 ### Post Text (English):
 ```
@@ -117,10 +117,10 @@ Look at this stunning hair transformation we did yesterday! From flat and lifele
 ⏰ Total time: 3 hours
 💰 Package price: 85 JOD
 
-Our client Sarah said: "I'm absolutely in love with my new look! The booking through BeautyCort was so easy, and the result exceeded my expectations!" ⭐⭐⭐⭐⭐
+Our client Sarah said: "I'm absolutely in love with my new look! The booking through Lamsa was so easy, and the result exceeded my expectations!" ⭐⭐⭐⭐⭐
 
 Want your own transformation? 
-📱 Book now on BeautyCort:
+📱 Book now on Lamsa:
 • Download the app
 • Search "{Business Name}"
 • Choose "Hair Color & Cut Package"
@@ -130,7 +130,7 @@ We use only premium products and our stylists have 10+ years of experience. Your
 
 Swipe to see the full transformation and booking info →
 
-#TransformationTuesday #HairTransformation #BeautyCort #{BusinessName} #HairColor #HairCut #BeforeAndAfter #HappyClient #BookNow #Jordan #Amman #HairStylist #ProfessionalService
+#TransformationTuesday #HairTransformation #Lamsa #{BusinessName} #HairColor #HairCut #BeforeAndAfter #HappyClient #BookNow #Jordan #Amman #HairStylist #ProfessionalService
 ```
 
 ### Post Text (Arabic):
@@ -182,7 +182,7 @@ Swipe to see the full transformation and booking info →
 │                                                     │
 │              Book consultation:                      │
 │               احجزي استشارة:                         │
-│                BeautyCort.com                       │
+│                Lamsa.com                       │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -217,14 +217,14 @@ Pro tip: Book your next appointment before leaving!
 
 Want personalized advice for your hair type? Book a consultation with our colorist! We'll create a custom care plan just for you.
 
-📱 Book on BeautyCort:
+📱 Book on Lamsa:
 • Search "{Business Name}"
 • Choose "Hair Color Consultation"
 • 30-minute session for only 15 JOD
 
 Have questions about your hair color? Drop them in the comments! 👇
 
-#HairCareTips #ColorCare #ProfessionalAdvice #BeautyCort #{BusinessName} #HairHealth #ColorConsultation #ExpertTips #Jordan #Amman #HairStylist
+#HairCareTips #ColorCare #ProfessionalAdvice #Lamsa #{BusinessName} #HairHealth #ColorConsultation #ExpertTips #Jordan #Amman #HairStylist
 ```
 
 ### Post Text (Arabic):
@@ -281,7 +281,7 @@ Have questions about your hair color? Drop them in the comments! 👇
 
 We absolutely love featuring our amazing customers, and today we're highlighting Layla who's been with us for over a year! 💕
 
-💬 "I discovered {Business Name} through a friend's recommendation, and when they joined BeautyCort, it made my life so much easier! I used to call multiple times to get an appointment, but now I just open the app, see their availability, and book instantly. The quality of service is always exceptional, and I love that I can easily reschedule if something comes up. Five stars!" - Layla K.
+💬 "I discovered {Business Name} through a friend's recommendation, and when they joined Lamsa, it made my life so much easier! I used to call multiple times to get an appointment, but now I just open the app, see their availability, and book instantly. The quality of service is always exceptional, and I love that I can easily reschedule if something comes up. Five stars!" - Layla K.
 
 🌟 Layla's favorite services:
 • Monthly hair treatments
@@ -297,11 +297,11 @@ What we love about Layla:
 Thank you, Layla, for being such an amazing customer and for adapting to new technology with us! 🤗
 
 Ready to join our family of happy customers?
-📱 Download BeautyCort and book with us today!
+📱 Download Lamsa and book with us today!
 
 Do you have a favorite service or memory with us? Share it in the comments! We love hearing from our clients! 👇
 
-#CustomerSpotlight #HappyCustomer #BeautyCort #{BusinessName} #FiveStars #CustomerLove #LoyalClient #ThankYou #Jordan #Amman #ClientAppreciation
+#CustomerSpotlight #HappyCustomer #Lamsa #{BusinessName} #FiveStars #CustomerLove #LoyalClient #ThankYou #Jordan #Amman #ClientAppreciation
 ```
 
 ### Post Text (Arabic):
@@ -351,17 +351,17 @@ Ever wondered what goes on behind the scenes at our salon? Let us take you throu
 • Sanitizing all tools and surfaces
 • Preparing color mixtures for the day
 • Setting up each station perfectly
-• Reviewing BeautyCort bookings and client notes
+• Reviewing Lamsa bookings and client notes
 
 ☀️ 9:00 AM - First Client Arrives
 • Warm welcome and consultation
-• Reviewing their booking details from BeautyCort
+• Reviewing their booking details from Lamsa
 • Beginning their transformation journey
 
 🕐 1:00 PM - Lunch Break & Restocking
 • Quick lunch for our team
 • Restocking products and supplies
-• Checking afternoon appointments on BeautyCort
+• Checking afternoon appointments on Lamsa
 
 🌆 3:00 PM - Afternoon Rush
 • Our busiest time with back-to-back bookings
@@ -373,11 +373,11 @@ Ever wondered what goes on behind the scenes at our salon? Let us take you throu
 • Planning tomorrow's schedule
 • Grateful for another day of making people beautiful
 
-💭 What we love most: Seeing the joy on our clients' faces when they see their results! And BeautyCort has made our scheduling so much smoother - we can focus on what we do best: creating beautiful looks! 
+💭 What we love most: Seeing the joy on our clients' faces when they see their results! And Lamsa has made our scheduling so much smoother - we can focus on what we do best: creating beautiful looks! 
 
 Want to be part of our story? Book your appointment and experience the magic! 📱
 
-#BehindTheScenes #DayInTheLife #BeautyCort #{BusinessName} #SalonLife #TeamWork #ClientCare #BookYourExperience #Jordan #Amman #BeautyProfessionals
+#BehindTheScenes #DayInTheLife #Lamsa #{BusinessName} #SalonLife #TeamWork #ClientCare #BookYourExperience #Jordan #Amman #BeautyProfessionals
 ```
 
 ### Post Text (Arabic):
@@ -432,7 +432,7 @@ Want to be part of our story? Book your appointment and experience the magic! �
 ```
 💅 FREE Beauty Consultation Worth 25 JOD! 💅
 
-Book through BeautyCort and get a complimentary 30-minute consultation with our senior stylist!
+Book through Lamsa and get a complimentary 30-minute consultation with our senior stylist!
 
 ✨ What you'll get:
 • Personalized hair and makeup recommendations
@@ -442,9 +442,9 @@ Book through BeautyCort and get a complimentary 30-minute consultation with our 
 
 Limited time offer - only 50 consultations available!
 
-📱 Download BeautyCort app and search "{Business Name}" to claim yours!
+📱 Download Lamsa app and search "{Business Name}" to claim yours!
 
-#FreeConsultation #BeautyCort #{BusinessName} #BeautyOffer #LimitedTime
+#FreeConsultation #Lamsa #{BusinessName} #BeautyOffer #LimitedTime
 ```
 
 ### Ad Template 2: Conversion Ad
@@ -454,7 +454,7 @@ Limited time offer - only 50 consultations available!
 
 ### Ad Text:
 ```
-🚀 Book Beauty Services in 30 Seconds with BeautyCort! 🚀
+🚀 Book Beauty Services in 30 Seconds with Lamsa! 🚀
 
 ✅ No more phone calls
 ✅ No more waiting for replies  
@@ -468,7 +468,7 @@ Download now and get 50% off your first booking with {Business Name}!
 
 [Download App Button]
 
-#BeautyCort #InstantBooking #BeautyApp #Jordan #50PercentOff
+#Lamsa #InstantBooking #BeautyApp #Jordan #50PercentOff
 ```
 
 ---
@@ -497,7 +497,7 @@ Download now and get 50% off your first booking with {Business Name}!
 ### Analytics to Track:
 - **Reach**: How many people see your posts
 - **Engagement Rate**: Likes, comments, shares per post
-- **Click-Through Rate**: Clicks to BeautyCort profile/app
+- **Click-Through Rate**: Clicks to Lamsa profile/app
 - **Conversion Rate**: Facebook visitors who book appointments
 - **Cost Per Acquisition**: For paid advertising campaigns
 

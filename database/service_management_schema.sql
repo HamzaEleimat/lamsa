@@ -1,5 +1,5 @@
 -- Service Management Enhanced Schema
--- This file adds comprehensive service management features for the BeautyCort platform
+-- This file adds comprehensive service management features for the Lamsa platform
 -- Designed specifically for the Jordan beauty market
 
 -- Enable necessary extensions

@@ -1,7 +1,7 @@
-# BeautyCort Language QA Checklist
+# Lamsa Language QA Checklist
 
 ## Overview
-This comprehensive checklist covers all aspects of bilingual (Arabic/English) support across the BeautyCort platform, ensuring proper translations, RTL layout functionality, Arabic number formatting, SMS notifications, form inputs, and error messages.
+This comprehensive checklist covers all aspects of bilingual (Arabic/English) support across the Lamsa platform, ensuring proper translations, RTL layout functionality, Arabic number formatting, SMS notifications, form inputs, and error messages.
 
 ## Pre-Testing Setup
 
@@ -366,7 +366,7 @@ This comprehensive checklist covers all aspects of bilingual (Arabic/English) su
 
 #### Welcome Emails
 - [ ] **Arabic Subject**: "مرحباً بك في بيوتي كورت"
-- [ ] **English Subject**: "Welcome to BeautyCort"
+- [ ] **English Subject**: "Welcome to Lamsa"
 - [ ] **HTML Template**: RTL layout for Arabic emails
 - [ ] **Text Content**: Arabic email content
 - [ ] **CTA Buttons**: Arabic call-to-action buttons

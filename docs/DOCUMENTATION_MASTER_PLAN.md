@@ -1,13 +1,13 @@
-# BeautyCort Documentation Master Plan
+# Lamsa Documentation Master Plan
 
 ## Overview
 
-This document outlines the comprehensive documentation strategy for BeautyCort, a mobile-first beauty booking platform for the Jordan market. The plan builds upon existing strong documentation foundations and establishes a complete, maintainable documentation ecosystem.
+This document outlines the comprehensive documentation strategy for Lamsa, a mobile-first beauty booking platform for the Jordan market. The plan builds upon existing strong documentation foundations and establishes a complete, maintainable documentation ecosystem.
 
 ## Current Documentation Status
 
 ### ✅ Existing Strong Foundation
-- **Authentication System**: Complete documentation in `beautycort-api/docs/AUTHENTICATION.md`
+- **Authentication System**: Complete documentation in `lamsa-api/docs/AUTHENTICATION.md`
 - **Database Schema**: Comprehensive schema with business logic in `database/optimized_schema.sql`
 - **Testing Framework**: Detailed integration testing plan in `testing/COMPREHENSIVE_INTEGRATION_TESTING_PLAN.md`
 - **Environment Setup**: Basic setup instructions in `ENVIRONMENT_SETUP.md`
@@ -192,14 +192,14 @@ docs/setup/
 
 **1. API Documentation Auto-Sync**
 ```javascript
-// Package dependencies to add to beautycort-api/package.json
+// Package dependencies to add to lamsa-api/package.json
 {
   "swagger-jsdoc": "^6.2.8",
   "swagger-ui-express": "^5.0.0",
   "yamljs": "^0.3.0"
 }
 
-// Implementation in beautycort-api/src/app.ts
+// Implementation in lamsa-api/src/app.ts
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -207,13 +207,13 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'BeautyCort API',
+      title: 'Lamsa API',
       version: '1.0.0',
       description: 'Beauty booking platform API for Jordan market with phone-based authentication, geolocation services, and loyalty program',
     },
     servers: [
       { url: 'http://localhost:3000/api', description: 'Development' },
-      { url: 'https://api.beautycort.com/api', description: 'Production' }
+      { url: 'https://api.lamsa.com/api', description: 'Production' }
     ],
   },
   apis: ['./src/routes/*.ts', './docs/api/endpoints/*.md'],
@@ -248,12 +248,12 @@ jobs:
       
       - name: Install dependencies
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm ci
       
       - name: Generate API Documentation
         run: |
-          cd beautycort-api
+          cd lamsa-api
           npm run docs:generate
       
       - name: Update Database Schema Docs
@@ -266,7 +266,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs-build
-          custom_domain: docs.beautycort.com
+          custom_domain: docs.lamsa.com
 ```
 
 **3. Database Documentation Automation**
@@ -288,14 +288,14 @@ COMMENT ON COLUMN bookings.location_type IS 'Service location: salon (fixed loca
 ### Documentation Site Architecture
 
 **Hosting Strategy**:
-- **Primary**: GitHub Pages with custom domain (docs.beautycort.com)
+- **Primary**: GitHub Pages with custom domain (docs.lamsa.com)
 - **CDN**: Cloudflare for global performance
 - **Search**: Algolia DocSearch for documentation search
 - **Analytics**: Google Analytics for usage insights
 
 **Site Structure**:
 ```
-docs.beautycort.com/
+docs.lamsa.com/
 ├── /                          # Documentation homepage
 ├── /api/                      # Interactive API documentation (Swagger UI)
 ├── /database/                 # Database schema and ERD
@@ -412,6 +412,6 @@ docs.beautycort.com/
 
 ## Conclusion
 
-This comprehensive documentation plan transforms BeautyCort's already strong documentation foundation into a world-class developer experience. By implementing automated generation, visual flows, and comprehensive troubleshooting guides, we ensure that documentation becomes a strategic asset that reduces support burden, accelerates developer onboarding, and enhances the overall platform quality.
+This comprehensive documentation plan transforms Lamsa's already strong documentation foundation into a world-class developer experience. By implementing automated generation, visual flows, and comprehensive troubleshooting guides, we ensure that documentation becomes a strategic asset that reduces support burden, accelerates developer onboarding, and enhances the overall platform quality.
 
 The phased implementation approach allows for immediate value delivery while building toward a complete, maintainable documentation ecosystem that scales with the platform's growth.

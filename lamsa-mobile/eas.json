@@ -1,0 +1,79 @@
+{
+  "cli": {
+    "version": ">= 8.0.0"
+  },
+  "build": {
+    "development": {
+      "channel": "development",
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "resourceClass": "medium"
+      }
+    },
+    "staging": {
+      "channel": "staging",
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium",
+        "bundleIdentifier": "com.lamsa.mobile.staging",
+        "buildNumber": "1.0.0"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "applicationId": "com.lamsa.mobile.staging",
+        "versionCode": 1
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "staging"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium",
+        "bundleIdentifier": "com.lamsa.mobile",
+        "buildNumber": "1.0.0"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "applicationId": "com.lamsa.mobile",
+        "versionCode": 1
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      }
+    }
+  },
+  "submit": {
+    "staging": {
+      "ios": {
+        "appleId": "your-apple-id@lamsa.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    },
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@lamsa.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "production"
+      }
+    }
+  },
+  "update": {
+    "url": "https://u.expo.dev/your-lamsa-project-id"
+  }
+}

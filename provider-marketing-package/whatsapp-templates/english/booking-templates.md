@@ -18,7 +18,7 @@ Your appointment is confirmed:
 A few things to know:
 ✨ Please arrive 10 minutes early
 💧 Come with clean, makeup-free skin
-📱 Download BeautyCort app for easier future bookings
+📱 Download Lamsa app for easier future bookings
 
 Need to reschedule? Just reply here or use the app.
 
@@ -26,9 +26,9 @@ See you soon!
 {ProviderName}
 ```
 
-#### Template 1.2: BeautyCort Introduction
+#### Template 1.2: Lamsa Introduction
 ```
-🌟 Thank you for booking with {BusinessName} through BeautyCort!
+🌟 Thank you for booking with {BusinessName} through Lamsa!
 
 We're Jordan's first professional beauty booking platform - no more WhatsApp chaos! 
 
@@ -37,13 +37,13 @@ Your confirmed appointment:
 💄 {ServiceName} - {Duration} minutes
 💰 {Price} JOD
 
-Why you'll love BeautyCort:
+Why you'll love Lamsa:
 ✅ Instant confirmations
 ✅ Easy rescheduling
 ✅ Verified professionals only
 ✅ Transparent pricing
 
-Download the app: beautycort.com/download
+Download the app: lamsa.com/download
 
 Looking forward to pampering you!
 {ProviderName} 💅
@@ -71,7 +71,7 @@ Your appointment is all set!
 ⏰ Duration: Approximately {Duration} minutes
 
 Need directions? 📍 Share location
-Need to change? 🔄 Reply here or use BeautyCort app
+Need to change? 🔄 Reply here or use Lamsa app
 
 We can't wait to see you!
 {BusinessName} Team
@@ -123,7 +123,7 @@ Quick reminders:
 • Remove contact lenses (for eye treatments) 👀
 • Avoid caffeine (for precise treatments) ☕
 
-Need to reschedule? Reply ASAP or use BeautyCort app.
+Need to reschedule? Reply ASAP or use Lamsa app.
 
 See you tomorrow! ✨
 {ProviderName}
@@ -176,7 +176,7 @@ If this doesn't work, here are other available slots:
 • {AlternativeTime2}
 • {AlternativeTime3}
 
-Please confirm by replying "YES" or use the BeautyCort app.
+Please confirm by replying "YES" or use the Lamsa app.
 
 Thanks for your flexibility!
 {BusinessName}
@@ -197,7 +197,7 @@ Service: {ServiceName}
 
 We're sorry we couldn't serve you this time. We'd love to see you soon!
 
-📱 Book again easily on BeautyCort app
+📱 Book again easily on Lamsa app
 🎁 Use code RETURN10 for 10% off your next visit
 
 Take care!
@@ -220,13 +220,13 @@ Your beautiful results should last:
 • Treatment: Follow aftercare instructions
 
 📱 How was your experience?
-Please leave a review on BeautyCort app - it helps other customers find us!
+Please leave a review on Lamsa app - it helps other customers find us!
 
 ⭐ Rate your visit: [5 stars = Amazing] ⭐
 
 🎁 BONUS: Leave a review and get 15% off your next appointment!
 
-Book again: beautycort.com/{BusinessHandle}
+Book again: lamsa.com/{BusinessHandle}
 
 Thank you for choosing us! 💅
 {ProviderName}
@@ -287,7 +287,7 @@ SAVE: {Savings} JOD!
 🎫 Mention code: {PromoCode}
 
 Book now: Reply with preferred date/time
-Or use BeautyCort app for instant booking
+Or use Lamsa app for instant booking
 
 Limited spots available! 
 {BusinessName} Team
@@ -311,7 +311,7 @@ Your VIP points: {Points}
 Next reward unlock: {NextReward} ({PointsNeeded} points needed)
 
 Book your VIP appointment:
-📱 BeautyCort app (shows VIP pricing automatically)
+📱 Lamsa app (shows VIP pricing automatically)
 💬 Reply here with your preferred service
 
 Thank you for being an amazing customer!

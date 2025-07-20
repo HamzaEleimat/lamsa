@@ -1,4 +1,4 @@
-# BeautyCort - Beauty Booking Platform
+# Lamsa - Beauty Booking Platform
 
 A mobile-first marketplace for booking beauty services in Jordan.
 

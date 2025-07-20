@@ -1,12 +1,12 @@
-# BeautyCort Provider Marketing Package
+# Lamsa Provider Marketing Package
 
-**Complete marketing toolkit for beauty providers joining BeautyCort platform**
+**Complete marketing toolkit for beauty providers joining Lamsa platform**
 
 ---
 
 ## 📦 Package Contents
 
-This comprehensive marketing package provides everything BeautyCort providers need to successfully launch, promote, and grow their business on the platform.
+This comprehensive marketing package provides everything Lamsa providers need to successfully launch, promote, and grow their business on the platform.
 
 ### 🏷️ **Window Stickers & Print Materials**
 - Bilingual sticker designs (Arabic/English)
@@ -101,7 +101,7 @@ provider-marketing-package/
 ## 🎯 Key Features
 
 ### **Professional Branding**
-- Consistent BeautyCort visual identity
+- Consistent Lamsa visual identity
 - Customizable elements for provider branding
 - High-quality, print-ready materials
 - Mobile-optimized designs
@@ -156,7 +156,7 @@ provider-marketing-package/
 
 ### **For WhatsApp Templates:**
 - WhatsApp Business account
-- BeautyCort provider account
+- Lamsa provider account
 - Customer contact database
 
 ---
@@ -182,27 +182,27 @@ provider-marketing-package/
 - [ ] Advanced social media advertising campaigns
 - [ ] Integration with email marketing tools
 - [ ] Partnership marketing with local businesses
-- [ ] Loyalty program integration with BeautyCort
+- [ ] Loyalty program integration with Lamsa
 
 ---
 
 ## 📞 Support & Resources
 
 ### **Technical Support**
-- **Email**: marketing@beautycort.com
+- **Email**: marketing@lamsa.com
 - **WhatsApp**: +962 XX XXX XXXX
 - **Response Time**: Within 24 hours
 - **Available**: Sunday-Thursday, 9 AM - 6 PM Jordan time
 
 ### **Training Resources**
-- **Video Tutorials**: beautycort.com/provider-training
+- **Video Tutorials**: lamsa.com/provider-training
 - **Webinars**: Monthly marketing workshops
 - **Community**: Provider Facebook group
 - **Documentation**: Comprehensive guides and FAQs
 
 ### **Design Support**
 - **Custom Design Requests**: Available for premium providers
-- **Brand Guidelines**: BeautyCort visual identity standards
+- **Brand Guidelines**: Lamsa visual identity standards
 - **Asset Library**: Additional graphics and templates
 - **Print Shop Partners**: Recommended printing services in Jordan
 
@@ -256,7 +256,7 @@ Based on beta testing with select providers:
 2. **Review the Quick Start Guide** for implementation priority
 3. **Generate your first QR code** using the provided tool
 4. **Post your launch announcement** using social media templates
-5. **Contact BeautyCort support** with any questions
+5. **Contact Lamsa support** with any questions
 
 ### **First Week Goals**
 - Complete profile setup and optimization
@@ -267,13 +267,13 @@ Based on beta testing with select providers:
 
 ---
 
-**Ready to grow your beauty business with BeautyCort?** 
+**Ready to grow your beauty business with Lamsa?** 
 
 This marketing package provides everything you need to successfully launch and scale your provider presence. From professional QR codes to engaging social media content, you'll have all the tools necessary to attract customers and build a thriving business on Jordan's leading beauty booking platform.
 
-**Questions or need help getting started?** Contact our marketing support team at marketing@beautycort.com or join our provider community for tips, tricks, and ongoing support.
+**Questions or need help getting started?** Contact our marketing support team at marketing@lamsa.com or join our provider community for tips, tricks, and ongoing support.
 
 ---
 
-*BeautyCort Provider Marketing Package v1.0*  
-*© 2024 BeautyCort. All rights reserved.*
+*Lamsa Provider Marketing Package v1.0*  
+*© 2024 Lamsa. All rights reserved.*

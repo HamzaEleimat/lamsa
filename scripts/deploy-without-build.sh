@@ -6,7 +6,7 @@
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_DIR="$PROJECT_ROOT/beautycort-api"
+API_DIR="$PROJECT_ROOT/lamsa-api"
 
 echo "🚀 Emergency Production Deployment (ts-node mode)"
 echo "⚠️  This deployment uses ts-node for faster deployment"
@@ -22,21 +22,21 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD:-beautycort123}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-lamsa123}
     volumes:
       - redis_data:/data
     networks:
-      - beautycort_network
+      - lamsa_network
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 30s
       timeout: 5s
       retries: 5
 
-  # BeautyCort API (ts-node mode)
+  # Lamsa API (ts-node mode)
   api:
     build:
-      context: ./beautycort-api
+      context: ./lamsa-api
       dockerfile: Dockerfile.ts-node
     restart: unless-stopped
     ports:
@@ -51,7 +51,7 @@ services:
       - JWT_EXPIRES_IN=15m
       - REFRESH_TOKEN_EXPIRES_IN=7d
       - REDIS_URL=redis://redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-beautycort123}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-lamsa123}
       - TAP_SECRET_KEY=${TAP_SECRET_KEY}
       - TAP_PUBLIC_KEY=${TAP_PUBLIC_KEY}
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
@@ -60,7 +60,7 @@ services:
       - EXPO_PUSH_TOKEN=${EXPO_PUSH_TOKEN}
       - SENTRY_DSN=${SENTRY_DSN}
       - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}
-      - APP_NAME=${APP_NAME:-BeautyCort}
+      - APP_NAME=${APP_NAME:-Lamsa}
       - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-ar}
       - CURRENCY=${CURRENCY:-JOD}
       - TIMEZONE=${TIMEZONE:-Asia/Amman}
@@ -74,9 +74,9 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - beautycort_network
+      - lamsa_network
     volumes:
-      - ./beautycort-api/logs:/app/logs
+      - ./lamsa-api/logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -84,10 +84,10 @@ services:
       retries: 3
       start_period: 60s
 
-  # BeautyCort Web (Next.js)
+  # Lamsa Web (Next.js)
   web:
     build:
-      context: ./beautycort-web
+      context: ./lamsa-web
       dockerfile: Dockerfile
       target: production
     restart: unless-stopped
@@ -98,7 +98,7 @@ services:
       - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - NEXT_PUBLIC_API_URL=${API_URL:-http://localhost:3000}
-      - NEXT_PUBLIC_APP_NAME=${APP_NAME:-BeautyCort}
+      - NEXT_PUBLIC_APP_NAME=${APP_NAME:-Lamsa}
       - NEXT_PUBLIC_DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-ar}
       - NEXT_PUBLIC_CURRENCY=${CURRENCY:-JOD}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
@@ -106,7 +106,7 @@ services:
     depends_on:
       - api
     networks:
-      - beautycort_network
+      - lamsa_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -128,7 +128,7 @@ services:
       - api
       - web
     networks:
-      - beautycort_network
+      - lamsa_network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/api/health"]
       interval: 30s
@@ -140,7 +140,7 @@ volumes:
     driver: local
 
 networks:
-  beautycort_network:
+  lamsa_network:
     driver: bridge
 EOF
 
@@ -171,11 +171,11 @@ RUN mkdir -p logs
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S beautycort -u 1001
+RUN adduser -S lamsa -u 1001
 
 # Change ownership
-RUN chown -R beautycort:nodejs /app
-USER beautycort
+RUN chown -R lamsa:nodejs /app
+USER lamsa
 
 # Expose port
 EXPOSE 3000
@@ -191,7 +191,7 @@ EOF
 # Create production environment file if it doesn't exist
 if [[ ! -f "$PROJECT_ROOT/.env.production" ]]; then
     cat > "$PROJECT_ROOT/.env.production" << 'EOF'
-# BeautyCort Production Environment
+# Lamsa Production Environment
 NODE_ENV=production
 PORT=3000
 
@@ -221,7 +221,7 @@ NEW_RELIC_LICENSE_KEY=your_newrelic_key
 SENTRY_DSN=your_sentry_dsn
 
 # Application
-APP_NAME=BeautyCort
+APP_NAME=Lamsa
 DEFAULT_LANGUAGE=ar
 CURRENCY=JOD
 TIMEZONE=Asia/Amman

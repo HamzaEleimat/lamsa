@@ -1,7 +1,7 @@
-# Google Play Store Description - BeautyCort
+# Google Play Store Description - Lamsa
 
 ## App Title
-BeautyCort: Beauty Booking Jordan
+Lamsa: Beauty Booking Jordan
 
 ## Short Description (80 characters max)
 Find & book verified beauty professionals in Jordan. Better than WhatsApp!
@@ -15,7 +15,7 @@ Find & book verified beauty professionals in Jordan. Better than WhatsApp!
 
 **🌟 Jordan's #1 Beauty Booking App**
 
-Transform how you book beauty services! BeautyCort connects you with licensed beauty professionals across Jordan, eliminating the chaos of WhatsApp groups and unreliable booking systems.
+Transform how you book beauty services! Lamsa connects you with licensed beauty professionals across Jordan, eliminating the chaos of WhatsApp groups and unreliable booking systems.
 
 **⚡ Book in Under 60 Seconds**
 • Quick phone number login - no passwords needed
@@ -65,7 +65,7 @@ Amman, Irbid, Zarqa, and expanding across Jordan
 **🎁 Launch Special:**
 Join early and get exclusive access to top-rated providers and special launch discounts!
 
-Say goodbye to unreliable WhatsApp groups. Download BeautyCort and experience professional beauty booking today.
+Say goodbye to unreliable WhatsApp groups. Download Lamsa and experience professional beauty booking today.
 
 ---
 

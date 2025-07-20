@@ -17,7 +17,7 @@
 ### Base URL
 ```
 Development: http://localhost:3000/api
-Production: https://api.beautycort.com/api
+Production: https://api.lamsa.com/api
 ```
 
 ### Authentication
@@ -2442,13 +2442,13 @@ Mobile App:
 #### Environment Setup
 ```bash
 # API Environment
-cd beautycort-api
+cd lamsa-api
 npm install
 cp .env.example .env
 # Configure environment variables
 
 # Mobile Environment
-cd beautycort-mobile
+cd lamsa-mobile
 npm install
 eas build:configure
 # Configure Expo credentials
@@ -2586,7 +2586,7 @@ const testProviders = [
 
 ## Conclusion
 
-Day 4 has successfully established the foundation for provider features in the BeautyCort platform. The implementation includes a comprehensive provider management system, flexible service configuration, sophisticated availability engine, and extensive help system tailored for the Jordan beauty market.
+Day 4 has successfully established the foundation for provider features in the Lamsa platform. The implementation includes a comprehensive provider management system, flexible service configuration, sophisticated availability engine, and extensive help system tailored for the Jordan beauty market.
 
 The architecture is scalable, maintainable, and ready for future enhancements. All critical provider workflows have been implemented with attention to local market needs, cultural considerations, and user experience.
 

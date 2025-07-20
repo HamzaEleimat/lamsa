@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# BeautyCort Deployment Script
+# Lamsa Deployment Script
 # This script handles deployment to different environments and cloud providers
 
 set -e
@@ -47,7 +47,7 @@ usage() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Deploy BeautyCort application to various environments and platforms.
+Deploy Lamsa application to various environments and platforms.
 
 Options:
     -e, --environment ENV    Environment (local, staging, production) [default: staging]
@@ -175,19 +175,19 @@ run_tests() {
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "api" ]]; then
         log "Testing API..."
-        cd "${PROJECT_ROOT}/beautycort-api"
+        cd "${PROJECT_ROOT}/lamsa-api"
         npm test
     fi
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "web" ]]; then
         log "Testing Web..."
-        cd "${PROJECT_ROOT}/beautycort-web"
+        cd "${PROJECT_ROOT}/lamsa-web"
         npm test
     fi
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "mobile" ]]; then
         log "Testing Mobile..."
-        cd "${PROJECT_ROOT}/beautycort-mobile"
+        cd "${PROJECT_ROOT}/lamsa-mobile"
         npm test
     fi
     
@@ -207,12 +207,12 @@ build_images() {
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "api" ]]; then
         log "Building API image..."
-        docker build -t beautycort-api:latest ./beautycort-api
+        docker build -t lamsa-api:latest ./lamsa-api
     fi
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "web" ]]; then
         log "Building Web image..."
-        docker build -t beautycort-web:latest ./beautycort-web
+        docker build -t lamsa-web:latest ./lamsa-web
     fi
     
     success "Images built successfully"
@@ -265,7 +265,7 @@ deploy_aws() {
     # Deploy CloudFormation stack
     aws cloudformation deploy \
         --template-file cloudformation.yaml \
-        --stack-name "beautycort-${ENVIRONMENT}" \
+        --stack-name "lamsa-${ENVIRONMENT}" \
         --parameter-overrides Environment="$ENVIRONMENT" \
         --capabilities CAPABILITY_IAM \
         --region us-east-1
@@ -373,7 +373,7 @@ confirm_deployment() {
 
 # Main deployment function
 main() {
-    log "Starting BeautyCort deployment..."
+    log "Starting Lamsa deployment..."
     log "Environment: $ENVIRONMENT"
     log "Platform: $PLATFORM"
     log "Component: $COMPONENT"

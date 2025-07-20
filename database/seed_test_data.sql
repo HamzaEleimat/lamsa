@@ -1,4 +1,4 @@
--- BeautyCort Test Data Seeding Script
+-- Lamsa Test Data Seeding Script
 -- Comprehensive seeding for development and testing environments
 -- Safe to run multiple times (uses INSERT ... ON CONFLICT)
 
@@ -481,4 +481,4 @@ ON CONFLICT (id) DO UPDATE SET
 COMMIT;
 
 -- Continue with more data in next part...
-RAISE NOTICE 'BeautyCort test data seeding completed successfully! Part 1: Providers, Services, and Users created.';
+RAISE NOTICE 'Lamsa test data seeding completed successfully! Part 1: Providers, Services, and Users created.';
