@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { secureLogger } from '../utils/secure-logger';
 
 export class AppError extends Error {
   statusCode: number;
@@ -40,7 +41,7 @@ export const errorHandler = (
     timestamp: new Date().toISOString()
   };
   
-  console.error('Error:', sanitizedError);
+  secureLogger.error('Request error', sanitizedError);
 
   res.status(statusCode).json({
     success: false,
