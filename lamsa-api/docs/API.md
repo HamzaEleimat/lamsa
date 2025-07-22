@@ -1081,8 +1081,9 @@ cancelled   cancelled
 
 ### Fee Structure
 
-- **Platform Fee**: 8% of service amount
-- **Provider Fee**: Service amount - Platform fee
+- **Services ≤25 JOD**: 2 JOD platform fee
+- **Services >25 JOD**: 5 JOD platform fee
+- **Provider Earnings**: Service amount - Platform fee
 
 ### Jordan Market Rules
 

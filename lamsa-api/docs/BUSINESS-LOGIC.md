@@ -610,12 +610,14 @@ function validateReschedule(booking, newDate, newTime, userRole) {
 ## Fee Structure
 
 ### Platform Fees
+Lamsa uses a fixed-fee structure based on service amount:
+
 ```javascript
 const FEE_STRUCTURE = {
-  platformFeeRate: 0.08,        // 8% platform fee
-  minimumFee: 1.00,             // Minimum 1 JOD fee
-  maximumFee: 50.00,            // Maximum 50 JOD fee
-  paymentProcessingFee: 0.025,  // 2.5% for online payments
+  lowTierThreshold: 25.00,      // 25 JOD threshold
+  lowTierFee: 2.00,             // 2 JOD fee for services ≤25 JOD
+  highTierFee: 5.00,            // 5 JOD fee for services >25 JOD
+  paymentProcessingFee: 0.025,  // 2.5% for online payments (future)
   refundFee: 2.00              // 2 JOD refund processing fee
 };
 ```
@@ -623,29 +625,44 @@ const FEE_STRUCTURE = {
 ### Fee Calculation
 ```javascript
 function calculateFees(serviceAmount, paymentMethod) {
-  // Calculate platform fee
-  let platformFee = serviceAmount * FEE_STRUCTURE.platformFeeRate;
-  platformFee = Math.max(platformFee, FEE_STRUCTURE.minimumFee);
-  platformFee = Math.min(platformFee, FEE_STRUCTURE.maximumFee);
+  // Calculate platform fee based on fixed tiers
+  let platformFee;
+  if (serviceAmount <= FEE_STRUCTURE.lowTierThreshold) {
+    platformFee = FEE_STRUCTURE.lowTierFee;
+  } else {
+    platformFee = FEE_STRUCTURE.highTierFee;
+  }
   
-  // Calculate payment processing fee
+  // Calculate payment processing fee (future implementation)
   let processingFee = 0;
   if (paymentMethod === 'online') {
     processingFee = serviceAmount * FEE_STRUCTURE.paymentProcessingFee;
   }
   
-  // Calculate provider fee
-  const providerFee = serviceAmount - platformFee - processingFee;
+  // Calculate provider earnings
+  const providerEarnings = serviceAmount - platformFee - processingFee;
+  
+  // Ensure provider earnings are not negative
+  if (providerEarnings < 0) {
+    throw new Error('Platform fee cannot exceed service amount');
+  }
   
   return {
-    serviceAmount,
+    serviceAmount: Number(serviceAmount.toFixed(2)),
     platformFee: Number(platformFee.toFixed(2)),
     processingFee: Number(processingFee.toFixed(2)),
-    providerFee: Number(providerFee.toFixed(2)),
-    totalFees: Number((platformFee + processingFee).toFixed(2))
+    providerEarnings: Number(providerEarnings.toFixed(2)),
+    totalFees: Number((platformFee + processingFee).toFixed(2)),
+    feePercentage: Number(((platformFee / serviceAmount) * 100).toFixed(2))
   };
 }
 ```
+
+### Fee Examples
+- Service cost: 20 JOD → Platform fee: 2 JOD → Provider earnings: 18 JOD (10% effective rate)
+- Service cost: 25 JOD → Platform fee: 2 JOD → Provider earnings: 23 JOD (8% effective rate)
+- Service cost: 30 JOD → Platform fee: 5 JOD → Provider earnings: 25 JOD (16.67% effective rate)
+- Service cost: 100 JOD → Platform fee: 5 JOD → Provider earnings: 95 JOD (5% effective rate)
 
 ### Refund Policies
 ```javascript

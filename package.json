@@ -15,15 +15,31 @@
     "mobile:start": "cd lamsa-mobile && npm start",
     "web:dev": "cd lamsa-web && npm run dev",
     "install:all": "npm install && cd lamsa-api && npm install && cd ../lamsa-mobile && npm install && cd ../lamsa-web && npm install",
+    "db:setup": "./setup-database.sh",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:status": "supabase migration list",
+    "db:diff": "supabase db diff --use-migra",
+    "db:new": "supabase migration new",
     "test": "node run-bilingual-tests.js",
     "test:mobile": "cd lamsa-mobile && npm test",
     "test:api": "cd lamsa-api && npm test",
     "test:web": "cd lamsa-web && npm test",
     "test:bilingual": "node run-bilingual-tests.js",
+    "env:setup": "node scripts/setup-env.js",
+    "env:validate": "node scripts/validate-env.js",
+    "env:status": "node scripts/env-status.js",
+    "env:secrets": "node scripts/validate-env.js generate-secrets",
+    "env:dev": "node scripts/setup-env.js dev",
+    "env:prod": "node scripts/setup-env.js prod",
+    "env:docker": "node scripts/setup-env.js docker",
     "language-qa": "node run-bilingual-tests.js --report-only"
   },
   "devDependencies": {
-    "husky": "^8.0.0"
+    "husky": "^8.0.0",
+    "supabase": "^2.31.8"
   },
   "repository": {
     "type": "git",
@@ -39,6 +55,5 @@
     "nextjs"
   ],
   "author": "Lamsa Development Team",
-  "license": "UNLICENSED",
-  "dependencies": {}
+  "license": "UNLICENSED"
 }
