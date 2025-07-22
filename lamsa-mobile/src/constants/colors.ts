@@ -1,15 +1,15 @@
 export const colors = {
-  // Primary colors
-  primary: '#6B46C1',
-  primaryDark: '#553C9A',
-  primaryLight: '#9F7AEA',
-  lightPrimary: '#E9D8FD',
+  // Primary colors - Updated with new pink palette
+  primary: '#FF8FAB',
+  primaryDark: '#50373E',
+  primaryLight: '#FFB3C6',
+  lightPrimary: '#FFE5EC',
   
-  // Secondary colors
-  secondary: '#ED8936',
-  secondaryDark: '#DD6B20',
-  secondaryLight: '#F6AD55',
-  lightSecondary: '#FED7AA',
+  // Secondary colors - Updated with new pink palette
+  secondary: '#FFC2D1',
+  secondaryDark: '#FF8FAB',
+  secondaryLight: '#FFE5EC',
+  lightSecondary: '#FFE5EC',
   
   // Status colors
   success: '#48BB78',

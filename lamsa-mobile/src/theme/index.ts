@@ -1,142 +1,148 @@
-import { MD3LightTheme, MD3DarkTheme, configureFonts } from 'react-native-paper';
-import { MD3Type } from 'react-native-paper/lib/typescript/types';
+import { MD3LightTheme, MD3DarkTheme, configureFonts, MD3Theme } from 'react-native-paper';
 
-// Lamsa brand colors
+// Lamsa brand colors - Updated with new palette
 const brandColors = {
-  primary: '#E91E63', // Pink
-  secondary: '#9C27B0', // Purple
-  tertiary: '#FF6090', // Light Pink
+  primary: '#FF8FAB', // Pink from palette
+  secondary: '#FFC2D1', // Light pink from palette
+  tertiary: '#FFB3C6', // Medium pink from palette
+  accent: '#FFE5EC', // Lightest pink from palette
+  dark: '#50373E', // Dark brown from palette
   success: '#4CAF50',
   warning: '#FF9800',
   error: '#F44336',
   info: '#2196F3',
 };
 
-// Custom fonts configuration
+// Custom fonts configuration based on brand guidelines
 const fontConfig = {
+  // Display fonts - Cormorant Garamond for main screen titles
   displayLarge: {
-    fontFamily: 'System',
+    fontFamily: 'CormorantGaramond_400Regular',
     fontSize: 57,
     fontWeight: '400' as const,
-    letterSpacing: 0,
+    letterSpacing: -0.5,
     lineHeight: 64,
   },
   displayMedium: {
-    fontFamily: 'System',
+    fontFamily: 'CormorantGaramond_400Regular',
     fontSize: 45,
     fontWeight: '400' as const,
-    letterSpacing: 0,
+    letterSpacing: -0.5,
     lineHeight: 52,
   },
   displaySmall: {
-    fontFamily: 'System',
+    fontFamily: 'CormorantGaramond_400Regular',
     fontSize: 36,
     fontWeight: '400' as const,
     letterSpacing: 0,
     lineHeight: 44,
   },
+  // Headlines - Cormorant Garamond for section headers
   headlineLarge: {
-    fontFamily: 'System',
-    fontSize: 32,
+    fontFamily: 'CormorantGaramond_400Regular',
+    fontSize: 32, // Main screen titles
     fontWeight: '400' as const,
-    letterSpacing: 0,
+    letterSpacing: -0.5,
     lineHeight: 40,
   },
   headlineMedium: {
-    fontFamily: 'System',
-    fontSize: 28,
-    fontWeight: '500' as const,
-    letterSpacing: 0,
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    fontSize: 28, // Important headers
+    fontWeight: '600' as const,
+    letterSpacing: -0.5,
     lineHeight: 36,
   },
   headlineSmall: {
-    fontFamily: 'System',
-    fontSize: 24,
-    fontWeight: '400' as const,
+    fontFamily: 'CormorantGaramond_500Medium',
+    fontSize: 24, // Section headers
+    fontWeight: '500' as const,
     letterSpacing: 0,
     lineHeight: 32,
   },
+  // Titles - Cormorant Garamond for smaller headings
   titleLarge: {
-    fontFamily: 'System',
-    fontSize: 22,
-    fontWeight: '500' as const,
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    fontSize: 22, // Call-to-action titles
+    fontWeight: '600' as const,
     letterSpacing: 0,
     lineHeight: 28,
   },
   titleMedium: {
-    fontFamily: 'System',
-    fontSize: 16,
+    fontFamily: 'CormorantGaramond_500Medium',
+    fontSize: 20, // Smaller CTAs
     fontWeight: '500' as const,
     letterSpacing: 0.15,
     lineHeight: 24,
   },
   titleSmall: {
-    fontFamily: 'System',
-    fontSize: 14,
+    fontFamily: 'CormorantGaramond_500Medium',
+    fontSize: 18, // Minimum CTA size
     fontWeight: '500' as const,
     letterSpacing: 0.1,
     lineHeight: 20,
   },
+  // Labels - Martel Sans for UI elements
   labelLarge: {
-    fontFamily: 'System',
+    fontFamily: 'MartelSans_700Bold',
     fontSize: 14,
-    fontWeight: '500' as const,
+    fontWeight: '700' as const,
     letterSpacing: 0.1,
     lineHeight: 20,
   },
   labelMedium: {
-    fontFamily: 'System',
+    fontFamily: 'MartelSans_400Regular',
     fontSize: 12,
-    fontWeight: '500' as const,
+    fontWeight: '400' as const,
     letterSpacing: 0.5,
     lineHeight: 16,
   },
   labelSmall: {
-    fontFamily: 'System',
+    fontFamily: 'MartelSans_400Regular',
     fontSize: 11,
-    fontWeight: '500' as const,
+    fontWeight: '400' as const,
     letterSpacing: 0.5,
     lineHeight: 16,
   },
+  // Body text - Martel Sans for readability
   bodyLarge: {
-    fontFamily: 'System',
-    fontSize: 16,
+    fontFamily: 'MartelSans_400Regular',
+    fontSize: 16, // Standard body text
     fontWeight: '400' as const,
-    letterSpacing: 0.15,
+    letterSpacing: 0.5,
     lineHeight: 24,
   },
   bodyMedium: {
-    fontFamily: 'System',
-    fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
+    fontSize: 14, // Standard body text
     fontWeight: '400' as const,
     letterSpacing: 0.25,
     lineHeight: 20,
   },
   bodySmall: {
-    fontFamily: 'System',
-    fontSize: 12,
+    fontFamily: 'MartelSans_400Regular',
+    fontSize: 12, // Legal/ancillary text
     fontWeight: '400' as const,
     letterSpacing: 0.4,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   default: {
-    fontFamily: 'System',
+    fontFamily: 'MartelSans_400Regular',
     fontWeight: '400' as const,
     letterSpacing: 0,
   },
 };
 
 // Light theme
-export const lightTheme: MD3Type = {
+export const lightTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
     primary: brandColors.primary,
-    primaryContainer: '#FCE4EC',
+    primaryContainer: brandColors.accent,
     secondary: brandColors.secondary,
-    secondaryContainer: '#F3E5F5',
+    secondaryContainer: brandColors.accent,
     tertiary: brandColors.tertiary,
-    tertiaryContainer: '#FFE0E8',
+    tertiaryContainer: brandColors.accent,
     surface: '#FFFFFF',
     surfaceVariant: '#F5F5F5',
     surfaceDisabled: '#E0E0E0',
@@ -144,14 +150,14 @@ export const lightTheme: MD3Type = {
     error: brandColors.error,
     errorContainer: '#FFEBEE',
     onPrimary: '#FFFFFF',
-    onPrimaryContainer: '#880E4F',
+    onPrimaryContainer: brandColors.dark,
     onSecondary: '#FFFFFF',
-    onSecondaryContainer: '#4A148C',
+    onSecondaryContainer: brandColors.dark,
     onTertiary: '#FFFFFF',
-    onTertiaryContainer: '#C2185B',
-    onSurface: '#212121',
-    onSurfaceVariant: '#666666',
-    onSurfaceDisabled: '#9E9E9E',
+    onTertiaryContainer: brandColors.dark,
+    onSurface: '#212121', // Primary heading color from guidelines
+    onSurfaceVariant: '#424242', // Primary body text color from guidelines
+    onSurfaceDisabled: '#757575', // Secondary text color from guidelines
     onError: '#FFFFFF',
     onErrorContainer: '#B71C1C',
     onBackground: '#212121',
@@ -172,21 +178,21 @@ export const lightTheme: MD3Type = {
       level5: '#EBEBEB',
     },
   },
-  fonts: configureFonts({ config: fontConfig }) as MD3Type['fonts'],
+  fonts: configureFonts({ config: fontConfig }),
   roundness: 12,
 };
 
 // Dark theme
-export const darkTheme: MD3Type = {
+export const darkTheme: MD3Theme = {
   ...MD3DarkTheme,
   colors: {
     ...MD3DarkTheme.colors,
     primary: brandColors.primary,
-    primaryContainer: '#880E4F',
+    primaryContainer: brandColors.dark,
     secondary: brandColors.secondary,
-    secondaryContainer: '#4A148C',
+    secondaryContainer: brandColors.dark,
     tertiary: brandColors.tertiary,
-    tertiaryContainer: '#C2185B',
+    tertiaryContainer: brandColors.dark,
     surface: '#121212',
     surfaceVariant: '#1E1E1E',
     surfaceDisabled: '#2C2C2C',
@@ -194,11 +200,11 @@ export const darkTheme: MD3Type = {
     error: brandColors.error,
     errorContainer: '#CF6679',
     onPrimary: '#FFFFFF',
-    onPrimaryContainer: '#FFB3C1',
+    onPrimaryContainer: brandColors.accent,
     onSecondary: '#FFFFFF',
-    onSecondaryContainer: '#CE93D8',
+    onSecondaryContainer: brandColors.accent,
     onTertiary: '#FFFFFF',
-    onTertiaryContainer: '#FFB3C1',
+    onTertiaryContainer: brandColors.accent,
     onSurface: '#E1E1E1',
     onSurfaceVariant: '#AAAAAA',
     onSurfaceDisabled: '#666666',
@@ -209,7 +215,7 @@ export const darkTheme: MD3Type = {
     outlineVariant: '#1E1E1E',
     inverseSurface: '#E1E1E1',
     inverseOnSurface: '#1E1E1E',
-    inversePrimary: '#C2185B',
+    inversePrimary: brandColors.primary,
     shadow: '#000000',
     scrim: '#000000',
     backdrop: 'rgba(0, 0, 0, 0.6)',
@@ -222,7 +228,7 @@ export const darkTheme: MD3Type = {
       level5: '#323232',
     },
   },
-  fonts: configureFonts({ config: fontConfig }) as MD3Type['fonts'],
+  fonts: configureFonts({ config: fontConfig }),
   roundness: 12,
 };
 
@@ -230,7 +236,7 @@ export const darkTheme: MD3Type = {
 export const customColors = brandColors;
 
 // Helper function to get theme based on user preference
-export const getTheme = (isDarkMode: boolean): MD3Type => {
+export const getTheme = (isDarkMode: boolean): MD3Theme => {
   return isDarkMode ? darkTheme : lightTheme;
 };
 

@@ -30,7 +30,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import MapView, { Marker, Region } from 'react-native-maps';
+import MapView, { Marker, Region } from '../../../components/MapView';
 import * as Location from 'expo-location';
 import i18n, { isRTL } from '../../../i18n';
 import ProgressIndicator from '../../../components/onboarding/ProgressIndicator';
@@ -289,7 +289,7 @@ const LocationSetupScreen: React.FC<Props> = ({ navigation, route }) => {
 
   if (isLoadingDraft) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <Text>{i18n.t('common.loading')}</Text>
         </View>
@@ -298,7 +298,7 @@ const LocationSetupScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ProgressIndicator
         currentStep={2}
         totalSteps={7}
@@ -327,7 +327,7 @@ const LocationSetupScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
 
           {/* Map Section */}
-          <Surface style={styles.mapContainer} elevation={2}>
+          <Surface style={[styles.mapContainer, { backgroundColor: theme.colors.surface }]} elevation={2}>
             <View style={styles.mapHeader}>
               <Text variant="titleMedium" style={styles.sectionTitle}>
                 {i18n.t('providerOnboarding.location.selectOnMap')}
@@ -373,7 +373,7 @@ const LocationSetupScreen: React.FC<Props> = ({ navigation, route }) => {
           </Surface>
 
           {/* Form Section */}
-          <Surface style={styles.formContainer} elevation={1}>
+          <Surface style={[styles.formContainer, { backgroundColor: theme.colors.surface }]} elevation={1}>
             {/* Mobile Service Toggle */}
             {businessType !== BusinessType.MOBILE && (
               <View style={styles.inputGroup}>
@@ -538,7 +538,7 @@ const LocationSetupScreen: React.FC<Props> = ({ navigation, route }) => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.surfaceVariant }]}>
         <Button
           mode="outlined"
           onPress={() => navigation.goBack()}
@@ -563,7 +563,6 @@ const LocationSetupScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
   },
   loadingContainer: {
     flex: 1,
@@ -599,7 +598,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   mapHeader: {
     flexDirection: 'row',
@@ -618,13 +617,13 @@ const styles = StyleSheet.create({
   formContainer: {
     borderRadius: 16,
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   inputGroup: {
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   inputRTL: {
     textAlign: 'right',
@@ -658,9 +657,9 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: 'transparent',
     gap: 12,
   },
   backButton: {

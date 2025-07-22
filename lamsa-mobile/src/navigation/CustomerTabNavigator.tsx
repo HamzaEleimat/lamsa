@@ -7,32 +7,52 @@ import { isRTL } from '../i18n';
 import i18n from '../i18n';
 
 // Screens
-import SearchScreen from '../screens/customer/SearchScreen';
-import BookingsScreen from '../screens/customer/BookingsScreen';
-import ProfileScreen from '../screens/customer/ProfileScreen';
+import SearchScreen from '../screens/main/SearchScreen';
+import BookingsScreen from '../screens/main/BookingsScreen';
+import ProfileScreen from '../screens/main/ProfileScreen';
 import HomeScreen from '../screens/customer/HomeScreen';
 import ProviderDetailScreen from '../screens/customer/ProviderDetailScreen';
 import ProviderFiltersScreen from '../screens/customer/ProviderFiltersScreen';
+import ServiceDetailsScreen from '../screens/customer/ServiceDetailsScreen';
+import BookingFlowScreen from '../screens/customer/BookingFlowScreen';
+import DateTimeSelectionScreen from '../screens/customer/DateTimeSelectionScreen';
+import BookingConfirmationScreen from '../screens/customer/BookingConfirmationScreen';
+import BookingDetailsScreen from '../screens/customer/BookingDetailsScreen';
+import CheckoutScreen from '../screens/customer/CheckoutScreen';
+import PaymentConfirmationScreen from '../screens/customer/PaymentConfirmationScreen';
+import SettingsScreen from '../screens/main/SettingsScreen';
+import EditProfileScreen from '../screens/customer/EditProfileScreen';
+import NotificationSettingsScreen from '../screens/customer/NotificationSettingsScreen';
+import PaymentMethodsScreen from '../screens/customer/PaymentMethodsScreen';
 
 // Stack Parameter Lists
 export type HomeStackParamList = {
   Home: undefined;
-  ServiceDetails: { serviceId: string };
+  ServiceDetails: { serviceId: string; providerId: string };
   ProviderProfile: { providerId: string };
   ProviderDetail: { providerId: string };
   BookingFlow: { serviceId: string; providerId: string };
+  DateTimeSelection: { serviceId: string; providerId: string; bookingData: any };
+  BookingConfirmation: { bookingData: any; selectedDate: string; selectedTime: string };
+  Checkout: { bookingId: string; amount: number };
+  PaymentConfirmation: { success: boolean; bookingId?: string; errorMessage?: string };
 };
 
 export type SearchStackParamList = {
   Search: undefined;
   Filters: undefined;
-  ServiceDetails: { serviceId: string };
+  ServiceDetails: { serviceId: string; providerId: string };
   ProviderProfile: { providerId: string };
   ProviderDetail: { providerId: string };
   ProviderFilters: {
     currentFilters: any;
     onApply: (filters: any) => void;
   };
+  BookingFlow: { serviceId: string; providerId: string };
+  DateTimeSelection: { serviceId: string; providerId: string; bookingData: any };
+  BookingConfirmation: { bookingData: any; selectedDate: string; selectedTime: string };
+  Checkout: { bookingId: string; amount: number };
+  PaymentConfirmation: { success: boolean; bookingId?: string; errorMessage?: string };
 };
 
 export type BookingsStackParamList = {
@@ -40,6 +60,7 @@ export type BookingsStackParamList = {
   BookingDetails: { bookingId: string };
   RescheduleBooking: { bookingId: string };
   CancelBooking: { bookingId: string };
+  DateTimeSelection: { serviceId: string; providerId: string; bookingData: any; isReschedule: boolean };
 };
 
 export type ProfileStackParamList = {
@@ -47,8 +68,10 @@ export type ProfileStackParamList = {
   EditProfile: undefined;
   Settings: undefined;
   NotificationSettings: undefined;
+  PaymentMethods: undefined;
   PrivacySettings: undefined;
   Support: undefined;
+  About: undefined;
 };
 
 export type CustomerTabParamList = {
@@ -69,7 +92,12 @@ const HomeStackScreen = () => (
   <HomeStack.Navigator screenOptions={{ headerShown: false }}>
     <HomeStack.Screen name="Home" component={HomeScreen} />
     <HomeStack.Screen name="ProviderDetail" component={ProviderDetailScreen} />
-    {/* Add other home stack screens here */}
+    <HomeStack.Screen name="ServiceDetails" component={ServiceDetailsScreen} />
+    <HomeStack.Screen name="BookingFlow" component={BookingFlowScreen} />
+    <HomeStack.Screen name="DateTimeSelection" component={DateTimeSelectionScreen} />
+    <HomeStack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+    <HomeStack.Screen name="Checkout" component={CheckoutScreen} />
+    <HomeStack.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} />
   </HomeStack.Navigator>
 );
 
@@ -85,21 +113,30 @@ const SearchStackScreen = () => (
         headerShown: false,
       }}
     />
-    {/* Add other search stack screens here */}
+    <SearchStack.Screen name="ServiceDetails" component={ServiceDetailsScreen} />
+    <SearchStack.Screen name="BookingFlow" component={BookingFlowScreen} />
+    <SearchStack.Screen name="DateTimeSelection" component={DateTimeSelectionScreen} />
+    <SearchStack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+    <SearchStack.Screen name="Checkout" component={CheckoutScreen} />
+    <SearchStack.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} />
   </SearchStack.Navigator>
 );
 
 const BookingsStackScreen = () => (
   <BookingsStack.Navigator screenOptions={{ headerShown: false }}>
     <BookingsStack.Screen name="Bookings" component={BookingsScreen} />
-    {/* Add other bookings stack screens here */}
+    <BookingsStack.Screen name="BookingDetails" component={BookingDetailsScreen} />
+    <BookingsStack.Screen name="DateTimeSelection" component={DateTimeSelectionScreen} />
   </BookingsStack.Navigator>
 );
 
 const ProfileStackScreen = () => (
   <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
-    {/* Add other profile stack screens here */}
+    <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+    <ProfileStack.Screen name="Settings" component={SettingsScreen} />
+    <ProfileStack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+    <ProfileStack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
   </ProfileStack.Navigator>
 );
 

@@ -9,7 +9,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Switch,
   Alert,
@@ -17,6 +16,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, useTheme } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { biometricAuth, BiometricType } from '../../services/auth/biometricAuth';
@@ -26,6 +26,7 @@ import RTLLayout from '../../components/RTLLayout';
 export default function BiometricSettingsScreen() {
   const { t, isRTL } = useTranslation();
   const { isBiometricEnabled, enableBiometric, disableBiometric } = useAuth();
+  const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [biometricStatus, setBiometricStatus] = useState({
     available: false,
@@ -99,6 +100,8 @@ export default function BiometricSettingsScreen() {
     return Platform.OS === 'ios' ? 'Touch ID' : t('settings.biometric.fingerprint');
   };
 
+  const styles = createStyles(theme);
+
   return (
     <SafeAreaView style={styles.container}>
       <RTLLayout>
@@ -113,7 +116,7 @@ export default function BiometricSettingsScreen() {
                 <MaterialIcons
                   name={getBiometricIcon()}
                   size={80}
-                  color="#E91E63"
+                  color={theme.colors.primary}
                 />
               </View>
 
@@ -133,14 +136,14 @@ export default function BiometricSettingsScreen() {
                   </Text>
                 </View>
                 {isLoading ? (
-                  <ActivityIndicator size="small" color="#E91E63" />
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
                 ) : (
                   <Switch
                     value={isBiometricEnabled}
                     onValueChange={handleToggleBiometric}
-                    trackColor={{ false: '#767577', true: '#FCE4EC' }}
-                    thumbColor={isBiometricEnabled ? '#E91E63' : '#f4f3f4'}
-                    ios_backgroundColor="#3e3e3e"
+                    trackColor={{ false: theme.colors.surfaceDisabled, true: theme.colors.primaryContainer }}
+                    thumbColor={isBiometricEnabled ? theme.colors.primary : theme.colors.surface}
+                    ios_backgroundColor={theme.colors.surfaceDisabled}
                   />
                 )}
               </View>
@@ -149,7 +152,7 @@ export default function BiometricSettingsScreen() {
                 <MaterialIcons
                   name="info-outline"
                   size={20}
-                  color="#666"
+                  color={theme.colors.onSurfaceVariant}
                   style={styles.infoIcon}
                 />
                 <Text style={styles.infoText}>
@@ -162,7 +165,7 @@ export default function BiometricSettingsScreen() {
               <MaterialIcons
                 name="block"
                 size={60}
-                color="#999"
+                color={theme.colors.outline}
                 style={styles.unavailableIcon}
               />
               <Text style={styles.unavailableTitle}>
@@ -179,20 +182,20 @@ export default function BiometricSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.background,
   },
   header: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.colors.outlineVariant,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.onSurface,
   },
   content: {
     flex: 1,
@@ -204,7 +207,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     marginBottom: 40,
     lineHeight: 24,
@@ -215,7 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.colors.outlineVariant,
   },
   settingInfo: {
     flex: 1,
@@ -224,16 +227,16 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.onSurface,
     marginBottom: 5,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: theme.colors.onSurfaceVariant,
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: theme.colors.surfaceVariant,
     padding: 15,
     borderRadius: 8,
     marginTop: 30,
@@ -244,7 +247,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: '#666',
+    color: theme.colors.onSurfaceVariant,
     lineHeight: 20,
   },
   unavailableContainer: {
@@ -258,12 +261,12 @@ const styles = StyleSheet.create({
   unavailableTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.onSurface,
     marginBottom: 10,
   },
   unavailableDescription: {
     fontSize: 16,
-    color: '#666',
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     paddingHorizontal: 40,
     lineHeight: 24,

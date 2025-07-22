@@ -12,6 +12,7 @@ import {
   BookingWithDetails,
   ProviderWithServices
 } from '../types/database';
+import { secureLogger } from '../utils/secure-logger';
 
 dotenv.config();
 
@@ -72,13 +73,13 @@ export async function handleSupabaseOperation<T>(
     const { data, error } = await operation;
     
     if (error) {
-      console.error('Supabase operation error:', error);
+      secureLogger.error('Supabase operation error', error);
       return { data: null, error: new Error(error.message || 'Database operation failed') };
     }
     
     return { data, error: null };
   } catch (err) {
-    console.error('Unexpected error:', err);
+    secureLogger.error('Unexpected error in Supabase operation', err);
     return { 
       data: null, 
       error: err instanceof Error ? err : new Error('Unexpected error occurred') 
@@ -445,7 +446,21 @@ export const auth = {
 
     if (profileError) {
       // Rollback auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      } catch (rollbackError) {
+        // Critical: Log orphaned auth user for manual cleanup
+        console.error('CRITICAL: Failed to rollback auth user after profile creation failure', {
+          userId: authData.user.id,
+          profileError: profileError.message,
+          rollbackError: rollbackError
+        });
+        // Return both errors
+        return { 
+          data: null, 
+          error: new Error(`Profile creation failed: ${profileError.message}. Rollback also failed - manual cleanup required for user ${authData.user.id}`) 
+        };
+      }
       return { data: null, error: new Error(profileError.message) };
     }
 

@@ -75,7 +75,7 @@ const UserTypeSelectionScreen: React.FC<Props> = ({ navigation, route }) => {
       description: i18n.t('userType.provider.description'),
       icon: 'briefcase',
       features: i18n.t('userType.provider.features', { returnObjects: true }) as string[],
-      color: '#FF6B35',
+      color: theme.colors.secondary,
     },
   ];
 
@@ -190,7 +190,7 @@ const UserTypeSelectionScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -253,7 +253,6 @@ const UserTypeSelectionScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
     flexGrow: 1,

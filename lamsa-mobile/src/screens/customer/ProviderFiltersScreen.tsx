@@ -7,11 +7,10 @@ import {
   Platform,
   I18nManager,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import { useTranslation } from '../../hooks/useTranslation';
-import { colors } from '../../constants/colors';
 import { ServiceCategory, BusinessType } from '../../types';
 import { ProviderSearchParams } from '../../services/providerService';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -27,26 +26,34 @@ interface FilterChipProps {
   onPress: () => void;
 }
 
-const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onPress }) => (
-  <TouchableOpacity
-    style={[styles.chip, selected && styles.selectedChip]}
-    onPress={onPress}
-  >
-    <Text style={[styles.chipText, selected && styles.selectedChipText]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
+const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onPress }) => {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
+  return (
+    <TouchableOpacity
+      style={[styles.chip, selected && styles.selectedChip]}
+      onPress={onPress}
+    >
+      <Text style={[styles.chipText, selected && styles.selectedChipText]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 export default function ProviderFiltersScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
+  const theme = useTheme();
   const { currentFilters, onApply } = route.params as RouteParams;
 
   const [filters, setFilters] = useState<ProviderSearchParams>({
     ...currentFilters,
   });
+  
+  const styles = createStyles(theme);
 
   const serviceCategories = [
     { key: ServiceCategory.HAIR, label: t('hair') },
@@ -137,7 +144,7 @@ export default function ProviderFiltersScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="close" size={24} color={colors.text} />
+          <Ionicons name="close" size={24} color={theme.colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('filters')}</Text>
         <TouchableOpacity onPress={handleReset} disabled={!hasActiveFilters()}>
@@ -207,9 +214,9 @@ export default function ProviderFiltersScreen() {
             maximumValue={100}
             value={filters.radiusKm || 50}
             onValueChange={(value) => setFilters({ ...filters, radiusKm: Math.round(value) })}
-            minimumTrackTintColor={colors.primary}
-            maximumTrackTintColor={colors.lightGray}
-            thumbTintColor={colors.primary}
+            minimumTrackTintColor={theme.colors.primary}
+            maximumTrackTintColor={theme.colors.surfaceVariant}
+            thumbTintColor={theme.colors.primary}
           />
           <View style={styles.sliderLabels}>
             <Text style={styles.sliderLabel}>1 {t('km')}</Text>
@@ -235,7 +242,7 @@ export default function ProviderFiltersScreen() {
                 <Ionicons
                   name="star"
                   size={24}
-                  color={(filters.minRating || 0) >= rating ? colors.warning : colors.lightGray}
+                  color={(filters.minRating || 0) >= rating ? theme.colors.tertiary : theme.colors.surfaceVariant}
                 />
               </TouchableOpacity>
             ))}
@@ -251,7 +258,7 @@ export default function ProviderFiltersScreen() {
           >
             <View style={[styles.checkbox, filters.availableNow && styles.checkedBox]}>
               {filters.availableNow && (
-                <Ionicons name="checkmark" size={16} color={colors.white} />
+                <Ionicons name="checkmark" size={16} color={theme.colors.onPrimary} />
               )}
             </View>
             <Text style={styles.checkboxLabel}>{t('availableNow')}</Text>
@@ -263,7 +270,7 @@ export default function ProviderFiltersScreen() {
           >
             <View style={[styles.checkbox, filters.availableToday && styles.checkedBox]}>
               {filters.availableToday && (
-                <Ionicons name="checkmark" size={16} color={colors.white} />
+                <Ionicons name="checkmark" size={16} color={theme.colors.onPrimary} />
               )}
             </View>
             <Text style={styles.checkboxLabel}>{t('availableToday')}</Text>
@@ -278,7 +285,7 @@ export default function ProviderFiltersScreen() {
           >
             <View style={[styles.checkbox, filters.includeNewProviders && styles.checkedBox]}>
               {filters.includeNewProviders && (
-                <Ionicons name="checkmark" size={16} color={colors.white} />
+                <Ionicons name="checkmark" size={16} color={theme.colors.onPrimary} />
               )}
             </View>
             <Text style={styles.checkboxLabel}>{t('showNewProviders')}</Text>
@@ -299,32 +306,32 @@ export default function ProviderFiltersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.colors.outlineVariant,
     paddingTop: Platform.OS === 'ios' ? 50 : 16,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   resetText: {
     fontSize: 16,
-    color: colors.primary,
+    color: theme.colors.primary,
   },
   disabledText: {
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   content: {
     flex: 1,
@@ -336,7 +343,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 12,
   },
   chipContainer: {
@@ -348,20 +355,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.colors.outlineVariant,
   },
   selectedChip: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   chipText: {
     fontSize: 14,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   selectedChipText: {
-    color: colors.white,
+    color: theme.colors.onPrimary,
     fontWeight: '500',
   },
   slider: {
@@ -374,7 +381,7 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -397,25 +404,25 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkedBox: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   checkboxLabel: {
     fontSize: 16,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   footer: {
     padding: 16,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: theme.colors.outlineVariant,
   },
   applyButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -423,6 +430,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.white,
+    color: theme.colors.onPrimary,
   },
 });

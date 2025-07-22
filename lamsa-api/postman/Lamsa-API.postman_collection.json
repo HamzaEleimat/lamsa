@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "beautycort-api-collection",
-		"name": "BeautyCort API",
-		"description": "Comprehensive Postman collection for the BeautyCort beauty booking platform API. This collection includes complete user journeys, error handling examples, and test scenarios for the Jordan market.\n\n## Features\n- Complete booking workflow demonstrations\n- Jordan-specific validations (phone numbers, currency, Arabic/English)\n- Authentication flows for customers, providers, and admins\n- Rate limiting and error handling examples\n- Performance and load testing scenarios\n- Real-world user journey simulations\n\n## Setup\n1. Import the collection and environment files\n2. Configure environment variables for your target server\n3. Run the 'Auth & Setup' folder first to generate tokens\n4. Execute individual requests or complete workflows\n\n## Environment Variables Required\n- `base_url`: API base URL (e.g., http://localhost:3000/api)\n- `customer_token`: JWT token for customer authentication\n- `provider_token`: JWT token for provider authentication\n- `admin_token`: JWT token for admin authentication\n\n## Documentation\nFor detailed API documentation, see: /docs/API.md\nFor error handling reference, see: /docs/ERROR-REFERENCE.md\nFor mobile integration guide, see: /docs/MOBILE-INTEGRATION.md",
+		"_postman_id": "lamsa-api-collection",
+		"name": "Lamsa API",
+		"description": "Comprehensive Postman collection for the Lamsa beauty booking platform API. This collection includes complete user journeys, error handling examples, and test scenarios for the Jordan market.\n\n## Features\n- Complete booking workflow demonstrations\n- Jordan-specific validations (phone numbers, currency, Arabic/English)\n- Authentication flows for customers, providers, and admins\n- Rate limiting and error handling examples\n- Performance and load testing scenarios\n- Real-world user journey simulations\n\n## Setup\n1. Import the collection and environment files\n2. Configure environment variables for your target server\n3. Run the 'Auth & Setup' folder first to generate tokens\n4. Execute individual requests or complete workflows\n\n## Environment Variables Required\n- `base_url`: API base URL (e.g., http://localhost:3000/api)\n- `customer_token`: JWT token for customer authentication\n- `provider_token`: JWT token for provider authentication\n- `admin_token`: JWT token for admin authentication\n\n## Documentation\nFor detailed API documentation, see: /docs/API.md\nFor error handling reference, see: /docs/ERROR-REFERENCE.md\nFor mobile integration guide, see: /docs/MOBILE-INTEGRATION.md",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "beautycort-dev-team"
+		"_exporter_id": "lamsa-dev-team"
 	},
 	"item": [
 		{
@@ -146,7 +146,7 @@
 									"    id: \"admin-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
 									"    type: \"admin\",",
 									"    phone: \"+962771111111\",",
-									"    email: \"admin@beautycort.com\",",
+									"    email: \"admin@lamsa.com\",",
 									"    role: \"super_admin\",",
 									"    permissions: [\"all\"],",
 									"    iat: Math.floor(Date.now() / 1000),",
@@ -372,9 +372,9 @@
 									"    pm.expect(data.platformFee).to.be.a('number').and.to.be.greaterThan(0);",
 									"    pm.expect(data.providerFee).to.be.a('number').and.to.be.greaterThan(0);",
 									"    ",
-									"    // Fee calculation validation (8% platform fee)",
-									"    const expectedPlatformFee = Math.round(data.amount * 0.08 * 100) / 100;",
-									"    pm.expect(data.platformFee).to.be.closeTo(expectedPlatformFee, 0.01);",
+									"    // Fee calculation validation (Fixed fees: 2 JOD for ≤25 JOD, 5 JOD for >25 JOD)",
+									"    const expectedPlatformFee = data.amount <= 25 ? 2.00 : 5.00;",
+									"    pm.expect(data.platformFee).to.equal(expectedPlatformFee);",
 									"    pm.expect(data.providerFee).to.be.closeTo(data.amount - data.platformFee, 0.01);",
 									"});",
 									"",
@@ -447,7 +447,7 @@
 								"bookings"
 							]
 						},
-						"description": "Creates a new booking with the specified details. This endpoint validates Jordan-specific business rules including phone number format, business hours, and payment methods.\n\n**Rate Limit**: 5 requests per 15 minutes\n\n**Authentication**: Required (customer role)\n\n**Request Body**:\n- `providerId`: UUID of the service provider\n- `serviceId`: UUID of the service\n- `date`: Booking date in YYYY-MM-DD format (2 hours to 90 days in future)\n- `time`: Booking time in HH:mm format (within business hours 8:00-22:00)\n- `paymentMethod`: Payment method (cash, card, online)\n- `notes`: Optional customer notes (max 500 characters)\n- `customerPhone`: Optional Jordanian phone number override\n\n**Business Rules**:\n- Date must be 2 hours to 90 days in the future\n- Time must be within business hours (8:00-22:00)\n- Online payment required for amounts > 100 JOD\n- Provider and service must exist and be active\n- Phone numbers must be in Jordanian format (+962XX...)\n\n**Response**:\n- Returns complete booking details including fees\n- Platform fee: 8% of service amount\n- Provider fee: Service amount - Platform fee\n- Initial status: 'pending'"
+						"description": "Creates a new booking with the specified details. This endpoint validates Jordan-specific business rules including phone number format, business hours, and payment methods.\n\n**Rate Limit**: 5 requests per 15 minutes\n\n**Authentication**: Required (customer role)\n\n**Request Body**:\n- `providerId`: UUID of the service provider\n- `serviceId`: UUID of the service\n- `date`: Booking date in YYYY-MM-DD format (2 hours to 90 days in future)\n- `time`: Booking time in HH:mm format (within business hours 8:00-22:00)\n- `paymentMethod`: Payment method (cash, card, online)\n- `notes`: Optional customer notes (max 500 characters)\n- `customerPhone`: Optional Jordanian phone number override\n\n**Business Rules**:\n- Date must be 2 hours to 90 days in the future\n- Time must be within business hours (8:00-22:00)\n- Online payment required for amounts > 100 JOD\n- Provider and service must exist and be active\n- Phone numbers must be in Jordanian format (+962XX...)\n\n**Response**:\n- Returns complete booking details including fees\n- Platform fee: Fixed fees (2 JOD for services ≤25 JOD, 5 JOD for services >25 JOD)\n- Provider earnings: Service amount - Platform fee\n- Initial status: 'pending'"
 					},
 					"response": [
 						{

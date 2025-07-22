@@ -8,13 +8,13 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "runtimeVersion": "1.0.0",
-    "owner": "your-expo-username",
+    "owner": "lamsa-team",
     "scheme": "lamsa",
-    "primaryColor": "#E91E63",
+    "primaryColor": "#FF8FAB",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFE5EC"
     },
     "ios": {
       "supportsTablet": true,
@@ -44,7 +44,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FFE5EC"
       },
       "edgeToEdgeEnabled": true,
       "versionCode": 1,
@@ -88,15 +88,14 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/your-project-id"
+      "url": "https://u.expo.dev/lamsa-mobile-project"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "notification": {
       "icon": "./assets/notification-icon.png",
-      "color": "#E91E63",
-      "sounds": ["./assets/notification-sound.wav"]
+      "color": "#FF8FAB"
     },
     "locales": {
       "en": "./locales/en.json",
@@ -110,7 +109,6 @@
       "expo-image-picker",
       "expo-contacts",
       "expo-calendar",
-      "expo-av",
       [
         "expo-build-properties",
         {
@@ -124,7 +122,7 @@
             "useLegacyPackaging": false
           },
           "ios": {
-            "deploymentTarget": "13.0",
+            "deploymentTarget": "15.1",
             "newArchEnabled": true,
             "flipper": false
           }
@@ -150,7 +148,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "lamsa-mobile-project"
       }
     }
   }
