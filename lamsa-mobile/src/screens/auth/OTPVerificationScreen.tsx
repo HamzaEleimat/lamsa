@@ -219,7 +219,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
@@ -242,7 +242,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
 
           <View style={styles.content}>
-            <View style={styles.iconContainer}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.colors.primaryContainer || `${theme.colors.primary}20` }]}>
               <MaterialCommunityIcons
                 name="message-text"
                 size={64}
@@ -278,7 +278,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
             )}
 
             {error && error.type !== 'otp' && (
-              <View style={styles.errorContainer}>
+              <View style={[styles.errorContainer, { backgroundColor: `${theme.colors.error}20` }]}>
                 <MaterialCommunityIcons
                   name={error.type === 'network' ? 'wifi-off' : 'alert-circle'}
                   size={24}
@@ -339,7 +339,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={3000}
-        style={styles.snackbar}
+        style={[styles.snackbar, { backgroundColor: theme.colors.primary }]}
       >
         {snackbarMessage}
       </Snackbar>
@@ -350,7 +350,6 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -375,7 +374,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 16,
     borderRadius: 32,
-    backgroundColor: 'rgba(103, 80, 164, 0.1)',
+    backgroundColor: 'transparent',
   },
   title: {
     textAlign: 'center',
@@ -399,7 +398,7 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     alignItems: 'center',
-    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+    backgroundColor: 'transparent',
     borderRadius: 12,
     padding: 16,
     marginVertical: 16,
@@ -441,7 +440,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   snackbar: {
-    backgroundColor: '#4CAF50',
   },
 });
 

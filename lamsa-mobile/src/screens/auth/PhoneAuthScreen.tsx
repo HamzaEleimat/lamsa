@@ -99,7 +99,7 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
@@ -181,7 +181,7 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
                       <Text style={styles.termsText}>
                         {i18n.t('phoneAuth.termsPrefix')}{' '}
                         <Text
-                          style={styles.termsLink}
+                          style={[styles.termsLink, { color: theme.colors.primary }]}
                           onPress={openTerms}
                         >
                           {i18n.t('phoneAuth.termsLink')}
@@ -217,7 +217,7 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
         duration={3000}
         style={[
           styles.snackbar,
-          snackbarType === 'error' && styles.errorSnackbar,
+          { backgroundColor: snackbarType === 'error' ? theme.colors.error : theme.colors.primary },
         ]}
       >
         {snackbarMessage}
@@ -229,7 +229,6 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -263,7 +262,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   rtlInput: {
     textAlign: 'right',
@@ -287,7 +286,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   termsLink: {
-    color: '#6750A4',
     textDecorationLine: 'underline',
   },
   submitButton: {
@@ -303,10 +301,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   snackbar: {
-    backgroundColor: '#4CAF50',
   },
   errorSnackbar: {
-    backgroundColor: '#F44336',
   },
 });
 

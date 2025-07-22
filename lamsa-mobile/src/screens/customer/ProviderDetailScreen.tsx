@@ -14,12 +14,11 @@ import {
   FlatList,
   Modal,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from '../../components/MapView';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from '../../hooks/useTranslation';
-import { colors } from '../../constants/colors';
 import providerService, {
   ProviderServiceItem,
   ProviderReview,
@@ -38,6 +37,7 @@ export default function ProviderDetailScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
+  const theme = useTheme();
   const isRTL = I18nManager.isRTL;
   const locale = i18n.language === 'ar' ? ar : enUS;
   
@@ -180,7 +180,7 @@ export default function ProviderDetailScreen() {
             />
             {provider.verified && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                <Ionicons name="checkmark-circle" size={24} color={theme.colors.primary} />
               </View>
             )}
           </View>
@@ -193,7 +193,7 @@ export default function ProviderDetailScreen() {
             <Ionicons
               name={getBusinessTypeIcon(provider.businessType) as any}
               size={16}
-              color={colors.gray}
+              color={theme.colors.onSurfaceVariant}
             />
             <Text style={styles.businessType}>
               {t(provider.businessType)}
@@ -207,7 +207,7 @@ export default function ProviderDetailScreen() {
                 key={i}
                 name={i < Math.floor(averageRating) ? 'star' : 'star-outline'}
                 size={20}
-                color={colors.warning}
+                color={theme.colors.tertiary}
               />
             ))}
             <Text style={styles.ratingText}>
@@ -218,12 +218,12 @@ export default function ProviderDetailScreen() {
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
             <TouchableOpacity style={styles.actionButton} onPress={handleCall}>
-              <Ionicons name="call" size={24} color={colors.white} />
+              <Ionicons name="call" size={24} color={theme.colors.onPrimary} />
               <Text style={styles.actionButtonText}>{t('call')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton} onPress={handleDirections}>
-              <Ionicons name="navigate" size={24} color={colors.white} />
+              <Ionicons name="navigate" size={24} color={theme.colors.onSecondary} />
               <Text style={styles.actionButtonText}>{t('directions')}</Text>
             </TouchableOpacity>
 
@@ -231,7 +231,7 @@ export default function ProviderDetailScreen() {
               style={[styles.actionButton, styles.bookButton]}
               onPress={() => scrollViewRef.current?.scrollTo({ y: 500, animated: true })}
             >
-              <Ionicons name="calendar" size={24} color={colors.white} />
+              <Ionicons name="calendar" size={24} color={theme.colors.onSecondary} />
               <Text style={styles.actionButtonText}>{t('book')}</Text>
             </TouchableOpacity>
           </View>
@@ -251,7 +251,7 @@ export default function ProviderDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('location')}</Text>
           <View style={styles.addressContainer}>
-            <Ionicons name="location" size={20} color={colors.gray} />
+            <Ionicons name="location" size={20} color={theme.colors.onSurfaceVariant} />
             <Text style={styles.address}>
               {isRTL ? provider.addressAr || provider.address : provider.address}, {provider.city}
             </Text>
@@ -350,7 +350,7 @@ export default function ProviderDetailScreen() {
               )}
               <View style={styles.serviceMeta}>
                 <View style={styles.serviceMetaItem}>
-                  <Ionicons name="time-outline" size={16} color={colors.gray} />
+                  <Ionicons name="time-outline" size={16} color={theme.colors.onSurfaceVariant} />
                   <Text style={styles.serviceMetaText}>
                     {service.durationMinutes} {t('minutes')}
                   </Text>
@@ -395,7 +395,7 @@ export default function ProviderDetailScreen() {
                       key={i}
                       name={i < review.rating ? 'star' : 'star-outline'}
                       size={14}
-                      color={colors.warning}
+                      color={theme.colors.tertiary}
                     />
                   ))}
                   <Text style={styles.reviewDate}>
@@ -452,7 +452,7 @@ export default function ProviderDetailScreen() {
                 {selectedService.name[i18n.language] || selectedService.name.en}
               </Text>
               <TouchableOpacity onPress={() => setShowServiceModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={24} color={theme.colors.onSurface} />
               </TouchableOpacity>
             </View>
 
@@ -464,21 +464,21 @@ export default function ProviderDetailScreen() {
 
             <View style={styles.modalDetails}>
               <View style={styles.modalDetailItem}>
-                <Ionicons name="time-outline" size={20} color={colors.primary} />
+                <Ionicons name="time-outline" size={20} color={theme.colors.primary} />
                 <Text style={styles.modalDetailText}>
                   {t('duration')}: {selectedService.durationMinutes} {t('minutes')}
                 </Text>
               </View>
 
               <View style={styles.modalDetailItem}>
-                <Ionicons name="pricetag-outline" size={20} color={colors.primary} />
+                <Ionicons name="pricetag-outline" size={20} color={theme.colors.primary} />
                 <Text style={styles.modalDetailText}>
                   {t('price')}: {selectedService.price} {t('jod')}
                 </Text>
               </View>
 
               <View style={styles.modalDetailItem}>
-                <Ionicons name="list-outline" size={20} color={colors.primary} />
+                <Ionicons name="list-outline" size={20} color={theme.colors.primary} />
                 <Text style={styles.modalDetailText}>
                   {t('category')}: {t(selectedService.category.toLowerCase())}
                 </Text>
@@ -500,20 +500,22 @@ export default function ProviderDetailScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
+
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.white} />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.onPrimary} />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color={colors.white} />
+          <Ionicons name="heart-outline" size={24} color={theme.colors.onPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -532,10 +534,10 @@ export default function ProviderDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -566,7 +568,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 24,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     marginTop: -40,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -581,20 +583,20 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 4,
-    borderColor: colors.white,
+    borderColor: theme.colors.surface,
   },
   verifiedBadge: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     padding: 2,
   },
   businessName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 4,
     textAlign: 'center',
   },
@@ -606,7 +608,7 @@ const styles = StyleSheet.create({
   },
   businessType: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -616,7 +618,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginLeft: 8,
   },
   actionButtons: {
@@ -627,33 +629,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
   },
   bookButton: {
-    backgroundColor: colors.secondary,
+    backgroundColor: theme.colors.secondary,
   },
   actionButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: colors.white,
+    color: theme.colors.onPrimary,
   },
   section: {
     padding: 16,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     marginTop: 8,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 12,
   },
   bio: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     lineHeight: 20,
   },
   addressContainer: {
@@ -665,7 +667,7 @@ const styles = StyleSheet.create({
   address: {
     flex: 1,
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   mapContainer: {
     height: 150,
@@ -682,18 +684,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     marginRight: 8,
   },
   selectedCategoryChip: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   categoryChipText: {
     fontSize: 14,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   selectedCategoryChipText: {
-    color: colors.white,
+    color: theme.colors.onPrimary,
     fontWeight: '500',
   },
   serviceCard: {
@@ -702,7 +704,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.colors.outlineVariant,
   },
   serviceInfo: {
     flex: 1,
@@ -711,12 +713,12 @@ const styles = StyleSheet.create({
   serviceName: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 4,
   },
   serviceDescription: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginBottom: 8,
   },
   serviceMeta: {
@@ -730,7 +732,7 @@ const styles = StyleSheet.create({
   },
   serviceMetaText: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   servicePrice: {
     alignItems: 'flex-end',
@@ -738,11 +740,11 @@ const styles = StyleSheet.create({
   priceAmount: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: theme.colors.primary,
   },
   priceCurrency: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   reviewsHeader: {
     flexDirection: 'row',
@@ -752,12 +754,12 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: 14,
-    color: colors.primary,
+    color: theme.colors.primary,
   },
   reviewCard: {
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.colors.outlineVariant,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -775,7 +777,7 @@ const styles = StyleSheet.create({
   reviewerName: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 4,
   },
   reviewRating: {
@@ -785,34 +787,34 @@ const styles = StyleSheet.create({
   },
   reviewDate: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginLeft: 8,
   },
   reviewService: {
     fontSize: 12,
-    color: colors.secondary,
+    color: theme.colors.secondary,
     marginBottom: 8,
   },
   reviewComment: {
     fontSize: 14,
-    color: colors.text,
+    color: theme.colors.onSurface,
     lineHeight: 20,
   },
   reviewResponse: {
     marginTop: 12,
     padding: 12,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     borderRadius: 8,
   },
   responseLabel: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 4,
   },
   responseText: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   loadMoreButton: {
     alignItems: 'center',
@@ -821,7 +823,7 @@ const styles = StyleSheet.create({
   },
   loadMoreText: {
     fontSize: 14,
-    color: colors.primary,
+    color: theme.colors.primary,
     fontWeight: '500',
   },
   modalOverlay: {
@@ -830,7 +832,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -845,13 +847,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
     flex: 1,
     marginRight: 16,
   },
   modalDescription: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     lineHeight: 20,
     marginBottom: 24,
   },
@@ -866,10 +868,10 @@ const styles = StyleSheet.create({
   },
   modalDetailText: {
     fontSize: 16,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   bookServiceButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -877,6 +879,6 @@ const styles = StyleSheet.create({
   bookServiceButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.white,
+    color: theme.colors.onPrimary,
   },
 });

@@ -1,5 +1,5 @@
 import { I18n } from 'i18n-js';
-import * as Localization from 'react-native-localize';
+import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import en from './translations/en.json';
 import ar from './translations/ar.json';
@@ -20,8 +20,9 @@ export const initializeI18n = async () => {
     if (savedLanguage) {
       i18n.locale = savedLanguage;
     } else {
-      const { languageTag } = Localization.getLocales()[0];
-      const locale = languageTag.startsWith('ar') ? 'ar' : 'en';
+      // Use Expo's localization API
+      const languageTag = Localization.locale;
+      const locale = languageTag && languageTag.startsWith('ar') ? 'ar' : 'en';
       i18n.locale = locale;
       await AsyncStorage.setItem(LANGUAGE_KEY, locale);
     }

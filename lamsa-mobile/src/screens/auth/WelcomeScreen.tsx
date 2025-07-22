@@ -5,6 +5,7 @@ import {
   Dimensions,
   ScrollView,
   I18nManager,
+  Image,
 } from 'react-native';
 import {
   Surface,
@@ -26,7 +27,10 @@ const { width, height } = Dimensions.get('window');
 type AuthStackParamList = {
   Welcome: undefined;
   PhoneAuth: undefined;
-  ProviderOnboarding: undefined;
+  OTPVerification: { phoneNumber: string };
+  UserTypeSelection: { phoneNumber: string };
+  CustomerOnboarding: { userData: { phone: string; userType: 'customer' } };
+  ProviderOnboarding: { userData: { phone: string; userType: 'provider' } };
 };
 
 type WelcomeScreenNavigationProp = NativeStackNavigationProp<
@@ -59,7 +63,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -78,13 +82,11 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-            <Surface style={styles.logoPlaceholder} elevation={2}>
-              <MaterialCommunityIcons
-                name="flower-tulip"
-                size={64}
-                color={theme.colors.primary}
-              />
-            </Surface>
+            <Image
+              source={require('../../../assets/images/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
 
           <Text variant="headlineLarge" style={styles.title}>
@@ -107,7 +109,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 
           <Button
             mode="text"
-            onPress={() => navigation.navigate('ProviderOnboarding')}
+            onPress={() => navigation.navigate('PhoneAuth')}
             style={styles.providerLink}
             labelStyle={styles.providerLinkText}
           >
@@ -120,7 +122,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
         <Modal
           visible={showLanguageModal}
           onDismiss={() => setShowLanguageModal(false)}
-          contentContainerStyle={styles.modalContent}
+          contentContainerStyle={[styles.modalContent, { backgroundColor: theme.colors.surface }]}
         >
           <Text variant="titleMedium" style={styles.modalTitle}>
             {i18n.t('common.language')}
@@ -131,14 +133,14 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             title={i18n.t('common.arabic')}
             onPress={() => handleLanguageChange('ar')}
             left={(props) => <List.Icon {...props} icon="check" />}
-            style={currentLanguage === 'ar' ? styles.selectedLanguage : undefined}
+            style={currentLanguage === 'ar' ? [styles.selectedLanguage, { backgroundColor: `${theme.colors.primary}15` }] : undefined}
           />
           
           <List.Item
             title={i18n.t('common.english')}
             onPress={() => handleLanguageChange('en')}
             left={(props) => <List.Icon {...props} icon="check" />}
-            style={currentLanguage === 'en' ? styles.selectedLanguage : undefined}
+            style={currentLanguage === 'en' ? [styles.selectedLanguage, { backgroundColor: `${theme.colors.primary}15` }] : undefined}
           />
         </Modal>
       </Portal>
@@ -149,7 +151,6 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
     flexGrow: 1,
@@ -174,13 +175,9 @@ const styles = StyleSheet.create({
   logoContainer: {
     marginBottom: 32,
   },
-  logoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#F5F5F5',
-    justifyContent: 'center',
-    alignItems: 'center',
+  logo: {
+    width: 150,
+    height: 150,
   },
   title: {
     marginBottom: 8,
@@ -211,7 +208,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     margin: 20,
     borderRadius: 8,
     padding: 0,
@@ -226,7 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedLanguage: {
-    backgroundColor: 'rgba(103, 80, 164, 0.08)',
+    backgroundColor: 'transparent',
   },
 });
 

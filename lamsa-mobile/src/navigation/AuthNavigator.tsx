@@ -1,9 +1,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
+// import WelcomeScreenDebug from '../screens/auth/WelcomeScreenDebug';
 import PhoneAuthScreen from '../screens/auth/PhoneAuthScreen';
 import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen';
 import UserTypeSelectionScreen from '../screens/auth/UserTypeSelectionScreen';
+import CustomerOnboardingScreen from '../screens/auth/onboarding/CustomerOnboardingScreen';
 import ProviderOnboardingNavigator from './ProviderOnboardingNavigator';
 
 export type AuthStackParamList = {
@@ -28,6 +30,7 @@ const AuthNavigator = () => {
       <Stack.Screen name="PhoneAuth" component={PhoneAuthScreen} />
       <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
       <Stack.Screen name="UserTypeSelection" component={UserTypeSelectionScreen} />
+      <Stack.Screen name="CustomerOnboarding" component={CustomerOnboardingScreen} />
       <Stack.Screen name="ProviderOnboarding" component={ProviderOnboardingNavigator} />
     </Stack.Navigator>
   );
