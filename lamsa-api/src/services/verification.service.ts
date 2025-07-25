@@ -15,11 +15,12 @@ import {
 import { supabase } from '../config/supabase-simple';
 import { validateJordanPhoneNumber } from '../utils/phone-validation';
 import { AppError } from '../middleware/error.middleware';
+import { secureLogger } from '../utils/secure-logger';
 
 // Mock SMS function for development - will be replaced with actual SMS service
 const sendSMS = async (phone: string, message: string): Promise<void> => {
   if (process.env.NODE_ENV === 'development') {
-    console.log(`📱 SMS to ${phone}: ${message}`);
+    secureLogger.info('SMS (dev mode)', { phone, message });
     return Promise.resolve();
   }
   // In production, this would integrate with actual SMS service
@@ -136,7 +137,7 @@ export class VerificationService {
           details
         });
     } catch (error) {
-      console.error('Failed to log auth event:', error);
+      secureLogger.error('Failed to log auth event', error);
       // Don't throw - logging failures shouldn't break the main flow
     }
   }
@@ -237,14 +238,14 @@ export class VerificationService {
 
       // Send SMS (in development mode, log the OTP)
       if (process.env.NODE_ENV === 'development') {
-        console.log(`🔐 Development OTP for ${normalizedPhone}: ${otp}`);
+        secureLogger.info('Development OTP generated', { phone: normalizedPhone });
       }
 
       // Attempt to send SMS
       try {
         await sendSMS(normalizedPhone, `Your Lamsa verification code is: ${otp}`);
       } catch (smsError) {
-        console.error('SMS sending failed:', smsError);
+        secureLogger.error('SMS sending failed', smsError);
         
         // In production, this should fail the request
         if (process.env.NODE_ENV === 'production') {
@@ -285,7 +286,7 @@ export class VerificationService {
       };
 
     } catch (error) {
-      console.error('Verification request error:', error);
+      secureLogger.error('Verification request error', error);
       
       await this.logAuthEvent(
         AuthAction.REQUEST_VERIFICATION,
@@ -478,7 +479,7 @@ export class VerificationService {
       };
 
     } catch (error) {
-      console.error('Identity verification error:', error);
+      secureLogger.error('Identity verification error', error);
       
       await this.logAuthEvent(
         AuthAction.VERIFY_IDENTITY,
@@ -640,7 +641,7 @@ export class VerificationService {
         .lt('created_at', thirtyDaysAgo.toISOString());
 
     } catch (error) {
-      console.error('Cleanup failed:', error);
+      secureLogger.error('Cleanup failed', error);
     }
   }
 }

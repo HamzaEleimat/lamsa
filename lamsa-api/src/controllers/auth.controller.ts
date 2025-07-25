@@ -11,6 +11,7 @@ import { tokenBlacklist, refreshTokenManager } from '../config/token-storage.con
 import { accountLockoutService } from '../services/account-lockout.service';
 import { encryptedDb } from '../services/encrypted-db.service';
 import { encryptionService } from '../services/encryption.service';
+import { secureLogger } from '../utils/secure-logger';
 
 // Interfaces for request bodies
 
@@ -174,7 +175,7 @@ export class AuthController {
         }
         
         data = result.data;
-        console.log('✅ OTP Response:', JSON.stringify(data, null, 2));
+        secureLogger.info('OTP Response received', { status: 'success' });
       }
       
       // Check if SMS was actually sent
@@ -334,10 +335,8 @@ export class AuthController {
         throw new AppError('Email already registered', 409);
       }
 
-      // Check if phone already exists
-      // Note: Provider phones are encrypted but not hashed in current implementation
-      // Using regular db query for now
-      const { data: existingPhone } = await db.providers.findByPhone(validatedPhone);
+      // Check if phone already exists using encrypted database service
+      const { data: existingPhone } = await encryptedDb.findProviderByPhone(validatedPhone);
       if (existingPhone) {
         throw new AppError('Phone number already registered', 409);
       }
@@ -348,43 +347,7 @@ export class AuthController {
         phone: validatedPhone,
       });
 
-      // In development mode, create mock provider if Supabase fails
-      if ((error || !result) && process.env.NODE_ENV === 'development') {
-        logger.warn('Supabase provider signup failed, using mock data');
-        const mockProvider = {
-          provider: {
-            id: 'mock-provider-' + Date.now(),
-            email: providerData.email,
-            business_name_ar: providerData.business_name_ar,
-            business_name_en: providerData.business_name_en,
-            owner_name: providerData.owner_name,
-            phone: validatedPhone,
-            address: providerData.address,
-            latitude: providerData.latitude,
-            longitude: providerData.longitude,
-            created_at: new Date().toISOString(),
-          }
-        };
-        
-        // Generate JWT token for mock provider
-        const token = this.generateToken({
-          id: mockProvider.provider.id,
-          type: 'provider',
-          email: mockProvider.provider.email,
-        });
-
-        const response: ApiResponse = {
-          success: true,
-          data: {
-            provider: mockProvider.provider,
-            token,
-            mockMode: true,
-          }
-        };
-        
-        res.status(201).json(response);
-        return;
-      }
+      // Remove development bypass - always require real signup
 
       if (error || !result) {
         const errorMessage = error && typeof error === 'object' && 'message' in error 
@@ -447,54 +410,7 @@ export class AuthController {
       // Sign in with Supabase Auth
       const { data: result, error } = await auth.signInProvider(email, password);
 
-      // In development mode, allow mock login
-      if ((error || !result) && process.env.NODE_ENV === 'development') {
-        logger.warn('Using mock provider login for development');
-        
-        // Record failed attempt in production
-        if (process.env.NODE_ENV !== 'development') {
-          const lockoutResult = await accountLockoutService.recordFailedAttempt(email, 'provider');
-          if (lockoutResult.isLocked) {
-            throw new AppError(
-              'Too many failed login attempts. Account temporarily locked.',
-              429
-            );
-          }
-        }
-        
-        // Create mock provider data for testing
-        const mockProvider = {
-          provider: {
-            id: 'mock-provider-' + Date.now(),
-            email: email,
-            business_name_ar: 'صالون تجميل تجريبي',
-            business_name_en: 'Test Beauty Salon',
-            owner_name: 'Test Owner',
-            phone: '+962790000000',
-            verified: true,
-            created_at: new Date().toISOString(),
-          }
-        };
-        
-        // Generate JWT token
-        const token = this.generateToken({
-          id: mockProvider.provider.id,
-          type: 'provider',
-          email: mockProvider.provider.email,
-        });
-
-        const response: ApiResponse = {
-          success: true,
-          data: {
-            provider: mockProvider.provider,
-            token,
-            mockMode: true,
-          }
-        };
-        
-        res.json(response);
-        return;
-      }
+      // Remove development bypass - always require real authentication
 
       if (error || !result) {
         // Record failed attempt
@@ -638,8 +554,8 @@ export class AuthController {
       
       const normalizedPhone = validation.normalizedPhone!;
       
-      // Check if phone is already registered to a provider
-      const { data: existingProvider } = await db.providers.findByPhone(normalizedPhone);
+      // Check if phone is already registered to a provider using encrypted database service
+      const { data: existingProvider } = await encryptedDb.findProviderByPhone(normalizedPhone);
       if (existingProvider) {
         throw new AppError('This phone number is already registered to another provider', 409);
       }

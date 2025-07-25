@@ -13,7 +13,9 @@ This comprehensive testing suite validates all payment calculations, processing,
 
 ### Payment System Architecture
 - **Currency**: Jordanian Dinar (JOD) with 3 decimal places
-- **Platform Fee**: 15% of service price
+- **Platform Fee**: Fixed fees based on service amount:
+  - Services ≤25 JOD: 2 JOD platform fee
+  - Services >25 JOD: 5 JOD platform fee
 - **Payment Methods**: Cash, Card (Tap Payment Gateway)
 - **Tax System**: VAT and applicable local taxes
 - **Refund Processing**: Automated refund calculations
@@ -44,17 +46,20 @@ This comprehensive testing suite validates all payment calculations, processing,
 **Objective**: Verify basic service price calculations
 
 **Test Scenarios**:
-| Service Price | Platform Fee (15%) | Total Customer Pays | Provider Receives |
-|---------------|-------------------|---------------------|-------------------|
-| 10.000 JOD | 1.500 JOD | 11.500 JOD | 10.000 JOD |
-| 25.500 JOD | 3.825 JOD | 29.325 JOD | 25.500 JOD |
-| 50.000 JOD | 7.500 JOD | 57.500 JOD | 50.000 JOD |
-| 100.750 JOD | 15.113 JOD | 115.863 JOD | 100.750 JOD |
-| 0.500 JOD | 0.075 JOD | 0.575 JOD | 0.500 JOD |
+| Service Price | Platform Fee | Total Customer Pays | Provider Receives |
+|---------------|--------------|---------------------|-------------------|
+| 10.000 JOD | 2.000 JOD | 12.000 JOD | 10.000 JOD |
+| 25.000 JOD | 2.000 JOD | 27.000 JOD | 25.000 JOD |
+| 25.500 JOD | 5.000 JOD | 30.500 JOD | 25.500 JOD |
+| 50.000 JOD | 5.000 JOD | 55.000 JOD | 50.000 JOD |
+| 100.750 JOD | 5.000 JOD | 105.750 JOD | 100.750 JOD |
+| 0.500 JOD | 2.000 JOD | 2.500 JOD | 0.500 JOD |
 
 **Validation Steps**:
 1. Enter service price
-2. Verify platform fee calculation (price × 0.15)
+2. Verify platform fee calculation:
+   - If price ≤ 25 JOD: Platform fee = 2 JOD
+   - If price > 25 JOD: Platform fee = 5 JOD
 3. Verify total calculation (price + platform fee)
 4. Check decimal precision (3 decimal places)
 5. Validate currency formatting
@@ -180,9 +185,9 @@ This comprehensive testing suite validates all payment calculations, processing,
 **Test Scenarios**:
 | Service Price | Discount Type | Discount Value | After Discount | Platform Fee | Total |
 |---------------|---------------|----------------|----------------|--------------|-------|
-| 30.000 JOD | Percentage | 20% | 24.000 JOD | 3.600 JOD | 27.600 JOD |
-| 50.000 JOD | Fixed Amount | 10.000 JOD | 40.000 JOD | 6.000 JOD | 46.000 JOD |
-| 25.000 JOD | First-time | 15% | 21.250 JOD | 3.188 JOD | 24.438 JOD |
+| 30.000 JOD | Percentage | 20% | 24.000 JOD | 2.000 JOD | 26.000 JOD |
+| 50.000 JOD | Fixed Amount | 10.000 JOD | 40.000 JOD | 5.000 JOD | 45.000 JOD |
+| 25.000 JOD | First-time | 15% | 21.250 JOD | 2.000 JOD | 23.250 JOD |
 
 **Validation Steps**:
 1. Apply discount to booking
@@ -641,8 +646,9 @@ This comprehensive testing suite validates all payment calculations, processing,
 // Payment calculation testing automation
 const paymentTest = {
   // Test basic service price calculation
-  testServicePriceCalculation(servicePrice, platformFeeRate = 0.15) {
-    const platformFee = servicePrice * platformFeeRate;
+  testServicePriceCalculation(servicePrice) {
+    // Fixed fee structure
+    const platformFee = servicePrice <= 25 ? 2.00 : 5.00;
     const total = servicePrice + platformFee;
     
     return {
@@ -677,7 +683,8 @@ const paymentTest = {
     }
     
     const discountedPrice = originalPrice - discountAmount;
-    const platformFee = discountedPrice * 0.15;
+    // Fixed fee structure based on discounted price
+    const platformFee = discountedPrice <= 25 ? 2.00 : 5.00;
     const total = discountedPrice + platformFee;
     
     return {

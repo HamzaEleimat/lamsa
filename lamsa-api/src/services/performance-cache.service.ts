@@ -120,7 +120,7 @@ export class PerformanceCacheService {
     const cached = await cacheService.get(cacheKey);
     if (cached) {
       this.recordHit('service_listings');
-      return cached.results;
+      return (cached as any).results;
     }
 
     this.recordMiss('service_listings');

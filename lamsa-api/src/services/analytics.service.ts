@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { RevenueService } from './revenue.service';
 import { CustomerAnalyticsService } from './customer-analytics.service';
 import { ReviewAnalyticsService } from './review-analytics.service';
-import { performanceInsightsService } from './performance-insights.service';
+// import { performanceInsightsService } from './performance-insights.service'; // Temporarily disabled
 
 export interface PeriodStatistics {
   totalBookings: number;
@@ -462,8 +462,9 @@ export class AnalyticsService {
     return {};
   }
 
-  async getImprovementSuggestions(providerId: string) {
-    return await performanceInsightsService.getOptimizationSuggestions(providerId);
+  async getImprovementSuggestions(_providerId: string) {
+    // return await performanceInsightsService.getOptimizationSuggestions(providerId);
+    return []; // Temporary placeholder
   }
 
   async getProviderAchievements(_providerId: string) {

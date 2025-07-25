@@ -94,7 +94,7 @@ Lamsa is a mobile-first beauty services booking platform designed for the Jordan
 - **Availability checking** against provider's schedule
 - **Conflict prevention** (no double-booking)
 - **Booking notes** (optional)
-- **Automatic fee calculation** (15% platform fee)
+- **Automatic fee calculation** (2 JOD for ≤25 JOD, 5 JOD for >25 JOD)
 
 #### 3.4.2 Booking Management
 - **Booking statuses**:
@@ -123,8 +123,10 @@ Lamsa is a mobile-first beauty services booking platform designed for the Jordan
 #### 3.5.2 Payment Processing
 - **Amount tracking** per booking
 - **Fee calculation**:
-  - Platform fee: 15% (configurable)
-  - Provider fee: 85% of total amount
+  - Platform fee: Fixed fees based on service amount
+    - Services ≤25 JOD: 2 JOD platform fee
+    - Services >25 JOD: 5 JOD platform fee
+  - Provider earnings: Service amount - Platform fee
 - **Payment status tracking**
 - **Refund functionality** with reason tracking
 

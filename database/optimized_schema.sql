@@ -433,11 +433,35 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Booking fee calculation function
+-- Fee Structure:
+-- - Services ≤25 JOD: 2 JOD platform fee
+-- - Services >25 JOD: 5 JOD platform fee
 CREATE OR REPLACE FUNCTION calculate_booking_fees()
 RETURNS TRIGGER AS $$
+DECLARE
+    low_tier_threshold DECIMAL(10,2) := 25.00; -- JOD
+    low_tier_fee DECIMAL(10,2) := 2.00; -- JOD
+    high_tier_fee DECIMAL(10,2) := 5.00; -- JOD
 BEGIN
-    NEW.platform_fee := ROUND(NEW.total_price * 0.15, 2);
+    -- Calculate platform fee based on service amount
+    IF NEW.total_price <= low_tier_threshold THEN
+        NEW.platform_fee := low_tier_fee;
+    ELSE
+        NEW.platform_fee := high_tier_fee;
+    END IF;
+    
+    -- Calculate provider earnings
     NEW.provider_earnings := NEW.total_price - NEW.platform_fee;
+    
+    -- Ensure provider earnings are not negative
+    IF NEW.provider_earnings < 0 THEN
+        RAISE EXCEPTION 'Platform fee (%) cannot exceed service amount (%)', NEW.platform_fee, NEW.total_price;
+    END IF;
+    
+    -- Round to 2 decimal places
+    NEW.platform_fee := ROUND(NEW.platform_fee, 2);
+    NEW.provider_earnings := ROUND(NEW.provider_earnings, 2);
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

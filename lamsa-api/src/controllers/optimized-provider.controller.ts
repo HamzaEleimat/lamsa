@@ -8,7 +8,7 @@ export class OptimizedProviderController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
 
-      const result = await providerService.getProviders({}, page, limit);
+      const result = await providerService.getProviders({ page, limit, filters: {} });
 
       const response: ApiResponse<PaginatedResponse<any>> = {
         success: true,
@@ -28,10 +28,11 @@ export class OptimizedProviderController {
       const provider = await providerService.getProviderById(providerId);
 
       if (!provider) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Provider not found'
         });
+        return;
       }
 
       const response: ApiResponse<any> = {

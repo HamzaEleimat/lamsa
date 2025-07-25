@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../config/supabase';
+import { secureLogger } from '../utils/secure-logger';
 
 interface QueryMetrics {
   query: string;
@@ -50,7 +51,7 @@ class QueryPerformanceMonitor {
       
       // Log critical queries immediately
       if (metrics.executionTime > this.thresholds.critical) {
-        console.warn(`🐌 CRITICAL SLOW QUERY: ${metrics.executionTime}ms`, {
+        secureLogger.warn(`CRITICAL SLOW QUERY: ${metrics.executionTime}ms`, {
           endpoint: metrics.endpoint,
           method: metrics.method,
           query: metrics.query.substring(0, 200),
@@ -204,7 +205,7 @@ export class PerformanceTrackingSupabaseClient {
                 const executionTime = Date.now() - startTime;
                 
                 queryMonitor.trackQuery({
-                  query: `${prop} ${table}`,
+                  query: `${String(prop)} ${table}`,
                   executionTime,
                   timestamp: new Date(),
                   endpoint: 'database',
@@ -255,10 +256,10 @@ export class PerformanceTrackingSupabaseClient {
   /**
    * Pass through other methods
    */
-  auth = this.supabaseClient.auth;
-  storage = this.supabaseClient.storage;
-  functions = this.supabaseClient.functions;
-  realtime = this.supabaseClient.realtime;
+  get auth() { return this.supabaseClient.auth; }
+  get storage() { return this.supabaseClient.storage; }
+  get functions() { return this.supabaseClient.functions; }
+  get realtime() { return this.supabaseClient.realtime; }
 }
 
 /**

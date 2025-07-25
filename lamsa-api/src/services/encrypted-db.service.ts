@@ -49,7 +49,7 @@ export class EncryptedDatabaseService {
       if (result.data) {
         result.data = encryptionService.decryptObject(
           result.data,
-          PII_FIELDS.users
+          PII_FIELDS.users as (keyof typeof result.data)[]
         );
       }
       
@@ -136,6 +136,46 @@ export class EncryptedDatabaseService {
       return { data: null, error: null };
     } catch (error) {
       logger.error('Error finding provider by email', error);
+      return { data: null, error };
+    }
+  }
+  
+  /**
+   * Find provider by phone with hash lookup
+   */
+  async findProviderByPhone(phone: string) {
+    try {
+      const phoneHash = encryptionService.hash(phone);
+      
+      // First, try to find by hash
+      if (!supabaseAdmin) {
+        throw new Error('Supabase admin client not configured');
+      }
+      
+      const { data, error } = await supabaseAdmin
+        .from('providers')
+        .select('*')
+        .eq('phone_hash', phoneHash)
+        .single();
+      
+      if (error || !data) {
+        return { data: null, error };
+      }
+      
+      // Decrypt PII fields
+      const decryptedProvider = encryptionService.decryptObject(
+        data,
+        PII_FIELDS.providers
+      );
+      
+      // Verify the decrypted phone matches (in case of hash collision)
+      if (decryptedProvider.phone === phone) {
+        return { data: decryptedProvider, error: null };
+      }
+      
+      return { data: null, error: null };
+    } catch (error) {
+      logger.error('Error finding provider by phone', error);
       return { data: null, error };
     }
   }
@@ -282,12 +322,12 @@ export class EncryptedDatabaseService {
         // Return fully decrypted data
         const decryptedProvider = encryptionService.decryptObject(
           data,
-          PII_FIELDS.providers
+          PII_FIELDS.providers as (keyof typeof data)[]
         );
         return { data: decryptedProvider, error: null };
       } else {
         // Return masked PII for public view
-        const maskedProvider = { ...data };
+        const maskedProvider = { ...(data as Record<string, any>) };
         
         // Mask sensitive fields
         if ((data as any).email) {
@@ -380,6 +420,67 @@ export class EncryptedDatabaseService {
       return { data: decryptedProvider, error: null };
     } catch (error) {
       logger.error('Error creating encrypted provider', error);
+      return { data: null, error };
+    }
+  }
+  
+  /**
+   * Update provider with encrypted PII
+   */
+  async updateProvider(providerId: string, updates: any) {
+    try {
+      // Encrypt PII fields in updates
+      const encryptedUpdates = { ...updates };
+      
+      for (const field of PII_FIELDS.providers) {
+        if (field in updates && updates[field] !== null && updates[field] !== undefined) {
+          encryptedUpdates[field] = encryptionService.encrypt(
+            updates[field],
+            field
+          );
+          
+          // Update search hash
+          if (field === 'email') {
+            encryptedUpdates.email_hash = encryptionService.hash(updates.email);
+          }
+          if (field === 'phone') {
+            encryptedUpdates.phone_hash = encryptionService.hash(updates.phone);
+          }
+        }
+      }
+      
+      // Update encrypted timestamp if PII was modified
+      const piiFieldsUpdated = PII_FIELDS.providers.some(field => field in updates);
+      if (piiFieldsUpdated) {
+        encryptedUpdates.pii_encrypted = true;
+        encryptedUpdates.pii_encrypted_at = new Date().toISOString();
+      }
+      
+      // Update with encrypted data
+      if (!supabaseAdmin) {
+        throw new Error('Supabase admin client not configured');
+      }
+      
+      const { data, error } = await supabaseAdmin
+        .from('providers')
+        .update(encryptedUpdates)
+        .eq('id', providerId)
+        .select()
+        .single();
+      
+      if (error || !data) {
+        return { data: null, error };
+      }
+      
+      // Decrypt before returning
+      const decryptedProvider = encryptionService.decryptObject(
+        data,
+        PII_FIELDS.providers
+      );
+      
+      return { data: decryptedProvider, error: null };
+    } catch (error) {
+      logger.error('Error updating encrypted provider', error);
       return { data: null, error };
     }
   }

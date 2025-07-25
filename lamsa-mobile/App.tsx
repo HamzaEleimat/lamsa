@@ -1,24 +1,68 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/contexts/AuthContext';
+import { ThemeProvider, ThemeContext } from './src/contexts/ThemeContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { initializeI18n } from './src/i18n';
+import { lightTheme, darkTheme } from './src/theme';
+import ErrorBoundary from './src/components/base/ErrorBoundary';
+import {
+  useFonts as useCormorantGaramond,
+  CormorantGaramond_400Regular,
+  CormorantGaramond_500Medium,
+  CormorantGaramond_600SemiBold,
+  CormorantGaramond_700Bold,
+} from '@expo-google-fonts/cormorant-garamond';
+import {
+  useFonts as useMartelSans,
+  MartelSans_400Regular,
+  MartelSans_700Bold,
+} from '@expo-google-fonts/martel-sans';
+
+function AppContent() {
+  const { isDarkMode } = useContext(ThemeContext);
+  const theme = isDarkMode ? darkTheme : lightTheme;
+
+  return (
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <PaperProvider theme={theme}>
+          <AuthProvider>
+            <RootNavigator />
+            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+          </AuthProvider>
+        </PaperProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
+  );
+}
 
 export default function App() {
+  const [fontsLoaded] = useCormorantGaramond({
+    CormorantGaramond_400Regular,
+    CormorantGaramond_500Medium,
+    CormorantGaramond_600SemiBold,
+    CormorantGaramond_700Bold,
+  });
+
+  const [martelSansLoaded] = useMartelSans({
+    MartelSans_400Regular,
+    MartelSans_700Bold,
+  });
+
   useEffect(() => {
     initializeI18n();
   }, []);
 
+  if (!fontsLoaded || !martelSansLoaded) {
+    return null;
+  }
+
   return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        <AuthProvider>
-          <RootNavigator />
-          <StatusBar style="auto" />
-        </AuthProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

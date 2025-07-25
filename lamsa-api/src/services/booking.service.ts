@@ -9,6 +9,7 @@ import { AvailabilityService } from './availability.service';
 import { bookingAuditService } from './booking-audit.service';
 import { notificationQueueService } from './notification-queue.service';
 import { NotificationData, NotificationRecipient } from './notification.service';
+import { secureLogger } from '../utils/secure-logger';
 import { 
   BookingError,
   BookingConflictError,
@@ -148,6 +149,67 @@ export interface ReminderFilters {
   includeConfirmed: boolean;
   includePending: boolean;
   limit: number;
+}
+
+/**
+ * Interface for bulk operation data
+ * Used for bulk cancel/confirm operations
+ */
+export interface BulkOperationData {
+  bookingIds: string[];
+  operation: 'cancel' | 'confirm';
+  reason?: string;
+}
+
+/**
+ * Interface for bulk reschedule data
+ */
+export interface BulkRescheduleData {
+  bookingIds: string[];
+  newDate: string;
+  newStartTime: string;
+  newEndTime: string;
+}
+
+/**
+ * Result of bulk operations
+ */
+export interface BulkOperationResult {
+  successful: string[];
+  failed: Array<{
+    id: string;
+    error: string;
+  }>;
+  totalProcessed: number;
+  successCount: number;
+  failureCount: number;
+}
+
+/**
+ * Type for booking with joined user/provider/service data
+ * Used when fetching bookings with foreign key relationships
+ */
+interface BookingWithRelations {
+  id: string;
+  user_id: string;
+  provider_id: string;
+  service_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  users?: {
+    name: string;
+    phone: string;
+  };
+  providers?: {
+    business_name_en: string;
+    business_name_ar: string;
+  };
+  services?: {
+    name_en: string;
+    name_ar: string;
+  };
 }
 
 export class BookingService {
@@ -758,7 +820,9 @@ export class BookingService {
           notificationData
         );
         if (customerNotification) {
-          notifications.push(notificationQueueService.enqueue(customerNotification, 'high'));
+          notifications.push(
+            notificationQueueService.enqueue(customerNotification, 'high').then(() => {})
+          );
         }
       }
 
@@ -770,17 +834,19 @@ export class BookingService {
           notificationData
         );
         if (providerNotification) {
-          notifications.push(notificationQueueService.enqueue(providerNotification, 'high'));
+          notifications.push(
+            notificationQueueService.enqueue(providerNotification, 'high').then(() => {})
+          );
         }
       }
 
       // Send all notifications
       await Promise.allSettled(notifications);
 
-      console.log(`Notifications queued for booking ${booking.id}, event: ${event}`);
+      secureLogger.info(`Notifications queued for booking ${booking.id}, event: ${event}`);
 
     } catch (error) {
-      console.error('Failed to send booking notifications:', error);
+      secureLogger.error('Failed to send booking notifications', error);
       // Don't throw error to avoid breaking the main booking flow
     }
   }
@@ -824,7 +890,7 @@ export class BookingService {
         channels: ['sms', 'websocket', 'push']
       };
     } catch (error) {
-      console.error('Failed to create customer notification:', error);
+      secureLogger.error('Failed to create customer notification', error);
       return null;
     }
   }
@@ -873,7 +939,7 @@ export class BookingService {
         channels: ['websocket', 'push', 'sms'] // Prioritize real-time for providers
       };
     } catch (error) {
-      console.error('Failed to create provider notification:', error);
+      secureLogger.error('Failed to create provider notification', error);
       return null;
     }
   }
@@ -959,11 +1025,19 @@ export class BookingService {
 
       const { data: conflicts } = await conflictQuery;
 
-      if (conflicts && conflicts.length > 0) {
+      // Type assertion for conflicts with user data
+      const typedConflicts = conflicts as unknown as Array<{
+        id: string;
+        start_time: string;
+        end_time: string;
+        users?: { name: string };
+      }>;
+
+      if (typedConflicts && typedConflicts.length > 0) {
         return {
           available: false,
           message: 'Time slot conflicts with existing bookings',
-          conflictingBookings: conflicts.map(conflict => ({
+          conflictingBookings: typedConflicts.map(conflict => ({
             id: conflict.id,
             startTime: conflict.start_time,
             endTime: conflict.end_time,
@@ -1043,8 +1117,11 @@ export class BookingService {
         throw new BookingError('Failed to fetch booking reminders', 500);
       }
 
+      // Type assertion for joined query results
+      const typedBookings = bookings as unknown as BookingWithRelations[];
+
       // Calculate hours until booking and format response
-      const reminders: BookingReminder[] = (bookings || []).map(booking => {
+      const reminders: BookingReminder[] = (typedBookings || []).map(booking => {
         const bookingDateTime = parseISO(`${booking.booking_date}T${booking.start_time}`);
         const hoursUntilBooking = Math.floor((bookingDateTime.getTime() - now.getTime()) / (60 * 60 * 1000));
 
@@ -1056,7 +1133,7 @@ export class BookingService {
           bookingDate: booking.booking_date,
           startTime: booking.start_time,
           endTime: booking.end_time,
-          status: booking.status,
+          status: booking.status as BookingStatus,
           userName: booking.users?.name || '',
           userPhone: booking.users?.phone || '',
           providerName: booking.providers?.business_name_en || booking.providers?.business_name_ar || '',
@@ -1161,15 +1238,3 @@ export class BookingService {
 }
 
 export const bookingService = new BookingService();
-
-// Export enhanced types for use in controllers
-export type {
-  BulkOperationData,
-  BulkRescheduleData,
-  BulkOperationResult,
-  AnalyticsFilters,
-  AvailabilityCheckData,
-  AvailabilityResult,
-  BookingReminder,
-  ReminderFilters
-};

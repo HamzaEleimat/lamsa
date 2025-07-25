@@ -32,6 +32,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../../constants/colors';
 import { API_URL } from '../../config';
 import TouchTimeSelector from '../../components/availability/TouchTimeSelector';
+import FridayPrayerManager from '../../components/availability/FridayPrayerManager';
+import ScheduleTemplatesModal from '../../components/availability/ScheduleTemplatesModal';
+import BreakTimeManager from '../../components/availability/BreakTimeManager';
 
 const { width, height } = Dimensions.get('window');
 
@@ -70,6 +73,9 @@ export default function WeeklyAvailabilityScreen() {
   const [timeSelectorVisible, setTimeSelectorVisible] = useState(false);
   const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showFridayPrayer, setShowFridayPrayer] = useState(false);
+  const [showBreakManager, setShowBreakManager] = useState(false);
 
   // Time grid configuration
   const timeSlotHeight = 60; // Height of each time slot
@@ -428,7 +434,21 @@ export default function WeeklyAvailabilityScreen() {
       <View style={styles.fabContainer}>
         <TouchableOpacity
           style={styles.fab}
-          onPress={() => navigation.navigate('ScheduleTemplates')}
+          onPress={() => setShowBreakManager(true)}
+        >
+          <Ionicons name="cafe" size={24} color={colors.white} />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setShowFridayPrayer(true)}
+        >
+          <Ionicons name="moon" size={24} color={colors.white} />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setShowTemplates(true)}
         >
           <Ionicons name="copy" size={24} color={colors.white} />
         </TouchableOpacity>
@@ -452,6 +472,40 @@ export default function WeeklyAvailabilityScreen() {
         title={t('setAvailability')}
         allowPrayerTimes={true}
         showPresets={true}
+      />
+
+      {/* Schedule Templates Modal */}
+      <ScheduleTemplatesModal
+        visible={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onApplyTemplate={(template) => {
+          console.log('Applied template:', template);
+          setShowTemplates(false);
+          loadWeeklySchedule(); // Reload schedule after applying template
+        }}
+      />
+
+      {/* Friday Prayer Manager */}
+      <FridayPrayerManager
+        visible={showFridayPrayer}
+        onClose={() => setShowFridayPrayer(false)}
+        onSave={(prayerSettings) => {
+          console.log('Friday prayer settings:', prayerSettings);
+          setShowFridayPrayer(false);
+          loadWeeklySchedule(); // Reload schedule after updating prayer settings
+        }}
+      />
+
+      {/* Break Time Manager */}
+      <BreakTimeManager
+        visible={showBreakManager}
+        onClose={() => setShowBreakManager(false)}
+        selectedDate={selectedDay || new Date()}
+        onBreakAdded={(breakTime) => {
+          console.log('Break added:', breakTime);
+          setShowBreakManager(false);
+          loadWeeklySchedule(); // Reload schedule after adding break
+        }}
       />
     </View>
   );

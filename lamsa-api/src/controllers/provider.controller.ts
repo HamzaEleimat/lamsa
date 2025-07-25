@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase-simple';
+import { encryptedDb } from '../services/encrypted-db.service';
 
 // TypeScript Interfaces
 interface ProviderSearchQuery {
@@ -227,12 +228,21 @@ export class ProviderController {
     try {
       const { id } = req.params;
       
-      // Fetch provider with related data
-      const { data: provider, error } = await supabase
-        .from('providers')
-        .select(`
-          *,
-          services:services(
+      // Get requester ID if authenticated
+      const requesterId = (req as AuthRequest).user?.id;
+      
+      // Fetch provider using encrypted database service
+      const { data: provider, error: providerError } = await encryptedDb.getProviderProfile(id, requesterId);
+      
+      if (providerError || !provider) {
+        throw new AppError('Provider not found', 404);
+      }
+      
+      // Fetch related data separately
+      const [servicesResult, reviewsResult, availabilityResult] = await Promise.all([
+        supabase
+          .from('services')
+          .select(`
             id,
             name_ar,
             name_en,
@@ -242,27 +252,34 @@ export class ProviderController {
             price,
             duration_minutes,
             active
-          ),
-          reviews:reviews(
+          `)
+          .eq('provider_id', id)
+          .eq('active', true),
+        supabase
+          .from('reviews')
+          .select(`
             id,
             rating,
             comment,
             created_at,
             user:users(name, id)
-          ),
-          availability:availability(
+          `)
+          .eq('provider_id', id),
+        supabase
+          .from('availability')
+          .select(`
             day_of_week,
             start_time,
             end_time,
             is_available
-          )
-        `)
-        .eq('id', id)
-        .single();
+          `)
+          .eq('provider_id', id)
+      ]);
       
-      if (error || !provider) {
-        throw new AppError('Provider not found', 404);
-      }
+      // Add related data to provider object
+      provider.services = servicesResult.data || [];
+      provider.reviews = reviewsResult.data || [];
+      provider.availability = availabilityResult.data || [];
       
       // Group services by category
       const servicesByCategory = provider.services?.reduce((acc: any, service: any) => {
@@ -324,16 +341,11 @@ export class ProviderController {
         updateData.license_image = req.file.buffer.toString('base64');
       }
       
-      // Update provider in database
-      const { data: updatedProvider, error } = await supabase
-        .from('providers')
-        .update({
-          ...updateData,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
+      // Update provider using encrypted database service
+      const { data: updatedProvider, error } = await encryptedDb.updateProvider(id, {
+        ...updateData,
+        updated_at: new Date().toISOString()
+      });
       
       if (error) {
         throw new AppError('Failed to update provider profile', 500);
@@ -470,18 +482,14 @@ export class ProviderController {
     try {
       const providerData = req.body;
       
-      // Create provider profile in database
-      const { data: newProvider, error } = await supabase
-        .from('providers')
-        .insert({
-          ...providerData,
-          user_id: req.user?.id,
-          verified: false,
-          active: true,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+      // Create provider profile using encrypted database service
+      const { data: newProvider, error } = await encryptedDb.createProvider({
+        ...providerData,
+        user_id: req.user?.id,
+        verified: false,
+        active: true,
+        created_at: new Date().toISOString()
+      });
       
       if (error) {
         throw new AppError('Failed to create provider profile', 500);

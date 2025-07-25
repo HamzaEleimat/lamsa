@@ -359,26 +359,28 @@ export class BookingAuditService {
     // In production, this would come from the database
     const baseTime = new Date();
     
-    return [
+    const entries: AuditEntry[] = [
       {
         id: `${bookingId}_1`,
         bookingId,
-        action: 'created',
+        action: 'created' as BookingAuditAction,
         userId: 'user_123',
-        userRole: 'customer',
+        userRole: 'customer' as const,
         timestamp: new Date(baseTime.getTime() - 3600000).toISOString(), // 1 hour ago
         details: { method: 'mobile_app' }
       },
       {
         id: `${bookingId}_2`,
         bookingId,
-        action: 'status_changed',
+        action: 'status_changed' as BookingAuditAction,
         userId: 'provider_456',
-        userRole: 'provider',
+        userRole: 'provider' as const,
         timestamp: new Date(baseTime.getTime() - 1800000).toISOString(), // 30 min ago
         details: { previousStatus: 'pending', newStatus: 'confirmed' }
       }
-    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    ];
+    
+    return entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 }
 

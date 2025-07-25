@@ -23,6 +23,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useForm, Controller } from 'react-hook-form';
 import i18n, { isRTL } from '../../i18n';
 import { validateJordanianPhone, formatPhoneNumber, getFullPhoneNumber } from '../../utils/validation';
+import { useAuth } from '../../contexts/AuthContext';
+import { UserRole } from '../../types';
+import Constants from 'expo-constants';
 
 type AuthStackParamList = {
   Welcome: undefined;
@@ -47,10 +50,15 @@ interface FormData {
 
 const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
   const theme = useTheme();
+  const { signIn } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [devLoading, setDevLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarType, setSnackbarType] = useState<'success' | 'error'>('success');
+  
+  // Check if we're in development mode - always true for Expo Go
+  const isDevelopment = __DEV__ || Constants.expoConfig?.extra?.eas?.projectId || process.env.EXPO_PUBLIC_ENV === 'development';
 
   const {
     control,
@@ -96,6 +104,35 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
   const openTerms = () => {
     // TODO: Replace with actual terms URL
     Linking.openURL('https://lamsa.com/terms');
+  };
+
+  // Development-only admin login
+  const handleDevLogin = async () => {
+    try {
+      setDevLoading(true);
+      
+      // Create mock admin user
+      const mockAdminUser = {
+        id: 'dev-admin-001',
+        phone: '+962777777777',
+        name: 'Dev Admin',
+        email: 'admin@lamsa.dev',
+        role: UserRole.PROVIDER, // Provider role to access all screens
+        languagePreference: 'en',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // Sign in with mock user
+      await signIn(mockAdminUser);
+      
+      showSnackbar('Logged in as Dev Admin', 'success');
+    } catch (error) {
+      showSnackbar('Dev login failed', 'error');
+      console.error('Dev login error:', error);
+    } finally {
+      setDevLoading(false);
+    }
   };
 
   return (
@@ -203,9 +240,41 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
                 style={styles.submitButton}
                 contentStyle={styles.submitButtonContent}
                 labelStyle={styles.submitButtonText}
+                uppercase={false}
+                touchSoundDisabled={false}
               >
                 {loading ? i18n.t('common.loading') : i18n.t('phoneAuth.sendOTP')}
               </Button>
+
+              {/* Development-only Admin Login Button */}
+              {isDevelopment && (
+                <View style={styles.devContainer}>
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>DEVELOPMENT ONLY</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+                  
+                  <Button
+                    mode="contained"
+                    onPress={handleDevLogin}
+                    loading={devLoading}
+                    disabled={devLoading}
+                    style={[styles.devButton, { backgroundColor: '#FF6B6B' }]}
+                    contentStyle={styles.devButtonContent}
+                    labelStyle={styles.devButtonText}
+                    icon="test-tube"
+                    uppercase={false}
+                    touchSoundDisabled={false}
+                  >
+                    {devLoading ? 'Loading...' : 'Dev Admin Login'}
+                  </Button>
+                  
+                  <Text style={styles.devWarning}>
+                    ⚠️ This button is for development only and will not appear in production
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         </ScrollView>
@@ -236,6 +305,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
+    paddingBottom: 40, // Add bottom padding for better scrolling
   },
   header: {
     paddingTop: 8,
@@ -291,18 +361,63 @@ const styles = StyleSheet.create({
   submitButton: {
     marginTop: 8,
     borderRadius: 28,
+    elevation: 0, // Remove elevation for iOS
   },
   submitButtonContent: {
     paddingHorizontal: 32,
-    paddingVertical: 8,
+    paddingVertical: 12, // Increased padding for better text display
+    minHeight: 48, // Ensure minimum height
   },
   submitButtonText: {
     fontSize: 16,
     fontWeight: '600',
+    lineHeight: 20, // Add line height to prevent text cutoff
   },
   snackbar: {
   },
   errorSnackbar: {
+  },
+  devContainer: {
+    marginTop: 32,
+    paddingTop: 24,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 12,
+    color: '#FF6B6B',
+    fontWeight: '600',
+  },
+  devButton: {
+    marginTop: 8,
+    borderRadius: 28,
+    elevation: 0, // Remove elevation for iOS
+  },
+  devButtonContent: {
+    paddingHorizontal: 32,
+    paddingVertical: 12, // Increased padding
+    minHeight: 48, // Ensure minimum height
+  },
+  devButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 20, // Add line height
+    color: '#FFFFFF', // Ensure white text
+  },
+  devWarning: {
+    marginTop: 12,
+    fontSize: 12,
+    color: '#666666',
+    textAlign: 'center',
   },
 });
 

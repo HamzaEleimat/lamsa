@@ -17,6 +17,8 @@ dist/
 .env.*
 !.env.example
 !.env.template
+!.env.*.template
+!*.env.template
 .env.local
 .env.development.local
 .env.test.local
@@ -47,7 +49,6 @@ dist/
 # Security - Never commit secrets
 .env.secrets
 .env.production
-.env.production.template
 .env.staging
 .env.local.*
 

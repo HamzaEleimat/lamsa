@@ -13,19 +13,19 @@ router.use(authenticate);
 router.use(apiRateLimiter);
 
 // Get comprehensive gamification overview
-router.get('/overview/:providerId?', 
+router.get(['/overview/:providerId', '/overview'], 
   validateProvider, 
   gamificationController.getGamificationOverview.bind(gamificationController)
 );
 
 // Get provider's current level and progress
-router.get('/level/:providerId?', 
+router.get(['/level/:providerId', '/level'], 
   validateProvider, 
   gamificationController.getProviderLevel.bind(gamificationController)
 );
 
 // Get daily goals and progress
-router.get('/goals/daily/:providerId?', 
+router.get(['/goals/daily/:providerId', '/goals/daily'], 
   validateProvider, 
   gamificationController.getDailyGoals.bind(gamificationController)
 );
@@ -36,31 +36,31 @@ router.post('/goals/complete',
 );
 
 // Get provider achievements
-router.get('/achievements/:providerId?', 
+router.get(['/achievements/:providerId', '/achievements'], 
   validateProvider, 
   gamificationController.getProviderAchievements.bind(gamificationController)
 );
 
 // Get leaderboard
-router.get('/leaderboard/:providerId?', 
+router.get(['/leaderboard/:providerId', '/leaderboard'], 
   validateProvider, 
   gamificationController.getLeaderboard.bind(gamificationController)
 );
 
 // Get active challenges/events
-router.get('/challenges/:providerId?', 
+router.get(['/challenges/:providerId', '/challenges'], 
   validateProvider, 
   gamificationController.getActiveChallenges.bind(gamificationController)
 );
 
 // Get provider streaks
-router.get('/streaks/:providerId?', 
+router.get(['/streaks/:providerId', '/streaks'], 
   validateProvider, 
   gamificationController.getProviderStreaks.bind(gamificationController)
 );
 
 // Get available badges
-router.get('/badges/:providerId?', 
+router.get(['/badges/:providerId', '/badges'], 
   validateProvider, 
   gamificationController.getAvailableBadges.bind(gamificationController)
 );

@@ -7,6 +7,7 @@
 import { supabase } from '../config/supabase-simple';
 import { AppError } from '../middleware/error.middleware';
 import { getEnvironmentConfig } from '../utils/environment-validation';
+import { logger } from '../utils/logger';
 
 export type NotificationChannel = 'sms' | 'websocket' | 'push' | 'email';
 export type NotificationPriority = 'urgent' | 'high' | 'normal' | 'low';
@@ -100,11 +101,18 @@ export interface SendNotificationResult {
 
 export class NotificationService {
   private static instance: NotificationService;
-  private envConfig: any;
+  private envConfig: any | null = null;
   private realtimeService: any; // Will be injected
 
   private constructor() {
-    this.envConfig = getEnvironmentConfig();
+    // Delay environment config initialization
+  }
+
+  private getEnvConfig() {
+    if (!this.envConfig) {
+      this.envConfig = getEnvironmentConfig();
+    }
+    return this.envConfig;
   }
 
   static getInstance(): NotificationService {
@@ -253,7 +261,7 @@ export class NotificationService {
         return primaryResult;
       }
 
-      console.warn(`Primary SMS failed for ${notificationId}: ${primaryResult.error}`);
+      logger.warn(`Primary SMS failed for ${notificationId}: ${primaryResult.error}`);
 
       // Fallback 1: Direct Twilio API (if configured)
       if (this.envConfig.TWILIO_ACCOUNT_SID && this.envConfig.TWILIO_AUTH_TOKEN) {
@@ -264,7 +272,7 @@ export class NotificationService {
           return twilioResult;
         }
         
-        console.warn(`Direct Twilio fallback failed for ${notificationId}: ${twilioResult.error}`);
+        logger.warn(`Direct Twilio fallback failed for ${notificationId}: ${twilioResult.error}`);
       }
 
       // Fallback 2: Alternative SMS provider (placeholder)
@@ -329,10 +337,10 @@ export class NotificationService {
   ): Promise<{ success: boolean; error?: string; externalId?: string }> {
     try {
       // TODO: Implement direct Twilio API call
-      // const twilio = require('twilio')(this.envConfig.TWILIO_ACCOUNT_SID, this.envConfig.TWILIO_AUTH_TOKEN);
+      // const twilio = require('twilio')(envConfig.TWILIO_ACCOUNT_SID, envConfig.TWILIO_AUTH_TOKEN);
       // const messageResponse = await twilio.messages.create({
       //   body: message,
-      //   from: this.envConfig.TWILIO_PHONE_NUMBER,
+      //   from: envConfig.TWILIO_PHONE_NUMBER,
       //   to: phone
       // });
       
@@ -733,4 +741,17 @@ export class NotificationService {
   }
 }
 
-export const notificationService = NotificationService.getInstance();
+// Export a getter function instead of the instance directly to delay initialization
+export const getNotificationService = () => NotificationService.getInstance();
+
+// For backward compatibility, export a proxy that will get the instance when accessed
+export const notificationService = new Proxy({} as NotificationService, {
+  get(target, prop) {
+    const instance = NotificationService.getInstance();
+    return (instance as any)[prop];
+  },
+  has(target, prop) {
+    const instance = NotificationService.getInstance();
+    return prop in instance;
+  }
+});

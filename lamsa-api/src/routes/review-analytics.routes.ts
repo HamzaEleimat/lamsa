@@ -15,7 +15,7 @@ router.use(authenticate);
 router.use(apiRateLimiter);
 
 // Get comprehensive review analytics
-router.get('/analytics/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/analytics/:providerId', '/analytics'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     const { startDate, endDate } = req.query;
@@ -42,7 +42,7 @@ router.get('/analytics/:providerId?', validateProvider, async (req: AuthRequest,
 });
 
 // Get detailed reviews with advanced filtering
-router.get('/detailed/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/detailed/:providerId', '/detailed'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     const { 
@@ -96,7 +96,7 @@ router.get('/detailed/:providerId?', validateProvider, async (req: AuthRequest, 
 });
 
 // Generate actionable insights from reviews
-router.get('/insights/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/insights/:providerId', '/insights'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     
@@ -118,7 +118,7 @@ router.get('/insights/:providerId?', validateProvider, async (req: AuthRequest, 
 });
 
 // Get response templates
-router.get('/response-templates/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/response-templates/:providerId', '/response-templates'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     
@@ -195,7 +195,7 @@ router.post('/respond/:reviewId', authenticate, async (req: AuthRequest, res: Re
 });
 
 // Get review sentiment trends
-router.get('/sentiment-trends/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/sentiment-trends/:providerId', '/sentiment-trends'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     const { period: _period = 'month', months = 6 } = req.query;
@@ -232,7 +232,7 @@ router.get('/sentiment-trends/:providerId?', validateProvider, async (req: AuthR
 });
 
 // Get aspect analysis for specific timeframe
-router.get('/aspects/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/aspects/:providerId', '/aspects'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     const { timeframe = 'month' } = req.query;
@@ -280,7 +280,7 @@ router.get('/aspects/:providerId?', validateProvider, async (req: AuthRequest, r
 });
 
 // Get competitor comparison data
-router.get('/competitor-comparison/:providerId?', validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.get(['/competitor-comparison/:providerId', '/competitor-comparison'], validateProvider, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const providerId = req.params.providerId || req.user?.id;
     

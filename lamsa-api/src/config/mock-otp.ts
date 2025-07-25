@@ -49,12 +49,13 @@ export const mockOTP = {
   
   // Check if we're in mock mode
   isMockMode(): boolean {
-    return process.env.MOCK_OTP === 'true' || process.env.NODE_ENV === 'development';
+    // Only allow mock OTP if explicitly enabled AND not in production
+    return process.env.NODE_ENV !== 'production' && process.env.ENABLE_MOCK_OTP === 'true';
   },
   
   // Get stored OTP for testing (development only)
   getStoredOTP(phone: string): { otp: string; expiresAt: Date } | undefined {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production' && process.env.ENABLE_MOCK_OTP === 'true') {
       return otpStore.get(phone);
     }
     return undefined;

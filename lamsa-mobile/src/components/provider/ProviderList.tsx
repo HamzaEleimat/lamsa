@@ -29,7 +29,7 @@ interface ProviderListProps {
 }
 
 export default function ProviderList({
-  providers,
+  providers = [],
   loading = false,
   refreshing = false,
   onRefresh,

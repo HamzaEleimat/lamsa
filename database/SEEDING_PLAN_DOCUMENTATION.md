@@ -121,7 +121,7 @@ psql -f database/seed_edge_cases.sql          # Edge cases & performance
 ### 1. **Price Boundaries**
 - Minimum: 1.00 JOD (Quick nail file)
 - Maximum: 9,999.00 JOD (Premium VIP package)
-- Platform fee calculation (15%)
+- Platform fee calculation (Fixed: 2 JOD for ≤25 JOD, 5 JOD for >25 JOD)
 
 ### 2. **Duration Boundaries**
 - Minimum: 15 minutes (Express services)
@@ -190,8 +190,10 @@ check_provider_availability(provider_id, date, time, duration)
 -- Loyalty points calculation
 calculate_loyalty_points(booking_amount) -- 1 point per JOD
 
--- Platform fee calculation (15%)
-provider_earnings = total_price - (total_price * 0.15)
+-- Platform fee calculation (Fixed fees)
+-- Services ≤25 JOD: platform_fee = 2.00 JOD
+-- Services >25 JOD: platform_fee = 5.00 JOD
+provider_earnings = total_price - platform_fee
 ```
 
 ### 4. **Financial Workflows**

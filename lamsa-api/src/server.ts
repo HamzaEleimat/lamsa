@@ -1,5 +1,6 @@
 import app from './app';
 import { supabase } from './config/supabase-simple';
+import { secureLogger } from './utils/secure-logger';
 
 const PORT = process.env.PORT || 3001;
 
@@ -8,20 +9,22 @@ const testSupabaseConnection = async () => {
   try {
     const { error } = await supabase.from('_test_').select('*').limit(1);
     if (error && error.code !== 'PGRST116') {
-      console.warn('Supabase connection warning:', error.message);
+      secureLogger.warn('Supabase connection warning', { message: error.message });
     } else {
-      console.log('✅ Supabase connected successfully');
+      secureLogger.info('Supabase connected successfully');
     }
   } catch (error) {
-    console.error('❌ Supabase connection error:', error);
+    secureLogger.error('Supabase connection error', error);
   }
 };
 
 const server = app.listen(PORT, async () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
-  console.log(`💚 Health check: http://localhost:${PORT}/api/health`);
+  secureLogger.info('Server started', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    apiBaseUrl: `http://localhost:${PORT}/api`,
+    healthCheck: `http://localhost:${PORT}/api/health`
+  });
   
   // Test database connection
   await testSupabaseConnection();
@@ -29,9 +32,9 @@ const server = app.listen(PORT, async () => {
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+  secureLogger.info('SIGTERM signal received: closing HTTP server');
   server.close(() => {
-    console.log('HTTP server closed');
+    secureLogger.info('HTTP server closed');
   });
 });
 

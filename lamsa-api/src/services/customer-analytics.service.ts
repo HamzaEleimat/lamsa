@@ -219,6 +219,14 @@ export class CustomerAnalyticsService {
     }
 
     // Group customers by segment
+    interface CustomerMetric {
+      segment?: string;
+      lifetime_value?: string | number;
+      total_visits?: number;
+      last_visit_date: string;
+      [key: string]: any;
+    }
+
     const segmentGroups = customerMetrics.reduce((acc, customer) => {
       const segment = customer.segment || 'new';
       if (!acc[segment]) {
@@ -226,25 +234,26 @@ export class CustomerAnalyticsService {
       }
       acc[segment].push(customer);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, CustomerMetric[]>);
 
     const totalCustomers = customerMetrics.length;
 
     return Object.entries(segmentGroups).map(([segment, customers]) => {
-      const avgLifetimeValue = customers.reduce((sum, c: any) => sum + Number(c.lifetime_value || 0), 0) / customers.length;
-      const avgVisits = customers.reduce((sum, c: any) => sum + (c.total_visits || 0), 0) / customers.length;
-      const avgLastVisitDays = customers.reduce((sum, c: any) => {
+      const typedCustomers = customers as CustomerMetric[];
+      const avgLifetimeValue = typedCustomers.reduce((sum, c) => sum + Number(c.lifetime_value || 0), 0) / typedCustomers.length;
+      const avgVisits = typedCustomers.reduce((sum, c) => sum + (c.total_visits || 0), 0) / typedCustomers.length;
+      const avgLastVisitDays = typedCustomers.reduce((sum, c) => {
         const lastVisit = new Date(c.last_visit_date);
         const daysSince = differenceInDays(new Date(), lastVisit);
         return sum + daysSince;
-      }, 0) / customers.length;
+      }, 0) / typedCustomers.length;
 
       const characteristics = this.getSegmentCharacteristics(segment as any);
 
       return {
         segment: segment as any,
-        count: customers.length,
-        percentage: (customers.length / totalCustomers) * 100,
+        count: typedCustomers.length,
+        percentage: (typedCustomers.length / totalCustomers) * 100,
         avgLifetimeValue,
         avgVisits,
         lastVisitDays: avgLastVisitDays,
@@ -291,7 +300,26 @@ export class CustomerAnalyticsService {
 
     if (!customers) return [];
 
-    return customers.map(customer => {
+    // Type assertion for customers with joined data
+    const typedCustomers = customers as unknown as Array<{
+      customer_id: string;
+      total_spent: string | number;
+      total_visits: number;
+      lifetime_value: string | number;
+      segment: string;
+      first_visit_date: string;
+      last_visit_date: string;
+      favorite_service_id?: string;
+      churn_risk_score?: number;
+      users?: {
+        name: string;
+      };
+      services?: {
+        name_en: string;
+      };
+    }>;
+
+    return typedCustomers.map(customer => {
       const totalSpent = Number(customer.total_spent || 0);
       const totalVisits = customer.total_visits || 0;
       const avgOrderValue = totalVisits > 0 ? totalSpent / totalVisits : 0;
@@ -417,7 +445,20 @@ export class CustomerAnalyticsService {
 
     if (!riskCustomers) return [];
 
-    return riskCustomers.map(customer => {
+    // Type assertion for risk customers with joined data
+    const typedRiskCustomers = riskCustomers as unknown as Array<{
+      customer_id: string;
+      last_visit_date: string;
+      total_spent: string | number;
+      total_visits: number;
+      churn_risk_score: number;
+      avg_days_between_visits: number;
+      users?: {
+        name: string;
+      };
+    }>;
+
+    return typedRiskCustomers.map(customer => {
       const daysSinceLastVisit = differenceInDays(new Date(), new Date(customer.last_visit_date));
       const riskFactors = this.identifyRiskFactors(customer, daysSinceLastVisit);
       const recommendedActions = this.getRetentionRecommendations(customer, riskFactors);
@@ -505,8 +546,19 @@ export class CustomerAnalyticsService {
       .eq('id', customerId)
       .single();
 
+    // Type assertion for bookings with services
+    const typedBookings = bookings as unknown as Array<{
+      service_id: string;
+      booking_date: string;
+      start_time: string;
+      total_price: string;
+      services?: {
+        name_en: string;
+      };
+    }>;
+
     // Analyze favorite services
-    const serviceFrequency = bookings.reduce((acc, booking) => {
+    const serviceFrequency = typedBookings.reduce((acc, booking) => {
       const serviceId = booking.service_id;
       if (!acc[serviceId]) {
         acc[serviceId] = {

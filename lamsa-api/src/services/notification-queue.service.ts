@@ -6,6 +6,7 @@
 
 import { getEnvironmentConfig } from '../utils/environment-validation';
 import { NotificationData, NotificationService } from './notification.service';
+import { logger } from '../utils/logger';
 
 export interface QueuedNotification {
   id: string;
@@ -304,7 +305,14 @@ export class NotificationQueueService {
    */
   private async initializeRedis(): Promise<void> {
     try {
-      const envConfig = getEnvironmentConfig();
+      // Try to get environment config, but don't fail if not initialized yet
+      let envConfig: any;
+      try {
+        envConfig = getEnvironmentConfig();
+      } catch (error) {
+        console.log('Environment not yet initialized, skipping Redis setup');
+        return;
+      }
       
       if (envConfig.REDIS_URL || envConfig.REDIS_HOST) {
         // TODO: Initialize Redis client
@@ -472,7 +480,7 @@ export class NotificationQueueService {
       if (notification && notification.status === 'processing') {
         const processingTime = now - notification.createdAt.getTime();
         if (processingTime > stuckThreshold) {
-          console.warn(`Stuck notification detected: ${notificationId}`);
+          logger.warn(`Stuck notification detected: ${notificationId}`);
           return true;
         }
       }
@@ -482,4 +490,17 @@ export class NotificationQueueService {
   }
 }
 
-export const notificationQueueService = NotificationQueueService.getInstance();
+// Export a getter function instead of the instance directly to delay initialization
+export const getNotificationQueueService = () => NotificationQueueService.getInstance();
+
+// For backward compatibility, export a proxy that will get the instance when accessed
+export const notificationQueueService = new Proxy({} as NotificationQueueService, {
+  get(target, prop) {
+    const instance = NotificationQueueService.getInstance();
+    return (instance as any)[prop];
+  },
+  has(target, prop) {
+    const instance = NotificationQueueService.getInstance();
+    return prop in instance;
+  }
+});

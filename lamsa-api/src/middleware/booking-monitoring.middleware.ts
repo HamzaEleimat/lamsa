@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
+import { secureLogger } from '../utils/secure-logger';
 
 interface BookingMetrics {
   totalRequests: number;
@@ -157,12 +158,12 @@ export const bookingPerformanceMonitor = (req: AuthRequest, res: Response, next:
 
     // Log slow requests
     if (durationMs > 1000) {
-      console.warn('⚠️  Slow Booking Request:', JSON.stringify(performanceData, null, 2));
+      secureLogger.warn('Slow Booking Request detected', performanceData);
     }
 
     // Log high memory usage
     if (performanceData.memoryUsage.delta > 50 * 1024 * 1024) { // 50MB
-      console.warn('⚠️  High Memory Usage:', JSON.stringify(performanceData, null, 2));
+      secureLogger.warn('High Memory Usage detected', performanceData);
     }
   });
 

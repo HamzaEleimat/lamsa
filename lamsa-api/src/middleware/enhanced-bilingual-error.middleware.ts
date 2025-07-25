@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ValidationError } from 'express-validator';
+import { secureLogger } from '../utils/secure-logger';
 import { 
   getErrorMessage, 
   getBilingualErrorMessage, 
@@ -375,11 +376,11 @@ function logError(error: Error, req: Request, response: ErrorResponse): void {
     }
   };
 
-  // Log to console (in production, this would go to logging service)
+  // Log errors using secure logger
   if (response.data.errorCode >= 500) {
-    console.error('Server Error:', logData);
+    secureLogger.error('Server Error', error, logData);
   } else {
-    console.warn('Client Error:', logData);
+    secureLogger.warn('Client Error', logData);
   }
 
   // In production, send to monitoring service
@@ -456,4 +457,4 @@ export function createRateLimitError(
 }
 
 // Export types for TypeScript support
-export type { BilingualMessage, ErrorResponse, ValidationErrorResponse };
+export type { BilingualMessage };

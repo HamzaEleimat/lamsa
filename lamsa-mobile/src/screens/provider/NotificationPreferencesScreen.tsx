@@ -7,11 +7,10 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { Text, Switch } from 'react-native-paper';
+import { Text, Switch, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '../../hooks/useTranslation';
-import { colors } from '../../constants/colors';
 import { useAuth } from '../../contexts/AuthContext';
 import { NotificationPreferencesManager } from '../../services/notifications/NotificationPreferencesManager';
 import {
@@ -25,6 +24,7 @@ export default function NotificationPreferencesScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { user } = useAuth();
+  const theme = useTheme();
   
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,6 +134,8 @@ export default function NotificationPreferencesScreen() {
     });
   };
 
+  const styles = createStyles(theme);
+
   const resetToDefaults = async () => {
     Alert.alert(
       t('resetToDefaults'),
@@ -166,7 +168,7 @@ export default function NotificationPreferencesScreen() {
         <View style={styles.settingsList}>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="phone-portrait" size={24} color={colors.primary} />
+              <Ionicons name="phone-portrait" size={24} color={theme.colors.primary} />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>{t('pushNotifications')}</Text>
                 <Text style={styles.settingSubtitle}>{t('freeAndInstant')}</Text>
@@ -175,7 +177,7 @@ export default function NotificationPreferencesScreen() {
             <Switch
               value={preferences.channels[NotificationChannel.PUSH]}
               onValueChange={(value) => updateChannelPreference(NotificationChannel.PUSH, value)}
-              color={colors.primary}
+              color={theme.colors.primary}
             />
           </View>
 
@@ -190,13 +192,13 @@ export default function NotificationPreferencesScreen() {
             <Switch
               value={preferences.channels[NotificationChannel.WHATSAPP]}
               onValueChange={(value) => updateChannelPreference(NotificationChannel.WHATSAPP, value)}
-              color={colors.primary}
+              color={theme.colors.primary}
             />
           </View>
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="chatbox" size={24} color={colors.secondary} />
+              <Ionicons name="chatbox" size={24} color={theme.colors.secondary} />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>{t('sms')}</Text>
                 <Text style={styles.settingSubtitle}>
@@ -207,13 +209,13 @@ export default function NotificationPreferencesScreen() {
             <Switch
               value={preferences.channels[NotificationChannel.SMS]}
               onValueChange={(value) => updateChannelPreference(NotificationChannel.SMS, value)}
-              color={colors.primary}
+              color={theme.colors.primary}
             />
           </View>
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="mail" size={24} color={colors.info} />
+              <Ionicons name="mail" size={24} color={theme.colors.tertiary} />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>{t('email')}</Text>
                 <Text style={styles.settingSubtitle}>{t('weeklyDigests')}</Text>
@@ -222,7 +224,7 @@ export default function NotificationPreferencesScreen() {
             <Switch
               value={preferences.channels[NotificationChannel.EMAIL]}
               onValueChange={(value) => updateChannelPreference(NotificationChannel.EMAIL, value)}
-              color={colors.primary}
+              color={theme.colors.primary}
             />
           </View>
         </View>
@@ -234,16 +236,16 @@ export default function NotificationPreferencesScreen() {
     if (!preferences) return null;
 
     const criticalTypes = [
-      { type: NotificationType.NEW_BOOKING, icon: 'calendar', color: colors.success },
-      { type: NotificationType.BOOKING_CANCELLED, icon: 'calendar-clear', color: colors.error },
-      { type: NotificationType.PAYMENT_FAILED, icon: 'cash', color: colors.error },
+      { type: NotificationType.NEW_BOOKING, icon: 'calendar', color: theme.colors.primary },
+      { type: NotificationType.BOOKING_CANCELLED, icon: 'calendar-clear', color: theme.colors.error },
+      { type: NotificationType.PAYMENT_FAILED, icon: 'cash', color: theme.colors.error },
     ];
 
     const importantTypes = [
-      { type: NotificationType.BOOKING_MODIFIED, icon: 'calendar', color: colors.warning },
-      { type: NotificationType.PAYMENT_RECEIVED, icon: 'cash', color: colors.success },
-      { type: NotificationType.NEW_REVIEW, icon: 'star', color: colors.warning },
-      { type: NotificationType.DAILY_SCHEDULE, icon: 'today', color: colors.primary },
+      { type: NotificationType.BOOKING_MODIFIED, icon: 'calendar', color: theme.colors.tertiary },
+      { type: NotificationType.PAYMENT_RECEIVED, icon: 'cash', color: theme.colors.primary },
+      { type: NotificationType.NEW_REVIEW, icon: 'star', color: theme.colors.tertiary },
+      { type: NotificationType.DAILY_SCHEDULE, icon: 'today', color: theme.colors.primary },
     ];
 
     const renderTypeGroup = (types: any[], title: string) => (
@@ -264,7 +266,7 @@ export default function NotificationPreferencesScreen() {
               <Switch
                 value={pref.enabled}
                 onValueChange={(value) => updateTypePreference(type, value)}
-                color={colors.primary}
+                color={theme.colors.primary}
               />
             </View>
           );
@@ -298,7 +300,7 @@ export default function NotificationPreferencesScreen() {
         <View style={styles.settingsList}>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="moon" size={24} color={colors.primary} />
+              <Ionicons name="moon" size={24} color={theme.colors.primary} />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>{t('quietHours')}</Text>
                 <Text style={styles.settingSubtitle}>
@@ -309,7 +311,7 @@ export default function NotificationPreferencesScreen() {
             <Switch
               value={preferences.timing.quietHours.enabled}
               onValueChange={(value) => updateQuietHours('enabled', value)}
-              color={colors.primary}
+              color={theme.colors.primary}
             />
           </View>
 
@@ -339,7 +341,7 @@ export default function NotificationPreferencesScreen() {
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="layers" size={24} color={colors.secondary} />
+              <Ionicons name="layers" size={24} color={theme.colors.secondary} />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>{t('notificationBatching')}</Text>
                 <Text style={styles.settingSubtitle}>{t('reducesInterruptions')}</Text>
@@ -409,7 +411,7 @@ export default function NotificationPreferencesScreen() {
         <View style={styles.settingsList}>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="alert-circle" size={24} color={colors.warning} />
+              <Ionicons name="alert-circle" size={24} color={theme.colors.tertiary} />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>{t('criticalOnly')}</Text>
                 <Text style={styles.settingSubtitle}>
@@ -420,13 +422,13 @@ export default function NotificationPreferencesScreen() {
             <Switch
               value={preferences.smsSettings.criticalOnly}
               onValueChange={(value) => updateSMSSettings('criticalOnly', value)}
-              color={colors.primary}
+              color={theme.colors.primary}
             />
           </View>
         </View>
 
         <TouchableOpacity style={styles.upgradeButton}>
-          <Ionicons name="rocket" size={20} color={colors.primary} />
+          <Ionicons name="rocket" size={20} color={theme.colors.primary} />
           <Text style={styles.upgradeButtonText}>{t('upgradeSMSPlan')}</Text>
         </TouchableOpacity>
       </View>
@@ -505,10 +507,10 @@ export default function NotificationPreferencesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -516,30 +518,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   section: {
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     marginTop: 16,
     paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
     paddingHorizontal: 16,
     marginBottom: 4,
   },
   sectionDescription: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     paddingHorizontal: 16,
     marginBottom: 16,
   },
   subsectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
   },
   settingsList: {
     paddingHorizontal: 16,
@@ -561,16 +563,16 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   settingSubtitle: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginTop: 2,
   },
   divider: {
     height: 1,
-    backgroundColor: colors.border,
+    backgroundColor: theme.colors.outlineVariant,
     marginVertical: 8,
   },
   timePickerRow: {
@@ -581,20 +583,20 @@ const styles = StyleSheet.create({
   },
   timePicker: {
     flex: 1,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   timePickerLabel: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginBottom: 4,
   },
   timePickerValue: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   batchingOptions: {
     flexDirection: 'row',
@@ -607,26 +609,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     borderWidth: 1,
     borderColor: colors.border,
   },
   activeBatchingOption: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     borderColor: colors.primary,
   },
   batchingOptionText: {
     fontSize: 14,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   activeBatchingOptionText: {
-    color: colors.white,
+    color: theme.colors.onPrimary,
     fontWeight: '500',
   },
   smsQuotaCard: {
     marginHorizontal: 16,
     padding: 16,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     borderRadius: 12,
     marginBottom: 16,
   },
@@ -637,31 +639,31 @@ const styles = StyleSheet.create({
   },
   smsQuotaTitle: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   smsQuotaValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   progressBar: {
     height: 8,
-    backgroundColor: colors.border,
+    backgroundColor: theme.colors.outlineVariant,
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 4,
   },
   progressFillWarning: {
-    backgroundColor: colors.warning,
+    backgroundColor: theme.colors.tertiary,
   },
   smsQuotaSubtext: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   upgradeButton: {
     flexDirection: 'row',
@@ -677,7 +679,7 @@ const styles = StyleSheet.create({
   upgradeButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.primary,
+    color: theme.colors.primary,
   },
   resetButton: {
     alignItems: 'center',
@@ -686,7 +688,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     fontSize: 14,
-    color: colors.error,
+    color: theme.colors.error,
   },
   bottomPadding: {
     height: 100,
@@ -696,14 +698,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     padding: 16,
     paddingBottom: Platform.OS === 'ios' ? 32 : 16,
   },
   saveButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -714,6 +716,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.white,
+    color: theme.colors.onPrimary,
   },
 });

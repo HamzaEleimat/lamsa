@@ -8,6 +8,8 @@
 
 import { Router, Request, Response } from 'express';
 import { apiRateLimiter } from '../middleware/rate-limit.middleware';
+import { authenticate } from '../middleware/auth.middleware';
+import { AuthRequest } from '../types';
 
 const router = Router();
 
@@ -42,8 +44,8 @@ router.get('/mobile', apiRateLimiter, (req: Request, res: Response) => {
   const isDevelopment = process.env.NODE_ENV === 'development';
   
   const config = {
-    supabaseUrl: process.env.SUPABASE_URL || '',
-    supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
+    // SECURITY: Never expose sensitive credentials through public endpoints
+    // Mobile apps should use authenticated endpoints to get configuration
     apiBaseUrl: process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 3000}`,
     environment: process.env.NODE_ENV || 'production',
     features: {
@@ -73,17 +75,9 @@ router.get('/mobile', apiRateLimiter, (req: Request, res: Response) => {
       support: 'https://lamsa.com/support',
       helpCenter: 'https://help.lamsa.com',
     },
-  };
-
-  // Remove sensitive values in production if not properly configured
-  if (!config.supabaseUrl || config.supabaseUrl.includes('your-project')) {
-    config.supabaseUrl = '';
-  }
-  if (!config.supabaseAnonKey || config.supabaseAnonKey.includes('your-anon-key')) {
-    config.supabaseAnonKey = '';
   }
 
-  res.json({
+  return res.json({
     success: true,
     config,
     timestamp: new Date().toISOString(),
@@ -136,6 +130,38 @@ router.get('/features', apiRateLimiter, (_req: Request, res: Response) => {
     success: true,
     features,
     version: '1.0.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * @route GET /api/config/mobile/secure
+ * @description Get secure mobile app configuration (authenticated)
+ * @access Private - Requires authentication
+ * @deprecated Supabase credentials should be embedded in the mobile app build process, not fetched via API
+ */
+router.get('/mobile/secure', authenticate, apiRateLimiter, (req: AuthRequest, res: Response) => {
+  // SECURITY: Never expose Supabase credentials via API endpoints
+  // These should be configured during the build process using environment variables
+  
+  // Return only non-sensitive configuration for authenticated users
+  const config = {
+    // Add any truly non-sensitive config that requires authentication here
+    userSettings: {
+      notificationsEnabled: true,
+      language: 'ar',
+    },
+    // Feature flags that might be user-specific
+    features: {
+      betaFeatures: false,
+      premiumFeatures: false,
+    }
+  };
+
+  return res.json({
+    success: true,
+    config,
+    userId: req.user?.id,
     timestamp: new Date().toISOString(),
   });
 });

@@ -125,11 +125,26 @@ export class ReviewAnalyticsService {
     }, {} as Record<number, number>);
 
     // Sentiment breakdown
-    const sentimentBreakdown = reviews.reduce((acc, review) => {
+    const sentimentBreakdown: { positive: number; neutral: number; negative: number } = { 
+      positive: 0, 
+      neutral: 0, 
+      negative: 0 
+    };
+    reviews.forEach(review => {
       const sentiment = review.sentiment || 'neutral';
-      acc[sentiment] = (acc[sentiment] || 0) + 1;
-      return acc;
-    }, { positive: 0, neutral: 0, negative: 0 });
+      switch (sentiment) {
+        case 'positive':
+          sentimentBreakdown.positive++;
+          break;
+        case 'negative':
+          sentimentBreakdown.negative++;
+          break;
+        case 'neutral':
+        default:
+          sentimentBreakdown.neutral++;
+          break;
+      }
+    });
 
     // Response metrics
     const reviewsWithResponses = reviews.filter(r => r.response);
@@ -567,7 +582,7 @@ export class ReviewAnalyticsService {
     }
 
     // Competitive advantages
-    if (analytics.competitorComparison?.improvement > 0.5) {
+    if (analytics.competitorComparison?.improvement && analytics.competitorComparison.improvement > 0.5) {
       competitiveAdvantages.push('Above-average rating in market');
     }
 

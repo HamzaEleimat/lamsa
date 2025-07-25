@@ -21,6 +21,9 @@ export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
   message?: string;
+  meta?: {
+    [key: string]: any;
+  };
 }
 
 export interface PaginationQuery {

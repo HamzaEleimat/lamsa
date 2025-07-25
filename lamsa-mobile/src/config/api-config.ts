@@ -81,10 +81,16 @@ class ApiConfigService {
         throw new Error(`Failed to fetch config: ${response.status}`);
       }
 
-      const config = await response.json();
+      const data = await response.json();
+      
+      // Extract config from response
+      const config = data.config || data;
       
       // Validate config structure
       if (!this.isValidConfig(config)) {
+        if (process.env.EXPO_PUBLIC_ENV === 'development') {
+          console.log('Config validation failed. Received:', config);
+        }
         throw new Error('Invalid config structure received');
       }
 
@@ -94,6 +100,26 @@ class ApiConfigService {
       return config;
     } catch (error) {
       console.error('Error fetching API config:', error);
+      console.warn('Using environment variables as fallback');
+      
+      // In development, use a more permissive fallback
+      if (process.env.EXPO_PUBLIC_ENV === 'development') {
+        console.log('Development mode: Using local configuration');
+        const devConfig = {
+          ...this.getDefaultConfig(),
+          // Override with development-friendly settings
+          environment: 'development',
+          features: {
+            enableOTP: true,
+            enablePushNotifications: false, // Disable in development
+            enableAnalytics: false, // Disable in development
+          },
+        };
+        
+        // Cache the dev config
+        await this.cacheConfig(devConfig);
+        return devConfig;
+      }
       
       // Fall back to default non-sensitive config
       return this.getDefaultConfig();
@@ -190,11 +216,22 @@ class ApiConfigService {
    * Get default configuration (non-sensitive only)
    */
   private getDefaultConfig(): ApiConfig {
+    // SECURITY: Supabase credentials must be provided via environment variables
+    // Never fetch these from API endpoints
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error(
+        'Supabase configuration missing. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your environment.'
+      );
+    }
+    
     return {
-      supabaseUrl: '', // Will cause controlled failure
-      supabaseAnonKey: '', // Will cause controlled failure
+      supabaseUrl,
+      supabaseAnonKey,
       apiBaseUrl: process.env.EXPO_PUBLIC_API_URL || 'https://api.lamsa.com',
-      environment: 'production',
+      environment: process.env.EXPO_PUBLIC_ENV || 'production',
       features: {
         enableOTP: true,
         enablePushNotifications: true,

@@ -13,79 +13,79 @@ router.use(authenticate);
 router.use(apiRateLimiter);
 
 // Today's overview - high frequency endpoint
-router.get('/overview/today/:providerId?', 
+router.get(['/overview/today/:providerId', '/overview/today'], 
   validateProvider, 
   dashboardController.getTodayOverview.bind(dashboardController)
 );
 
 // Statistics with period support (week/month)
-router.get('/statistics/:providerId?', 
+router.get(['/statistics/:providerId', '/statistics'], 
   validateProvider, 
   dashboardController.getStatistics.bind(dashboardController)
 );
 
 // Upcoming appointments with pagination
-router.get('/appointments/upcoming/:providerId?', 
+router.get(['/appointments/upcoming/:providerId', '/appointments/upcoming'], 
   validateProvider, 
   dashboardController.getUpcomingAppointments.bind(dashboardController)
 );
 
 // Reviews and ratings with filtering
-router.get('/reviews/:providerId?', 
+router.get(['/reviews/:providerId', '/reviews'], 
   validateProvider, 
   dashboardController.getReviews.bind(dashboardController)
 );
 
 // Revenue reports with detailed breakdown
-router.get('/revenue/:providerId?', 
+router.get(['/revenue/:providerId', '/revenue'], 
   validateProvider, 
   dashboardController.getRevenueReport.bind(dashboardController)
 );
 
 // Customer analytics and retention
-router.get('/customers/analytics/:providerId?', 
+router.get(['/customers/analytics/:providerId', '/customers/analytics'], 
   validateProvider, 
   dashboardController.getCustomerAnalytics.bind(dashboardController)
 );
 
 // Popular services performance
-router.get('/services/popular/:providerId?', 
+router.get(['/services/popular/:providerId', '/services/popular'], 
   validateProvider, 
   dashboardController.getPopularServices.bind(dashboardController)
 );
 
 // Performance insights and recommendations
-router.get('/insights/:providerId?', 
+router.get(['/insights/:providerId', '/insights'], 
   validateProvider, 
   dashboardController.getPerformanceInsights.bind(dashboardController)
 );
 
 // Get specific performance insights
-router.get('/insights/specific/:providerId?', 
+router.get(['/insights/specific/:providerId', '/insights/specific'], 
   validateProvider, 
   dashboardController.getSpecificInsights.bind(dashboardController)
 );
 
 // Get market intelligence
-router.get('/market-intelligence/:providerId?', 
+router.get(['/market-intelligence/:providerId', '/market-intelligence'], 
   validateProvider, 
   dashboardController.getMarketIntelligence.bind(dashboardController)
 );
 
 // Get predictive analytics
-router.get('/predictions/:providerId?', 
+router.get(['/predictions/:providerId', '/predictions'], 
   validateProvider, 
   dashboardController.getPredictiveAnalytics.bind(dashboardController)
 );
 
 // Real-time notifications
-router.get('/notifications/:providerId?', 
+router.get(['/notifications/:providerId', '/notifications'], 
   validateProvider, 
   dashboardController.getNotifications.bind(dashboardController)
 );
 
 // Export dashboard data
-router.get('/export/:providerId?', 
+router.get(['/export/:providerId', '/export'], 
   validateProvider, 
   dashboardController.exportDashboardData.bind(dashboardController)
 );

@@ -265,7 +265,7 @@ export const validateBookingQuery: ValidationChain[] = [
     .isISO8601()
     .withMessage('Date to must be in ISO8601 format (YYYY-MM-DD)')
     .custom((dateTo, { req }) => {
-      if (req.query.dateFrom && dateTo) {
+      if (req.query?.dateFrom && dateTo) {
         const from = parseISO(req.query.dateFrom as string);
         const to = parseISO(dateTo);
         return isAfter(to, from) || format(to, 'yyyy-MM-dd') === format(from, 'yyyy-MM-dd');
@@ -312,7 +312,7 @@ export const validateBookingQuery: ValidationChain[] = [
     .isFloat({ min: 0, max: 1000 })
     .withMessage('Maximum amount must be between 0 and 1000')
     .custom((maxAmount, { req }) => {
-      if (req.query.minAmount && maxAmount) {
+      if (req.query?.minAmount && maxAmount) {
         return parseFloat(maxAmount) >= parseFloat(req.query.minAmount as string);
       }
       return true;
@@ -380,7 +380,7 @@ export const validateAnalyticsQuery: ValidationChain[] = [
     .isISO8601()
     .withMessage('End date must be in ISO8601 format')
     .custom((endDate, { req }) => {
-      if (req.query.startDate && endDate) {
+      if (req.query?.startDate && endDate) {
         const start = parseISO(req.query.startDate as string);
         const end = parseISO(endDate);
         return isAfter(end, start);

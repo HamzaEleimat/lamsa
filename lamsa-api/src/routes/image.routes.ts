@@ -6,7 +6,8 @@
 import { Router } from 'express';
 import { imageController } from '../controllers/image.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { validateRequest } from '../middleware/validation.middleware';
+import { validate } from '../middleware/validation.middleware';
+import { validateFileUpload } from '../middleware/file-validation.middleware';
 import { body, param } from 'express-validator';
 
 const router = Router();
@@ -50,9 +51,10 @@ router.post(
   [
     body('fileName').notEmpty().withMessage('File name is required'),
     body('bucket').notEmpty().isIn(['avatars', 'services', 'reviews', 'certificates']),
-    body('maxSizeInMB').optional().isInt({ min: 1, max: 10 })
+    body('maxSizeInMB').optional().isInt({ min: 1, max: 20 })
   ],
-  validateRequest,
+  validate,
+  validateFileUpload, // Add file validation
   imageController.generateUploadUrl
 );
 
@@ -88,7 +90,7 @@ router.post(
     body('bucket').notEmpty(),
     body('key').notEmpty()
   ],
-  validateRequest,
+  validate,
   imageController.confirmUpload
 );
 
@@ -115,13 +117,14 @@ router.post(
  *       200:
  *         description: Image deleted successfully
  */
+// Simple route - key should be URL encoded if it contains slashes
 router.delete(
-  '/:bucket/:key(*)',
+  '/:bucket/:key',
   [
     param('bucket').notEmpty(),
     param('key').notEmpty()
   ],
-  validateRequest,
+  validate,
   imageController.deleteImage
 );
 
@@ -161,7 +164,7 @@ router.post(
     body('width').optional().isInt({ min: 50, max: 1000 }),
     body('height').optional().isInt({ min: 50, max: 1000 })
   ],
-  validateRequest,
+  validate,
   imageController.generateThumbnail
 );
 

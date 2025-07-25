@@ -9,7 +9,7 @@ import {
   Text,
   ActivityIndicator,
 } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE, Region } from '../MapView';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
 import { colors } from '../../constants/colors';

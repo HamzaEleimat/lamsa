@@ -5,7 +5,8 @@ import { useTheme } from 'react-native-paper';
 import SearchScreen from '../screens/main/SearchScreen';
 import BookingsScreen from '../screens/main/BookingsScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
-import i18n, { isRTL } from '../i18n';
+import { PlatformTabBar } from '@components/navigation';
+import i18n from '../i18n';
 
 export type MainTabParamList = {
   Search: undefined;
@@ -22,20 +23,8 @@ const MainTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.surfaceVariant,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontFamily: isRTL() ? 'System' : undefined,
-        },
       }}
+      tabBar={(props) => <PlatformTabBar {...props} />}
     >
       <Tab.Screen
         name="Search"

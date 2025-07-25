@@ -33,7 +33,7 @@ interface CityCoordinates {
 
 export class PrayerTimeService {
   private static instance: PrayerTimeService;
-  private readonly API_URL = 'http://api.aladhan.com/v1/timings';
+  private readonly API_URL = 'https://api.aladhan.com/v1/timings';
   
   // Jordan major cities coordinates
   private readonly jordanCities: CityCoordinates[] = [
@@ -83,6 +83,9 @@ export class PrayerTimeService {
           method: method,
           timestamp: timestamp,
         },
+        timeout: 5000, // 5 second timeout
+        maxRedirects: 0, // Prevent redirect attacks
+        validateStatus: (status) => status === 200, // Only accept 200 OK
       });
 
       if (response.data && response.data.data) {
@@ -91,7 +94,9 @@ export class PrayerTimeService {
 
       return null;
     } catch (error) {
-      console.error('Error fetching prayer times:', error);
+      // Use secure logger instead of console.error
+      const { secureLogger } = await import('../utils/secure-logger');
+      secureLogger.error('Error fetching prayer times', error);
       return null;
     }
   }

@@ -34,7 +34,8 @@ export class BookingFactory {
     overrides: Partial<TestBooking> = {}
   ): TestBooking {
     const amount = Number(faker.number.float({ min: 10, max: 100, fractionDigits: 2 }));
-    const platformFee = Number((amount * 0.08).toFixed(2)); // 8% platform fee
+    // Fixed fee structure: 2 JOD for services ≤25 JOD, 5 JOD for services >25 JOD
+    const platformFee = amount <= 25 ? 2.00 : 5.00;
     const providerFee = Number((amount - platformFee).toFixed(2));
 
     const bookingDate = faker.date.future({ days: 30 });
@@ -272,7 +273,8 @@ export class BookingFactory {
     amount: number,
     overrides: Partial<TestBooking> = {}
   ): TestBooking {
-    const platformFee = Number((amount * 0.08).toFixed(2));
+    // Fixed fee structure: 2 JOD for services ≤25 JOD, 5 JOD for services >25 JOD
+    const platformFee = amount <= 25 ? 2.00 : 5.00;
     const providerFee = Number((amount - platformFee).toFixed(2));
 
     return this.create(userId, providerId, serviceId, {
@@ -403,8 +405,8 @@ export class BookingFactory {
         status: 'confirmed',
         payment_method: 'card',
         amount: 15.00,
-        platform_fee: 1.20,
-        provider_fee: 13.80
+        platform_fee: 2.00,
+        provider_fee: 13.00
       },
       completedBooking: {
         id: 'booking3-3333-3333-3333-333333333333',
@@ -417,8 +419,8 @@ export class BookingFactory {
         status: 'completed',
         payment_method: 'online',
         amount: 35.00,
-        platform_fee: 2.80,
-        provider_fee: 32.20
+        platform_fee: 5.00,
+        provider_fee: 30.00
       },
       cancelledBooking: {
         id: 'booking4-4444-4444-4444-444444444444',

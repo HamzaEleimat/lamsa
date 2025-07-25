@@ -28,9 +28,12 @@ export class EncryptionService {
     const envKey = process.env.PII_ENCRYPTION_KEY;
     
     if (!envKey) {
-      logger.warn('PII_ENCRYPTION_KEY not set, using development key');
-      // Development only - DO NOT use in production
-      this.masterKey = crypto.scryptSync('development-key-do-not-use', 'salt', this.keyLength);
+      const errorMsg = 'PII_ENCRYPTION_KEY environment variable is required. ' +
+                      'Generate a key using: openssl rand -base64 32';
+      logger.error(errorMsg);
+      
+      // Always require encryption key - no auto-generation
+      throw new Error(errorMsg);
     } else {
       // Validate key format (should be base64)
       try {
@@ -38,11 +41,44 @@ export class EncryptionService {
         if (this.masterKey.length !== this.keyLength) {
           throw new Error(`Invalid key length: ${this.masterKey.length} bytes (expected ${this.keyLength})`);
         }
+        
+        // Additional validation for production
+        if (process.env.NODE_ENV === 'production') {
+          // Ensure key has sufficient entropy (not all zeros, ones, or simple patterns)
+          const keyEntropy = this.calculateEntropy(this.masterKey);
+          if (keyEntropy < 4.0) { // Shannon entropy threshold
+            throw new Error('Encryption key has insufficient entropy. Please generate a cryptographically secure key.');
+          }
+        }
       } catch (error) {
         logger.error('Invalid PII_ENCRYPTION_KEY format', error);
         throw new Error('Invalid encryption key configuration');
       }
     }
+  }
+  
+  /**
+   * Calculate Shannon entropy of a buffer
+   * Used to ensure encryption keys have sufficient randomness
+   */
+  private calculateEntropy(buffer: Buffer): number {
+    const frequencies = new Map<number, number>();
+    
+    // Count byte frequencies
+    for (const byte of buffer) {
+      frequencies.set(byte, (frequencies.get(byte) || 0) + 1);
+    }
+    
+    // Calculate entropy
+    let entropy = 0;
+    const length = buffer.length;
+    
+    for (const count of frequencies.values()) {
+      const probability = count / length;
+      entropy -= probability * Math.log2(probability);
+    }
+    
+    return entropy;
   }
   
   /**

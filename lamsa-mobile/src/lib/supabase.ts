@@ -41,16 +41,6 @@ export const getSupabase = async (): Promise<SupabaseClient> => {
   }
 };
 
-// For backward compatibility - will be initialized on first use
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    console.warn('Direct supabase access is deprecated. Use getSupabase() instead.');
-    if (!supabaseInstance) {
-      throw new Error('Supabase not initialized. Use getSupabase() for async initialization.');
-    }
-    return (supabaseInstance as any)[prop];
-  },
-});
 
 // Handle app state changes to refresh session
 AppState.addEventListener('change', async (state) => {
@@ -123,7 +113,8 @@ export const auth = {
         throw new Error('OTP must be 6 digits');
       }
 
-      const { data, error } = await supabase.auth.verifyOtp({
+      const client = await getSupabase();
+      const { data, error } = await client.auth.verifyOtp({
         phone,
         token: otp,
         type: 'sms',
@@ -161,7 +152,8 @@ export const auth = {
    */
   async getSession() {
     try {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const client = await getSupabase();
+      const { data: { session }, error } = await client.auth.getSession();
 
       if (error) {
         console.error('Error getting session:', error);
@@ -189,7 +181,8 @@ export const auth = {
    */
   async signOut() {
     try {
-      const { error } = await supabase.auth.signOut();
+      const client = await getSupabase();
+      const { error } = await client.auth.signOut();
 
       if (error) {
         console.error('Error signing out:', error);
@@ -219,7 +212,8 @@ export const auth = {
    */
   async getUser() {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const client = await getSupabase();
+      const { data: { user }, error } = await client.auth.getUser();
 
       if (error) {
         console.error('Error getting user:', error);
@@ -246,8 +240,9 @@ export const auth = {
    * @param callback - Function to call when auth state changes
    * @returns Unsubscribe function
    */
-  onAuthStateChange(callback: (event: string, session: any) => void) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+  async onAuthStateChange(callback: (event: string, session: any) => void) {
+    const client = await getSupabase();
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });
 
@@ -261,7 +256,8 @@ export const auth = {
    */
   async updateProfile(updates: { name?: string; avatar_url?: string }) {
     try {
-      const { data, error } = await supabase.auth.updateUser({
+      const client = await getSupabase();
+      const { data, error } = await client.auth.updateUser({
         data: updates,
       });
 
@@ -295,7 +291,8 @@ export const db = {
    */
   async getUserProfile(userId: string) {
     try {
-      const { data, error } = await supabase
+      const client = await getSupabase();
+      const { data, error } = await client
         .from('users')
         .select('*')
         .eq('id', userId)
@@ -318,7 +315,8 @@ export const db = {
    */
   async updateUserProfile(userId: string, updates: any) {
     try {
-      const { data, error } = await supabase
+      const client = await getSupabase();
+      const { data, error } = await client
         .from('users')
         .update(updates)
         .eq('id', userId)
@@ -381,4 +379,3 @@ export const categorizeAuthError = (error: any): AuthErrorType => {
   return AuthErrorType.UNKNOWN_ERROR;
 };
 
-export default supabase;

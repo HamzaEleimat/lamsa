@@ -241,17 +241,28 @@ describe('BookingService', () => {
     });
 
     it('should calculate correct platform fees', async () => {
-      const bookingData = {
+      // Test low tier (≤25 JOD)
+      const lowTierBooking = {
         ...testBookingScenarios.validBooking,
-        amount: 100.00
+        amount: 20.00
       };
       const userId = testUsers.customer.id;
 
-      const result = await bookingService.createBooking(userId, bookingData);
+      const result1 = await bookingService.createBooking(userId, lowTierBooking);
+      expect(result1.platformFee).toBe(2.00); // Fixed 2 JOD fee
+      expect(result1.providerFee).toBe(18.00); // 20 - 2
+      expect(result1.amount).toBe(20.00);
 
-      expect(result.platformFee).toBe(8.00); // 8% of 100
-      expect(result.providerFee).toBe(92.00); // 100 - 8
-      expect(result.amount).toBe(100.00);
+      // Test high tier (>25 JOD)
+      const highTierBooking = {
+        ...testBookingScenarios.validBooking,
+        amount: 50.00
+      };
+
+      const result2 = await bookingService.createBooking(userId, highTierBooking);
+      expect(result2.platformFee).toBe(5.00); // Fixed 5 JOD fee
+      expect(result2.providerFee).toBe(45.00); // 50 - 5
+      expect(result2.amount).toBe(50.00);
     });
 
     it('should require online payment for high-value bookings', async () => {

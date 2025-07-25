@@ -242,8 +242,12 @@ CONSTRAINT bookings_max_advance CHECK (booking_date <= CURRENT_DATE + INTERVAL '
 
 ### Financial Calculations
 ```sql
--- Platform fee calculation (15%)
-NEW.platform_fee := ROUND(NEW.total_price * 0.15, 2);
+-- Platform fee calculation (Fixed fees)
+IF NEW.total_price <= 25.00 THEN
+    NEW.platform_fee := 2.00;
+ELSE
+    NEW.platform_fee := 5.00;
+END IF;
 NEW.provider_earnings := NEW.total_price - NEW.platform_fee;
 
 -- Price consistency validation

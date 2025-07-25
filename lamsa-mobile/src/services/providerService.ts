@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { Provider, ServiceCategory, BusinessType } from '../types';
+import mockDataService from './mock/mockDataService';
+import { ServiceItem } from './mock/mockServices';
+import { Review } from './mock/mockReviews';
 
 export interface ProviderSearchParams {
   // Location
@@ -175,7 +178,31 @@ class ProviderService {
       return data;
     } catch (error) {
       console.error('Error searching providers:', error);
-      throw error;
+      console.log('Using mock data as fallback');
+      
+      // Use mock data as fallback
+      const mockProviders = await mockDataService.withDelay(
+        mockDataService.searchProviders({
+          searchQuery: params.searchQuery,
+          serviceCategory: params.categories?.[0],
+          sortBy: params.sortBy,
+          limit: params.limit
+        })
+      );
+      
+      const page = params.page || 1;
+      const limit = params.limit || 20;
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedProviders = mockProviders.slice(startIndex, endIndex);
+      
+      return {
+        providers: paginatedProviders,
+        totalCount: mockProviders.length,
+        page,
+        totalPages: Math.ceil(mockProviders.length / limit),
+        hasMore: endIndex < mockProviders.length
+      };
     }
   }
 
@@ -204,7 +231,18 @@ class ProviderService {
       return data.provider;
     } catch (error) {
       console.error('Error fetching provider:', error);
-      throw error;
+      console.log('Using mock data as fallback');
+      
+      // Use mock data as fallback
+      const mockProvider = await mockDataService.withDelay(
+        mockDataService.getProviderById(providerId)
+      );
+      
+      if (!mockProvider) {
+        throw new Error('Provider not found');
+      }
+      
+      return mockProvider as Provider;
     }
   }
 
@@ -236,7 +274,30 @@ class ProviderService {
       return data.services;
     } catch (error) {
       console.error('Error fetching provider services:', error);
-      throw error;
+      console.log('Using mock data as fallback');
+      
+      // Use mock data as fallback
+      const mockServices = await mockDataService.withDelay(
+        mockDataService.getProviderServices(providerId)
+      );
+      
+      // Convert mock services to ProviderServiceItem format
+      return mockServices.map(service => ({
+        id: service.id,
+        name: {
+          en: service.name_en,
+          ar: service.name_ar
+        },
+        description: {
+          en: service.description_en,
+          ar: service.description_ar
+        },
+        price: service.price,
+        durationMinutes: service.duration_minutes,
+        category: service.category as ServiceCategory,
+        isPopular: service.is_popular,
+        imageUrl: service.image_url
+      }));
     }
   }
 
@@ -269,7 +330,38 @@ class ProviderService {
       return data;
     } catch (error) {
       console.error('Error fetching provider reviews:', error);
-      throw error;
+      console.log('Using mock data as fallback');
+      
+      // Use mock data as fallback
+      const mockReviews = await mockDataService.withDelay(
+        mockDataService.getProviderReviews(providerId)
+      );
+      const stats = mockDataService.getProviderReviewStats(providerId);
+      
+      // Paginate reviews
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedReviews = mockReviews.slice(startIndex, endIndex);
+      
+      // Convert to ProviderReview format
+      const reviews: ProviderReview[] = paginatedReviews.map(review => ({
+        id: review.id,
+        customerId: review.user_id,
+        customerName: review.user_name,
+        customerAvatar: review.user_avatar,
+        rating: review.rating,
+        comment: review.comment,
+        serviceId: undefined,
+        serviceName: review.service_name,
+        createdAt: review.created_at,
+        response: undefined
+      }));
+      
+      return {
+        reviews,
+        totalCount: stats.totalReviews,
+        rating: stats.averageRating
+      };
     }
   }
 

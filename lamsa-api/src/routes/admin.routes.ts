@@ -8,15 +8,15 @@
 
 import { Router } from 'express';
 import { adminController } from '../controllers/admin.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticate } from '../middleware/auth.middleware';
 import { apiRateLimiter } from '../middleware/rate-limit.middleware';
-import { validateInput } from '../middleware/request-validation.middleware';
+import { validate } from '../middleware/validation.middleware';
 import { body, param, query } from 'express-validator';
 
 const router = Router();
 
 // All admin routes require authentication
-router.use(authenticateToken);
+router.use(authenticate);
 router.use(apiRateLimiter);
 
 /**
@@ -30,7 +30,7 @@ router.get(
     param('identifier').notEmpty().withMessage('Identifier is required'),
     param('type').isIn(['customer', 'provider', 'otp', 'mfa']).withMessage('Invalid lockout type'),
   ],
-  validateInput,
+  validate,
   adminController.getLockoutStatus
 );
 
@@ -44,7 +44,7 @@ router.post(
   [
     param('identifier').notEmpty().withMessage('Identifier is required'),
   ],
-  validateInput,
+  validate,
   adminController.unlockAccount
 );
 
@@ -60,7 +60,7 @@ router.get(
     query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
     query('offset').optional().isInt({ min: 0 }).withMessage('Offset must be non-negative'),
   ],
-  validateInput,
+  validate,
   adminController.getSecurityEvents
 );
 
@@ -84,7 +84,7 @@ router.put(
     body('lockoutDuration').optional().isInt({ min: 1, max: 1440 }).withMessage('Lockout duration must be between 1 and 1440 minutes'),
     body('resetWindow').optional().isInt({ min: 1, max: 1440 }).withMessage('Reset window must be between 1 and 1440 minutes'),
   ],
-  validateInput,
+  validate,
   adminController.updateLockoutConfig
 );
 

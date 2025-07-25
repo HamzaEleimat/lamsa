@@ -15,7 +15,7 @@ export class ImageController {
    */
   async generateUploadUrl(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { fileName, bucket, maxSizeInMB } = req.body;
+      const { fileName, bucket, maxSizeInMB, sanitizedFileName } = req.body;
       
       if (!fileName || !bucket) {
         throw new AppError('File name and bucket are required', 400);
@@ -42,7 +42,11 @@ export class ImageController {
         maxSizeInMB: maxSizeInMB || 5
       };
 
-      const uploadData = await imageStorageService.generatePresignedUploadUrl(options, fileName);
+      // Use sanitized file name for storage
+      const uploadData = await imageStorageService.generatePresignedUploadUrl(
+        options, 
+        sanitizedFileName || fileName
+      );
 
       const response: ApiResponse = {
         success: true,

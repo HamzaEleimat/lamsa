@@ -354,8 +354,8 @@ describe('Booking Integration Tests', () => {
 
       const booking = response.body.data;
       
-      // Platform fee should be 15% of total price
-      const expectedPlatformFee = Math.round(booking.total_price * 0.15 * 100) / 100;
+      // Platform fee should be based on fixed tiers
+      const expectedPlatformFee = booking.total_price <= 25 ? 2.00 : 5.00;
       const expectedProviderEarnings = booking.total_price - expectedPlatformFee;
 
       expect(booking.platform_fee).toBe(expectedPlatformFee);

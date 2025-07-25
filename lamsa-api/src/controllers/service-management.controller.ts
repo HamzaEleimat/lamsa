@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase-simple';
+import { assertAuthenticated, assertDefined } from '../utils/null-safety';
 
 // Enhanced service management interfaces
 // interface ServiceWithDetails { // Commented out to suppress unused interface warning
@@ -128,7 +129,8 @@ export class ServiceManagementController {
    */
   async createFromTemplates(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.user?.type !== 'provider') {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider') {
         throw new AppError('Only providers can create services', 403);
       }
       
@@ -152,7 +154,7 @@ export class ServiceManagementController {
       const services = templates.map(template => {
         const customization = customizations?.[template.id] || {};
         return {
-          provider_id: req.user!.id,
+          provider_id: req.user.id,
           category_id: template.category_id,
           name_en: customization.name_en || template.name_en,
           name_ar: customization.name_ar || template.name_ar,
@@ -221,7 +223,8 @@ export class ServiceManagementController {
    */
   async bulkServiceOperations(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.user?.type !== 'provider') {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider') {
         throw new AppError('Only providers can perform bulk operations', 403);
       }
       
@@ -241,7 +244,7 @@ export class ServiceManagementController {
         throw new AppError('Failed to verify services', 500);
       }
       
-      const unauthorizedServices = services.filter(s => s.provider_id !== req.user!.id);
+      const unauthorizedServices = services.filter(s => s.provider_id !== req.user.id);
       if (unauthorizedServices.length > 0) {
         throw new AppError('You can only modify your own services', 403);
       }
@@ -275,13 +278,16 @@ export class ServiceManagementController {
             throw new AppError('Price adjustment is required', 400);
           }
           
+          const priceAdjustment = operation.data.price_adjustment;
+          const adjustmentType = operation.data.price_adjustment_type;
+          
           const priceUpdates = services.map(service => {
             let newPrice = service.price;
             
-            if (operation.data!.price_adjustment_type === 'percentage') {
-              newPrice = service.price * (1 + operation.data!.price_adjustment! / 100);
+            if (adjustmentType === 'percentage') {
+              newPrice = service.price * (1 + priceAdjustment / 100);
             } else {
-              newPrice = service.price + operation.data!.price_adjustment!;
+              newPrice = service.price + priceAdjustment;
             }
             
             return {
@@ -341,7 +347,8 @@ export class ServiceManagementController {
    */
   async createServicePackage(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.user?.type !== 'provider') {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider') {
         throw new AppError('Only providers can create packages', 403);
       }
       
@@ -371,7 +378,7 @@ export class ServiceManagementController {
         throw new AppError('Invalid services selected', 400);
       }
       
-      const unauthorizedServices = services.filter(s => s.provider_id !== req.user!.id);
+      const unauthorizedServices = services.filter(s => s.provider_id !== req.user.id);
       if (unauthorizedServices.length > 0) {
         throw new AppError('You can only include your own services in packages', 403);
       }
@@ -510,7 +517,8 @@ export class ServiceManagementController {
    */
   async duplicateService(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.user?.type !== 'provider') {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider') {
         throw new AppError('Only providers can duplicate services', 403);
       }
       
@@ -592,7 +600,8 @@ export class ServiceManagementController {
       const { date_from, date_to, service_id } = req.query;
       
       // Check authorization
-      if (req.user?.type !== 'provider' || req.user.id !== providerId) {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider' || req.user.id !== providerId) {
         throw new AppError('You can only view your own analytics', 403);
       }
       
@@ -675,7 +684,8 @@ export class ServiceManagementController {
    */
   async updateServiceVariations(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.user?.type !== 'provider') {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider') {
         throw new AppError('Only providers can manage variations', 403);
       }
       
@@ -798,7 +808,8 @@ export class ServiceManagementController {
    */
   async updateServiceTags(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (req.user?.type !== 'provider') {
+      assertAuthenticated(req, 'Authentication required');
+      if (req.user.type !== 'provider') {
         throw new AppError('Only providers can manage tags', 403);
       }
       

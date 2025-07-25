@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from '../MapView';
 import { useTranslation } from '../../hooks/useTranslation';
 import { colors } from '../../constants/colors';
 import { format, isToday, isTomorrow, addDays, getDay } from 'date-fns';

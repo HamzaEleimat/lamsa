@@ -132,13 +132,19 @@ no_show   no_show
 ## 6. Payment & Financial Logic
 
 ### 6.1 Fee Calculation
-- **Platform fee rate**: 15% (configurable)
+- **Fixed fee structure based on service amount**:
+  - Services ≤25 JOD: 2 JOD platform fee
+  - Services >25 JOD: 5 JOD platform fee
 - **Automatic calculation on booking creation**:
   ```sql
-  platform_fee = ROUND(amount * 0.15, 2)
+  IF amount <= 25 THEN
+    platform_fee = 2.00
+  ELSE
+    platform_fee = 5.00
+  END IF
   provider_fee = amount - platform_fee
   ```
-- **Fee calculation trigger** executes before insert
+- **Fee calculation trigger** executes before insert/update
 
 ### 6.2 Payment Methods
 - **Cash**: Default, on-service delivery
@@ -152,7 +158,7 @@ no_show   no_show
   - Total bookings count
   - Total amount (sum of all bookings)
   - Total fees (sum of platform fees)
-  - Fee rate (15%)
+  - Fee structure (2 JOD for ≤25 JOD, 5 JOD for >25 JOD)
 - **Settlement statuses**:
   - Pending: Initial state
   - Processing: Payment in progress

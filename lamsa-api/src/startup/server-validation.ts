@@ -5,6 +5,7 @@
 
 import { getEnvironmentConfig } from '../utils/environment-validation';
 import { supabase } from '../config/supabase-simple';
+import { logger } from '../utils/logger';
 
 export interface StartupValidationResult {
   success: boolean;
@@ -45,8 +46,7 @@ export class ServerValidator {
     }
 
     if (this.warnings.length > 0) {
-      console.warn('⚠️  Startup warnings:');
-      this.warnings.forEach(warning => console.warn(`  - ${warning}`));
+      logger.warn('Startup warnings:', { warnings: this.warnings });
     }
 
     return {
@@ -91,9 +91,10 @@ export class ServerValidator {
   private async validateDatabase(): Promise<boolean> {
     try {
       // Test database connection
+      // Test basic query instead of count
       const { error } = await supabase
         .from('users')
-        .select('count(*)')
+        .select('id')
         .limit(1);
 
       if (error) {
@@ -112,9 +113,10 @@ export class ServerValidator {
       ];
 
       for (const table of requiredTables) {
+        // Test basic query instead of count
         const { error: tableError } = await supabase
           .from(table)
-          .select('count(*)')
+          .select('id')
           .limit(1);
 
         if (tableError) {
@@ -238,8 +240,13 @@ export class ServerValidator {
     console.log('\n' + '='.repeat(60));
     
     if (!result.success) {
-      console.error('🚫 Server startup aborted due to validation failures');
-      process.exit(1);
+      if (process.env.NODE_ENV === 'production') {
+        console.error('🚫 Server startup aborted due to validation failures');
+        process.exit(1);
+      } else {
+        logger.warn('Server starting with validation warnings (development mode)');
+        logger.warn('Please ensure database tables are created before using the API');
+      }
     }
   }
 }

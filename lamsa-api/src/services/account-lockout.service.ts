@@ -323,6 +323,10 @@ export class AccountLockoutService {
     data: LoginAttempt
   ): Promise<void> {
     try {
+      if (!supabaseAdmin) {
+        logger.warn('Supabase admin client not available, skipping database storage');
+        return;
+      }
       await supabaseAdmin.from('account_lockouts').upsert({
         identifier,
         lockout_type: type,
@@ -345,6 +349,10 @@ export class AccountLockoutService {
   private async getAttemptDataFromDatabase(key: string): Promise<LoginAttempt | null> {
     try {
       const [type, identifier] = key.split(':').slice(1);
+      
+      if (!supabaseAdmin) {
+        return null;
+      }
       
       const { data, error } = await supabaseAdmin
         .from('account_lockouts')
@@ -373,6 +381,10 @@ export class AccountLockoutService {
    */
   private async clearLockoutFromDatabase(identifier: string, type?: string): Promise<void> {
     try {
+      if (!supabaseAdmin) {
+        logger.warn('Supabase admin client not available, skipping lockout clear');
+        return;
+      }
       const query = supabaseAdmin.from('account_lockouts').delete();
       
       query.eq('identifier', identifier);
@@ -396,6 +408,10 @@ export class AccountLockoutService {
     metadata: Record<string, any>
   ): Promise<void> {
     try {
+      if (!supabaseAdmin) {
+        logger.warn('Supabase admin client not available, skipping security event logging');
+        return;
+      }
       await supabaseAdmin.from('security_events').insert({
         identifier,
         event_type: event,
@@ -423,6 +439,10 @@ export class AccountLockoutService {
     limit: number = 50
   ): Promise<any[]> {
     try {
+      if (!supabaseAdmin) {
+        logger.warn('Supabase admin client not available, returning empty security events');
+        return [];
+      }
       const { data, error } = await supabaseAdmin
         .from('security_events')
         .select('*')

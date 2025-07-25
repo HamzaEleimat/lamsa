@@ -105,7 +105,7 @@ export class CacheController {
       // Import services that we want to warm up
       const { DashboardService } = await import('../services/dashboard.service');
       const { AnalyticsService } = await import('../services/analytics.service');
-      const { performanceInsightsService } = await import('../services/performance-insights.service');
+      // const { performanceInsightsService } = await import('../services/performance-insights.service'); // Temporarily disabled
       
       const dashboardService = new DashboardService();
       const analyticsService = new AnalyticsService();
@@ -124,11 +124,11 @@ export class CacheController {
         // Analytics data
         analyticsService.getPeriodStatistics(providerId, startOfToday, endOfToday, 'day'),
         analyticsService.getReviewInsights(providerId),
-        analyticsService.getBookingPatterns(providerId),
+        analyticsService.getBookingPatterns(providerId)
         
-        // Performance insights
-        performanceInsightsService.generatePerformanceInsights(providerId),
-        performanceInsightsService.getMarketIntelligence(providerId)
+        // Performance insights - temporarily disabled
+        // performanceInsightsService.generatePerformanceInsights(providerId),
+        // performanceInsightsService.getMarketIntelligence(providerId)
       ];
 
       await Promise.allSettled(warmUpTasks);

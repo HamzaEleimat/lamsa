@@ -32,12 +32,18 @@ export class RedisTokenService {
   private readonly USER_TOKENS_PREFIX = 'user_tokens:';
 
   constructor() {
-    this.client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-      password: process.env.REDIS_PASSWORD,
-    });
+    // Only create Redis client if Redis tokens are enabled
+    if (process.env.USE_REDIS_TOKENS === 'true' || process.env.NODE_ENV === 'production') {
+      this.client = createClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        password: process.env.REDIS_PASSWORD,
+      });
 
-    this.setupEventHandlers();
+      this.setupEventHandlers();
+    } else {
+      // Create a dummy client that won't connect
+      this.client = null as any;
+    }
   }
 
   private setupEventHandlers(): void {
@@ -390,12 +396,32 @@ export class RedisTokenService {
   }
 }
 
-// Create singleton instance
-export const redisTokenService = new RedisTokenService();
+// Create singleton instance lazily
+let _redisTokenService: RedisTokenService | null = null;
 
-// Initialize connection
-redisTokenService.connect().catch(error => {
-  console.error('Failed to initialize Redis Token Service:', error);
+export function getRedisTokenService(): RedisTokenService {
+  if (!_redisTokenService) {
+    _redisTokenService = new RedisTokenService();
+    // Only connect if Redis is actually being used
+    if (process.env.USE_REDIS_TOKENS === 'true' || process.env.NODE_ENV === 'production') {
+      _redisTokenService.connect().catch(error => {
+        console.error('Failed to initialize Redis Token Service:', error);
+      });
+    }
+  }
+  return _redisTokenService;
+}
+
+// Export for backward compatibility, but only initialize when accessed
+export const redisTokenService = new Proxy({} as RedisTokenService, {
+  get(target, prop) {
+    const instance = getRedisTokenService();
+    return (instance as any)[prop];
+  },
+  has(target, prop) {
+    const instance = getRedisTokenService();
+    return prop in instance;
+  }
 });
 
 export default RedisTokenService;

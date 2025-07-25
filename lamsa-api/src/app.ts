@@ -14,6 +14,7 @@ dotenv.config();
 
 // Initialize and validate environment configuration
 import { initializeEnvironment } from './utils/environment-validation';
+import { secureLogger } from './utils/secure-logger';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -40,6 +41,7 @@ import adminRoutes from './routes/admin.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { apiRateLimiter } from './middleware/rate-limit.middleware';
 import { csrfProtection, csrfTokenGenerator, getCSRFToken } from './middleware/csrf.middleware';
+import { enforceHTTPS, addSecurityHeaders } from './middleware/https-redirect.middleware';
 
 // Swagger configuration
 const swaggerOptions = {
@@ -82,7 +84,7 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Initialize and validate environment before creating app
-console.log('🔧 Initializing environment configuration...');
+secureLogger.info('Initializing environment configuration...');
 // const envConfig = initializeEnvironment(); // Commented out to suppress unused variable warning
 initializeEnvironment();
 
@@ -91,62 +93,99 @@ const app: Application = express();
 // CORS configuration for mobile app support
 const corsOptions: cors.CorsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    // Allow requests with no origin (mobile apps, Postman, etc.) only in development
+    if (!origin) {
+      if (process.env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+      return callback(new Error('Origin required'));
+    }
     
-    // Allowed origins
-    const allowedOrigins = [
+    // Production allowed origins
+    const productionOrigins = [
+      'https://lamsa.com',
+      'https://www.lamsa.com',
+      'https://app.lamsa.com',
+      'https://admin.lamsa.com',
+      'https://api.lamsa.com'
+    ];
+    
+    // Development allowed origins
+    const developmentOrigins = [
       'http://localhost:8081', // Expo default
       'http://localhost:19000', // Expo DevTools
       'http://localhost:19001', // Expo web
       'http://localhost:19002', // Expo web
       'http://localhost:3000', // Web dashboard dev
       'http://localhost:3001', // Alternative API port
-      'https://lamsa.com', // Production web
-      'https://api.lamsa.com' // Production API
     ];
     
-    // Check if origin is allowed or matches Expo pattern
-    const isAllowed = allowedOrigins.includes(origin) || 
-                     /^https?:\/\/.*\.exp\.direct$/.test(origin) || // Expo published apps
-                     /^https?:\/\/.*\.expo\.dev$/.test(origin) || // Expo development
-                     /^exp:\/\//.test(origin); // Expo client
+    // Get allowed origins based on environment
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? productionOrigins 
+      : [...productionOrigins, ...developmentOrigins];
+    
+    // Check if origin is allowed
+    let isAllowed = allowedOrigins.includes(origin);
+    
+    // In development only, allow Expo patterns
+    if (!isAllowed && process.env.NODE_ENV === 'development') {
+      isAllowed = /^https?:\/\/.*\.exp\.direct$/.test(origin) || // Expo published apps
+                  /^https?:\/\/.*\.expo\.dev$/.test(origin) || // Expo development
+                  /^exp:\/\//.test(origin); // Expo client
+    }
     
     if (isAllowed) {
       callback(null, true);
     } else {
-      console.log(`CORS blocked origin: ${origin}`);
+      secureLogger.warn('CORS blocked origin', { origin });
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true, // Allow cookies/auth headers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
   exposedHeaders: ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
   optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   maxAge: 86400 // Cache preflight response for 24 hours
 };
 
 // Enhanced security headers
+const isDevelopment = process.env.NODE_ENV !== 'production';
 const helmetOptions = {
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+  contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // For Swagger UI
-      scriptSrc: ["'self'", "'unsafe-inline'"], // For Swagger UI
+      // Only allow unsafe-inline in development for Swagger UI
+      styleSrc: isDevelopment ? ["'self'", "'unsafe-inline'"] : ["'self'"],
+      scriptSrc: isDevelopment ? ["'self'", "'unsafe-inline'"] : ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.lamsa.com"],
+      connectSrc: ["'self'", "https://api.lamsa.com", "https://*.supabase.co"],
+      fontSrc: ["'self'", "https:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
     }
-  } : false, // Disable CSP in development
-  hsts: process.env.NODE_ENV === 'production' ? {
+  },
+  hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
-  } : false
+  },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' as const },
+  permittedCrossDomainPolicies: false,
+  hidePoweredBy: true,
+  ieNoOpen: true,
+  frameguard: { action: 'deny' as const },
+  dnsPrefetchControl: { allow: false }
 };
 
 // Apply middleware in correct order
+app.use(enforceHTTPS); // HTTPS redirect - must be first
 app.use(helmet(helmetOptions)); // Security headers - must be early
+app.use(addSecurityHeaders); // Additional security headers
 app.use(cors(corsOptions)); // CORS - must be before routes
 app.use(compression()); // Compress responses
 app.use(morgan('dev')); // Request logging
@@ -217,39 +256,59 @@ app.get('/', (_req: Request, res: Response) => {
   });
 });
 
-// Test dashboard route
-app.get('/dashboard', (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '..', 'test-dashboard.html'));
-});
+// Test dashboard route - REMOVED for security
+// SECURITY: Never serve HTML files without authentication in production
+if (isDevelopment) {
+  app.get('/dashboard', (_req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '..', 'test-dashboard.html'));
+  });
+}
 
-// Swagger Documentation
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Lamsa API Documentation',
-  swaggerOptions: {
-    persistAuthorization: true,
-    displayRequestDuration: true,
-    docExpansion: 'none',
-    filter: true,
-    showRequestHeaders: true,
-    tryItOutEnabled: true
+// Swagger Documentation (ONLY in development - NEVER in production)
+if (isDevelopment) {
+  secureLogger.info('Swagger documentation enabled for development environment');
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Lamsa API Documentation',
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      docExpansion: 'none',
+      filter: true,
+      showRequestHeaders: true,
+      tryItOutEnabled: true
+    }
+  }));
+
+  // Swagger JSON endpoint
+  app.get('/api/docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+} else {
+  // In production, always return 404 for Swagger endpoints
+  // SECURITY: Never allow Swagger in production, even with environment variables
+  app.get('/api/docs', (_req, res) => {
+    res.status(404).json({ error: 'API documentation is disabled in production' });
+  });
+  app.get('/api/docs.json', (_req, res) => {
+    res.status(404).json({ error: 'API documentation is disabled in production' });
+  });
+  
+  // Log warning if someone tries to enable Swagger in production
+  if (process.env.ENABLE_SWAGGER === 'true') {
+    secureLogger.warn('SECURITY WARNING: Attempt to enable Swagger in production was blocked');
   }
-}));
-
-// Swagger JSON endpoint
-app.get('/api/docs.json', (_req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerSpec);
-});
-
-// Configuration endpoints (before CSRF protection - public access)
-app.use('/api/config', configRoutes);
+}
 
 // CSRF token endpoint (before CSRF protection)
 app.get('/api/csrf-token', getCSRFToken);
 
 // Apply CSRF protection to all routes (after token endpoint)
 app.use(csrfProtection);
+
+// Configuration endpoints (after CSRF protection - now protected)
+app.use('/api/config', configRoutes);
 
 // API Routes
 app.use('/api/auth', authRoutes);

@@ -75,7 +75,7 @@ All acceptance testing deliverables have been successfully created for Lamsa's p
 ### 4. **PAYMENT_VALIDATION_TESTS.md** ✅
 **Payment Calculation and Processing Tests**
 - Service price calculations (JOD currency)
-- Platform fee calculations (15%)
+- Platform fee calculations (Fixed: 2 JOD for ≤25 JOD, 5 JOD for >25 JOD)
 - VAT and tax calculations (Jordan)
 - Discount and promotion validation
 - Refund processing accuracy
@@ -175,7 +175,7 @@ All acceptance testing deliverables have been successfully created for Lamsa's p
 
 ### **Payment Processing Coverage** 💰
 - **Currency handling**: JOD with 3 decimal places
-- **Fee calculations**: 15% platform fee validation
+- **Fee calculations**: Fixed platform fee validation (2 JOD/5 JOD)
 - **Tax calculations**: Jordan VAT (16%) compliance
 - **Security testing**: PCI DSS compliance validation
 - **Gateway integration**: Tap Payment Gateway for Jordan

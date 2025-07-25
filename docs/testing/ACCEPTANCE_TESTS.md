@@ -108,7 +108,7 @@ This document contains 10 complete user journeys covering all major flows in the
    - Submit booking request
    - **Validation**: 
      - Booking summary accurate
-     - Platform fee calculated correctly (15%)
+     - Platform fee calculated correctly (2 JOD for ≤25 JOD, 5 JOD for >25 JOD)
      - Confirmation screen displays
 
 8. **Booking Completion**
@@ -277,7 +277,7 @@ This document contains 10 complete user journeys covering all major flows in the
    - Receipt generated
    - **Validation**: 
      - Payment calculation correct
-     - Platform fee applied (15%)
+     - Platform fee applied (2 JOD for ≤25 JOD, 5 JOD for >25 JOD)
      - Receipt includes all details
 
 7. **Review Process**
@@ -382,11 +382,12 @@ This document contains 10 complete user journeys covering all major flows in the
      - Currency symbol correct
 
 2. **Fee Calculation**
-   - Verify platform fee (15%) calculation
+   - Verify platform fee calculation based on service amount
    - Check tax calculations if applicable
    - Validate total amount
    - **Validation**: 
-     - Platform fee = service price × 0.15
+     - Platform fee = 2 JOD for services ≤25 JOD
+     - Platform fee = 5 JOD for services >25 JOD
      - Tax calculations accurate
      - Total = service price + platform fee + tax
 

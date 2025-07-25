@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 import { tokenManager } from './tokenManager';
 import { APIResponse, TokenInfo } from '../core/types';
 import { User, UserRole } from '../../types';
@@ -44,7 +44,8 @@ export class AuthService {
         };
       }
 
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const client = await getSupabase();
+      const { data, error } = await client.auth.signInWithOtp({
         phone,
         options: {
           channel: 'sms',
@@ -127,7 +128,8 @@ export class AuthService {
         };
       }
 
-      const { data, error } = await supabase.auth.verifyOtp({
+      const client = await getSupabase();
+      const { data, error } = await client.auth.verifyOtp({
         phone,
         token: otp,
         type: 'sms',
@@ -208,7 +210,8 @@ export class AuthService {
    */
   async signOut(): Promise<APIResponse<{ success: boolean }>> {
     try {
-      const { error } = await supabase.auth.signOut();
+      const client = await getSupabase();
+      const { error } = await client.auth.signOut();
 
       // Clear tokens regardless of Supabase result
       await tokenManager.clearTokens();
@@ -248,7 +251,8 @@ export class AuthService {
    */
   async getCurrentUser(): Promise<APIResponse<User | null>> {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const client = await getSupabase();
+      const { data: { user }, error } = await client.auth.getUser();
 
       if (error) {
         return {
@@ -304,7 +308,8 @@ export class AuthService {
    */
   async refreshTokens(): Promise<TokenInfo | null> {
     try {
-      const { data, error } = await supabase.auth.refreshSession();
+      const client = await getSupabase();
+      const { data, error } = await client.auth.refreshSession();
 
       if (error || !data.session) {
         console.error('Token refresh failed:', error);
@@ -335,7 +340,8 @@ export class AuthService {
         return false;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const client = await getSupabase();
+      const { data: { session } } = await client.auth.getSession();
       return !!session;
     } catch (error) {
       console.error('Error checking authentication:', error);
@@ -366,7 +372,8 @@ export class AuthService {
       }
 
       // Update user in database
-      const { data, error } = await supabase
+      const client = await getSupabase();
+      const { data, error } = await client
         .from('users')
         .update({
           ...updates,
@@ -475,7 +482,8 @@ export class AuthService {
   private async getOrCreateUserProfile(supabaseUser: any, phone: string): Promise<User> {
     try {
       // Try to get existing user
-      const { data: existingUser, error: fetchError } = await supabase
+      const client = await getSupabase();
+      const { data: existingUser, error: fetchError } = await client
         .from('users')
         .select('*')
         .eq('id', supabaseUser.id)
@@ -497,7 +505,7 @@ export class AuthService {
         updated_at: new Date().toISOString(),
       };
 
-      const { data: createdUser, error: createError } = await supabase
+      const { data: createdUser, error: createError } = await client
         .from('users')
         .insert(newUser)
         .select()
@@ -533,7 +541,8 @@ export class AuthService {
 
   private async getUserProfile(userId: string): Promise<User | null> {
     try {
-      const { data, error } = await supabase
+      const client = await getSupabase();
+      const { data, error } = await client
         .from('users')
         .select('*')
         .eq('id', userId)

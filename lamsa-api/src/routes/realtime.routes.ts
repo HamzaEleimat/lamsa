@@ -18,7 +18,7 @@ router.get('/info',
 );
 
 // Get real-time connection status for provider
-router.get('/status/:providerId?', 
+router.get(['/status/:providerId', '/status'], 
   validateProvider,
   realtimeController.getConnectionStatus.bind(realtimeController)
 );
@@ -29,7 +29,7 @@ router.get('/stats',
 );
 
 // Trigger metrics update for provider
-router.post('/metrics/update/:providerId?', 
+router.post(['/metrics/update/:providerId', '/metrics/update'], 
   validateProvider,
   realtimeController.triggerMetricsUpdate.bind(realtimeController)
 );

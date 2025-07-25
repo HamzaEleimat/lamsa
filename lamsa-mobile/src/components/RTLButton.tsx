@@ -78,22 +78,22 @@ const RTLButton: React.FC<RTLButtonProps> = ({
     if (icon) {
       return (
         <React.Fragment>
-          {iconPosition === 'left' && (
-            <React.cloneElement(icon as React.ReactElement, {
+          {iconPosition === 'left' && 
+            React.cloneElement(icon as React.ReactElement, {
               style: [
                 (icon as React.ReactElement).props.style,
                 getMarginEnd(8)
               ]
             })
-          )}
-          {iconPosition === 'right' && (
-            <React.cloneElement(icon as React.ReactElement, {
+          }
+          {iconPosition === 'right' && 
+            React.cloneElement(icon as React.ReactElement, {
               style: [
                 (icon as React.ReactElement).props.style,
                 getMarginStart(8)
               ]
             })
-          )}
+          }
         </React.Fragment>
       );
     }

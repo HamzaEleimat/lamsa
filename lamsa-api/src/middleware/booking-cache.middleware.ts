@@ -18,7 +18,7 @@ interface CacheEntry {
 const cacheStore = new Map<string, CacheEntry>();
 
 // Cache configuration
-const CACHE_CONFIG = {
+export const CACHE_CONFIG = {
   // Cache TTL in milliseconds
   DEFAULT_TTL: 5 * 60 * 1000, // 5 minutes
   SHORT_TTL: 1 * 60 * 1000,   // 1 minute
@@ -70,7 +70,8 @@ export const bookingCacheMiddleware = (ttl: number = CACHE_CONFIG.DEFAULT_TTL) =
       res.setHeader('X-Cache-Status', 'HIT');
       res.setHeader('X-Cache-Age', Math.floor((Date.now() - cachedEntry.timestamp) / 1000));
       
-      return res.json(cachedEntry.data);
+      res.json(cachedEntry.data);
+      return;
     }
 
     // Cache miss - continue to controller

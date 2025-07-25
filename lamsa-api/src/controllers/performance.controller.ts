@@ -8,6 +8,7 @@ import { ApiResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
 import { getPerformanceStats, queryMonitor } from '../middleware/query-performance.middleware';
 import { performanceCacheService } from '../services/performance-cache.service';
+import { getErrorMessage } from '../utils/error-handling';
 import { cacheService } from '../services/cache.service';
 import { supabase } from '../config/supabase';
 
@@ -387,7 +388,7 @@ export class PerformanceController {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: getErrorMessage(error),
         queryTime: Date.now() - startTime
       };
     }

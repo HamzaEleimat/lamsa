@@ -1,6 +1,42 @@
 import { supabase } from '../config/supabase-simple';
 import { format, addDays, startOfDay } from 'date-fns';
 
+// Type definitions for joined queries
+interface AppointmentWithRelations {
+  id: string;
+  start_time: string;
+  end_time: string;
+  total_price: string;
+  status: string;
+  user_notes: string | null;
+  users: {
+    id: string;
+    name: string;
+    phone: string;
+    avatar_url: string | null;
+  };
+  services: {
+    name_en: string;
+    name_ar: string;
+    duration_minutes: number;
+  };
+}
+
+// Type for next appointment query
+interface NextBookingType {
+  id: string;
+  start_time: string;
+  booking_date: string;
+  users: {
+    id: string;
+    name: string;
+  };
+  services: {
+    name_en: string;
+    duration_minutes: number;
+  };
+}
+
 export interface TodayAppointment {
   id: string;
   customerName: string;
@@ -126,14 +162,14 @@ export class DashboardService {
 
     if (!appointments) return [];
 
+    // Type assertion for the query result
+    const typedAppointments = appointments as unknown as AppointmentWithRelations[];
+
     // Check which customers are new (first booking with this provider)
-    const customerIds = appointments.map(apt => apt.users.id);
-    const { data: customerHistory } = await supabase
-      .from('bookings')
-      .select('user_id, MIN(created_at) as first_booking')
-      .eq('provider_id', providerId)
-      .in('user_id', customerIds)
-      .group('user_id');
+    const customerIds = typedAppointments.map(apt => apt.users.id);
+    // For now, we'll skip the new customer check as it requires raw SQL
+    // TODO: Implement with raw SQL or RPC function
+    const customerHistory: any[] = [];
 
     const newCustomerIds = new Set(
       customerHistory?.filter(ch => 
@@ -141,7 +177,7 @@ export class DashboardService {
       ).map(ch => ch.user_id) || []
     );
 
-    return appointments.map(apt => ({
+    return typedAppointments.map(apt => ({
       id: apt.id,
       customerName: apt.users.name || 'Unknown',
       customerPhone: apt.users.phone,
@@ -152,9 +188,9 @@ export class DashboardService {
       duration: apt.services.duration_minutes,
       price: Number(apt.total_price),
       status: apt.status,
-      notes: apt.user_notes,
+      notes: apt.user_notes || undefined,
       isNewCustomer: newCustomerIds.has(apt.users.id),
-      customerAvatar: apt.users.avatar_url
+      customerAvatar: apt.users.avatar_url || undefined
     }));
   }
 
@@ -217,15 +253,31 @@ export class DashboardService {
   ): Promise<number> {
     if (customerIds.length === 0) return 0;
 
-    const { data: firstBookings } = await supabase
+    // Get all bookings for these customers and find their first booking dates
+    const { data: allBookings } = await supabase
       .from('bookings')
-      .select('user_id, MIN(booking_date) as first_booking_date')
+      .select('user_id, booking_date')
       .eq('provider_id', providerId)
-      .in('user_id', customerIds);
+      .in('user_id', customerIds)
+      .order('booking_date', { ascending: true });
 
-    return firstBookings?.filter(fb => 
-      fb.first_booking_date === format(todayDate, 'yyyy-MM-dd')
-    ).length || 0;
+    // Group by user and find first booking date
+    const firstBookingByUser = new Map<string, string>();
+    allBookings?.forEach(booking => {
+      if (!firstBookingByUser.has(booking.user_id)) {
+        firstBookingByUser.set(booking.user_id, booking.booking_date);
+      }
+    });
+
+    // Count how many have their first booking today
+    let newCustomerCount = 0;
+    firstBookingByUser.forEach(firstDate => {
+      if (firstDate === format(todayDate, 'yyyy-MM-dd')) {
+        newCustomerCount++;
+      }
+    });
+
+    return newCustomerCount;
   }
 
   // Get real-time metrics
@@ -288,26 +340,29 @@ export class DashboardService {
 
     if (!nextBooking) return null;
 
+    // Type assertion for the query result
+    const typedNextBooking = nextBooking as unknown as NextBookingType;
+
     // Check if this is customer's first time
     const { data: customerHistory } = await supabase
       .from('bookings')
       .select('id')
       .eq('provider_id', providerId)
-      .eq('user_id', nextBooking.users.id)
+      .eq('user_id', typedNextBooking.users.id)
       .eq('status', 'completed')
       .limit(1);
 
     const isFirstTime = !customerHistory || customerHistory.length === 0;
 
-    const appointmentDateTime = new Date(`${nextBooking.booking_date}T${nextBooking.start_time}`);
+    const appointmentDateTime = new Date(`${typedNextBooking.booking_date}T${typedNextBooking.start_time}`);
     const timeUntil = this.calculateTimeUntil(appointmentDateTime);
 
     return {
-      id: nextBooking.id,
-      customerName: nextBooking.users.name || 'Unknown',
-      serviceName: nextBooking.services.name_en,
-      startTime: nextBooking.start_time,
-      duration: nextBooking.services.duration_minutes,
+      id: typedNextBooking.id,
+      customerName: typedNextBooking.users.name || 'Unknown',
+      serviceName: typedNextBooking.services.name_en,
+      startTime: typedNextBooking.start_time,
+      duration: typedNextBooking.services.duration_minutes,
       timeUntil,
       isFirstTime
     };
@@ -449,8 +504,27 @@ export class DashboardService {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
+    // Type assertion for appointments with joined data
+    const typedAppointments = appointments as unknown as Array<{
+      id: string;
+      booking_date: string;
+      start_time: string;
+      end_time: string;
+      status: string;
+      total_price: string;
+      users: {
+        name: string;
+        phone: string;
+        avatar_url: string | null;
+      };
+      services: {
+        name_en: string;
+        name_ar: string;
+      };
+    }>;
+
     return {
-      data: appointments?.map(apt => ({
+      data: typedAppointments?.map(apt => ({
         id: apt.id,
         date: apt.booking_date,
         startTime: apt.start_time,
@@ -517,8 +591,28 @@ export class DashboardService {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
+    // Type assertion for reviews with joined data
+    const typedReviews = reviews as unknown as Array<{
+      id: string;
+      rating: number;
+      comment: string;
+      sentiment: string;
+      aspects: any;
+      response: string | null;
+      created_at: string;
+      is_verified: boolean;
+      helpful_count: number;
+      users: {
+        name: string;
+        avatar_url: string | null;
+      };
+      services: {
+        name_en: string;
+      };
+    }>;
+
     return {
-      data: reviews?.map(review => ({
+      data: typedReviews?.map(review => ({
         id: review.id,
         customerName: review.users.name,
         customerAvatar: review.users.avatar_url,

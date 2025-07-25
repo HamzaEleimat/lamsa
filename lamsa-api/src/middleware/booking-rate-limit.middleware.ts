@@ -6,6 +6,7 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
 import { AuthRequest } from '../types';
+import { logger } from '../utils/logger';
 
 /**
  * Rate limiter for booking creation
@@ -16,7 +17,7 @@ export const bookingCreationLimiter = rateLimit({
   max: 5, // Limit each user to 5 booking attempts per window
   keyGenerator: (req: AuthRequest) => {
     // Use user ID if authenticated, otherwise fall back to IP
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'anonymous';
   },
   message: {
     success: false,
@@ -26,7 +27,10 @@ export const bookingCreationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
-    console.warn(`Booking creation rate limit exceeded for user: ${(req as AuthRequest).user?.id || 'anonymous'} IP: ${req.ip}`);
+    logger.warn(`Booking creation rate limit exceeded`, {
+      userId: (req as AuthRequest).user?.id || 'anonymous',
+      ip: req.ip
+    });
     res.status(429).json({
       success: false,
       error: 'Too many booking attempts. Please try again in 15 minutes.',
@@ -43,7 +47,7 @@ export const bookingCancellationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3, // Limit each user to 3 cancellations per hour
   keyGenerator: (req: AuthRequest) => {
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'anonymous';
   },
   message: {
     success: false,
@@ -53,7 +57,10 @@ export const bookingCancellationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
-    console.warn(`Booking cancellation rate limit exceeded for user: ${(req as AuthRequest).user?.id || 'anonymous'} IP: ${req.ip}`);
+    logger.warn(`Booking cancellation rate limit exceeded`, {
+      userId: (req as AuthRequest).user?.id || 'anonymous',
+      ip: req.ip
+    });
     res.status(429).json({
       success: false,
       error: 'Too many cancellation attempts. Please try again in 1 hour.',
@@ -70,7 +77,7 @@ export const bookingRescheduleLimiter = rateLimit({
   windowMs: 30 * 60 * 1000, // 30 minutes
   max: 3, // Limit each user to 3 reschedules per 30 minutes
   keyGenerator: (req: AuthRequest) => {
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'anonymous';
   },
   message: {
     success: false,
@@ -80,7 +87,10 @@ export const bookingRescheduleLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
-    console.warn(`Booking reschedule rate limit exceeded for user: ${(req as AuthRequest).user?.id || 'anonymous'} IP: ${req.ip}`);
+    logger.warn(`Booking reschedule rate limit exceeded`, {
+      userId: (req as AuthRequest).user?.id || 'anonymous',
+      ip: req.ip
+    });
     res.status(429).json({
       success: false,
       error: 'Too many reschedule attempts. Please try again in 30 minutes.',
@@ -97,7 +107,7 @@ export const bulkOperationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // Limit to 10 bulk operations per hour
   keyGenerator: (req: AuthRequest) => {
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'anonymous';
   },
   message: {
     success: false,
@@ -107,7 +117,10 @@ export const bulkOperationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
-    console.warn(`Bulk operation rate limit exceeded for user: ${(req as AuthRequest).user?.id || 'anonymous'} IP: ${req.ip}`);
+    logger.warn(`Bulk operation rate limit exceeded`, {
+      userId: (req as AuthRequest).user?.id || 'anonymous',
+      ip: req.ip
+    });
     res.status(429).json({
       success: false,
       error: 'Too many bulk operations. Please try again in 1 hour.',
@@ -124,7 +137,7 @@ export const generalBookingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // 100 requests per 15 minutes for general endpoints
   keyGenerator: (req: AuthRequest) => {
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'anonymous';
   },
   message: {
     success: false,
@@ -156,7 +169,11 @@ export const suspiciousActivityDetector = (req: AuthRequest, res: Response, next
   ];
   
   if (suspiciousPatterns.some(pattern => pattern)) {
-    console.warn(`Suspicious booking activity detected - User: ${userId || 'anonymous'}, IP: ${ip}, UA: ${userAgent}`);
+    logger.warn('Suspicious booking activity detected', {
+      userId: userId || 'anonymous',
+      ip: ip,
+      userAgent: userAgent
+    });
     
     // Log but don't block - just monitor
     // In production, you might want to implement additional security measures

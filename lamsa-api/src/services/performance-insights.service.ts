@@ -1,6 +1,8 @@
 import { supabase } from '../config/supabase-simple';
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import { AnalyticsService } from './analytics.service';
+import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import { RevenueService } from './revenue.service';
+import { CustomerAnalyticsService } from './customer-analytics.service';
+import { ReviewAnalyticsService } from './review-analytics.service';
 
 export interface PerformanceInsight {
   id: string;
@@ -77,10 +79,14 @@ export interface PredictiveAnalytics {
 }
 
 export class PerformanceInsightsService {
-  private analyticsService: AnalyticsService;
+  private revenueService: RevenueService;
+  private customerAnalyticsService: CustomerAnalyticsService;
+  private reviewAnalyticsService: ReviewAnalyticsService;
 
   constructor() {
-    this.analyticsService = new AnalyticsService();
+    this.revenueService = new RevenueService();
+    this.customerAnalyticsService = new CustomerAnalyticsService();
+    this.reviewAnalyticsService = new ReviewAnalyticsService();
   }
 
   // Generate comprehensive performance insights
@@ -125,10 +131,22 @@ export class PerformanceInsightsService {
     const currentMonth = new Date();
     const lastMonth = subMonths(currentMonth, 1);
     
-    const [currentRevenue, previousRevenue] = await Promise.all([
-      this.analyticsService.getRevenueReport(providerId, startOfMonth(currentMonth), endOfMonth(currentMonth), 'day'),
-      this.analyticsService.getRevenueReport(providerId, startOfMonth(lastMonth), endOfMonth(lastMonth), 'day')
+    const [currentTimeline, previousTimeline] = await Promise.all([
+      this.revenueService.getRevenueTimeline(providerId, startOfMonth(currentMonth), endOfMonth(currentMonth), 'day'),
+      this.revenueService.getRevenueTimeline(providerId, startOfMonth(lastMonth), endOfMonth(lastMonth), 'day')
     ]);
+
+    // Convert timeline to report format
+    const currentRevenue = {
+      summary: {
+        totalRevenue: currentTimeline.reduce((sum, item) => sum + item.revenue, 0)
+      }
+    };
+    const previousRevenue = {
+      summary: {
+        totalRevenue: previousTimeline.reduce((sum, item) => sum + item.revenue, 0)
+      }
+    };
 
     const revenueGrowth = previousRevenue.summary.totalRevenue > 0 
       ? ((currentRevenue.summary.totalRevenue - previousRevenue.summary.totalRevenue) / previousRevenue.summary.totalRevenue) * 100
@@ -191,7 +209,7 @@ export class PerformanceInsightsService {
     }
 
     // Pricing optimization
-    const serviceBreakdown = await this.analyticsService.getServiceRevenueBreakdown(providerId, startOfMonth(currentMonth), endOfMonth(currentMonth));
+    const serviceBreakdown = await this.revenueService.getServiceRevenueBreakdown(providerId, startOfMonth(currentMonth), endOfMonth(currentMonth));
     const lowPerformingServices = serviceBreakdown.filter(s => s.percentage < 10 && s.bookingsCount > 0);
     
     if (lowPerformingServices.length > 0) {
@@ -229,8 +247,8 @@ export class PerformanceInsightsService {
     const insights: PerformanceInsight[] = [];
     
     // Get customer analytics
-    const customerMetrics = await this.analyticsService.getCustomerSegments(providerId);
-    const churnRiskCustomers = await this.analyticsService.getChurnRiskCustomers(providerId, false);
+    const customerMetrics = await this.getCustomerSegments(providerId);
+    const churnRiskCustomers = await this.customerAnalyticsService.getChurnRiskCustomers(providerId, false);
     
     // High churn risk
     const highRiskCustomers = churnRiskCustomers.filter(c => c.churnProbability > 0.7);
@@ -301,7 +319,7 @@ export class PerformanceInsightsService {
   private async analyzeServicePerformance(providerId: string): Promise<PerformanceInsight[]> {
     const insights: PerformanceInsight[] = [];
     
-    const servicePerformance = await this.analyticsService.getServicePerformance(providerId, startOfMonth(new Date()), endOfMonth(new Date()), 20, 'bookings');
+    const servicePerformance = await this.getServicePerformance(providerId, startOfMonth(new Date()), endOfMonth(new Date()), 20, 'bookings');
     
     // Underperforming services
     const underperformingServices = servicePerformance.filter(s => s.avgRating < 4.0 && s.bookingsCount > 5);
@@ -372,7 +390,7 @@ export class PerformanceInsightsService {
     const insights: PerformanceInsight[] = [];
     
     // Get booking patterns
-    const bookingPatterns = await this.analyticsService.getBookingPatterns(providerId);
+    const bookingPatterns = await this.getBookingPatterns(providerId);
     const peakHours = bookingPatterns.filter(p => p.patternType === 'hourly' && p.peakScore > 0.8);
     const lowUtilizationHours = bookingPatterns.filter(p => p.patternType === 'hourly' && p.avgOccupancyRate < 30);
     
@@ -412,7 +430,7 @@ export class PerformanceInsightsService {
     const insights: PerformanceInsight[] = [];
     
     // Get review analytics
-    const reviewAnalytics = await this.analyticsService.getReviewInsights(providerId);
+    const reviewAnalytics = await this.reviewAnalyticsService.getReviewAnalytics(providerId);
     
     if (reviewAnalytics.averageRating < 4.0) {
       insights.push({
@@ -536,8 +554,8 @@ export class PerformanceInsightsService {
     
     // Get current performance data
     const [bookingPatterns, servicePerformance] = await Promise.all([
-      this.analyticsService.getBookingPatterns(providerId),
-      this.analyticsService.getServicePerformance(providerId, startOfMonth(new Date()), endOfMonth(new Date()), 10, 'revenue')
+      this.getBookingPatterns(providerId),
+      this.getServicePerformance(providerId, startOfMonth(new Date()), endOfMonth(new Date()), 10, 'revenue')
     ]);
 
     // Scheduling optimization
@@ -582,12 +600,18 @@ export class PerformanceInsightsService {
   // Generate predictive analytics
   async getPredictiveAnalytics(providerId: string): Promise<PredictiveAnalytics> {
     // Get historical data for predictions
-    const historicalRevenue = await this.analyticsService.getRevenueReport(
+    const historicalTimeline = await this.revenueService.getRevenueTimeline(
       providerId, 
       subMonths(new Date(), 6), 
       new Date(), 
       'month'
     );
+
+    const historicalRevenue = {
+      timeline: historicalTimeline.map(item => ({
+        revenue: item.revenue
+      }))
+    };
 
     const avgMonthlyRevenue = historicalRevenue.timeline.reduce((sum, month) => sum + month.revenue, 0) / historicalRevenue.timeline.length;
     const revenueGrowthRate = historicalRevenue.timeline.length > 1 
@@ -649,6 +673,107 @@ export class PerformanceInsightsService {
       predictions,
       generatedAt: new Date().toISOString()
     };
+  }
+
+  // Helper method to get customer segments
+  private async getCustomerSegments(providerId: string): Promise<any[]> {
+    const { data: segments } = await supabase
+      .from('customer_retention_metrics')
+      .select(`
+        segment,
+        total_visits,
+        lifetime_value
+      `)
+      .eq('provider_id', providerId);
+
+    if (!segments) return [];
+
+    // Group by segment
+    const segmentGroups = segments.reduce((acc: any, metric) => {
+      const segment = metric.segment;
+      if (!acc[segment]) {
+        acc[segment] = {
+          segment,
+          count: 0,
+          totalValue: 0,
+          totalVisits: 0
+        };
+      }
+      acc[segment].count++;
+      acc[segment].totalValue += Number(metric.lifetime_value || 0);
+      acc[segment].totalVisits += Number(metric.total_visits || 0);
+      return acc;
+    }, {});
+
+    const segmentArray = Object.values(segmentGroups) as any[];
+    const totalCount: number = segmentArray.reduce((sum: number, group: any) => sum + (group.count || 0), 0);
+
+    return segmentArray.map((data: any) => ({
+      segment: data.segment,
+      count: data.count,
+      percentage: totalCount > 0 ? (data.count / totalCount) * 100 : 0,
+      avgLifetimeValue: data.count && data.count > 0 ? data.totalValue / data.count : 0,
+      avgVisits: data.count > 0 ? data.totalVisits / data.count : 0
+    }));
+  }
+
+  // Helper method to get service performance
+  private async getServicePerformance(
+    providerId: string,
+    startDate: Date,
+    endDate: Date,
+    limit: number,
+    sortBy: string
+  ): Promise<any[]> {
+    const { data: metrics } = await supabase
+      .from('service_performance_metrics')
+      .select(`
+        service_id,
+        bookings_count,
+        completed_count,
+        revenue,
+        avg_rating,
+        service:services(name_en, name_ar)
+      `)
+      .eq('provider_id', providerId)
+      .gte('metric_date', format(startDate, 'yyyy-MM-dd'))
+      .lte('metric_date', format(endDate, 'yyyy-MM-dd'))
+      .order(sortBy === 'revenue' ? 'revenue' : 'bookings_count', { ascending: false })
+      .limit(limit);
+
+    return metrics?.map((metric: any) => ({
+      serviceId: metric.service_id,
+      serviceName: metric.service?.name_en || '',
+      serviceNameAr: metric.service?.name_ar || '',
+      bookingsCount: Number(metric.bookings_count || 0),
+      completedCount: Number(metric.completed_count || 0),
+      revenue: Number(metric.revenue || 0),
+      avgRating: Number(metric.avg_rating || 0),
+      rebookingRate: 0, // Would need additional calculation
+      onTimeRate: 0, // Would need additional calculation
+      popularityRank: 0,
+      revenueRank: 0
+    })) || [];
+  }
+
+  // Helper method to get booking patterns
+  private async getBookingPatterns(providerId: string): Promise<any[]> {
+    const { data: patterns } = await supabase
+      .from('booking_patterns')
+      .select('*')
+      .eq('provider_id', providerId)
+      .order('peak_score', { ascending: false });
+
+    return patterns?.map(pattern => ({
+      patternType: pattern.pattern_type,
+      patternKey: pattern.pattern_key,
+      avgBookings: Number(pattern.avg_bookings || 0),
+      avgRevenue: Number(pattern.avg_revenue || 0),
+      avgOccupancyRate: Number(pattern.avg_occupancy_rate || 0),
+      peakScore: Number(pattern.peak_score || 0),
+      suggestedStaffCount: Number(pattern.suggested_staff_count),
+      suggestedPriceModifier: Number(pattern.suggested_price_modifier)
+    })) || [];
   }
 }
 

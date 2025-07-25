@@ -5,6 +5,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { performance } from 'perf_hooks';
+import { getErrorMessage } from '../utils/error-handling';
+import { secureLogger } from '../utils/secure-logger';
 
 // Import monitoring services
 const monitoringConfig = require('../../../monitoring/production-monitoring.config.js');
@@ -14,6 +16,10 @@ interface MonitoringRequest extends Request {
   startTime?: number;
   requestId?: string;
   userId?: string;
+  user?: {
+    id: string;
+    [key: string]: any;
+  };
 }
 
 interface AlertMetrics {
@@ -60,7 +66,7 @@ class ProductionMonitoringMiddleware {
         require('newrelic');
         console.log('✅ New Relic monitoring initialized');
       } catch (error) {
-        console.warn('⚠️ New Relic initialization failed:', error.message);
+        secureLogger.warn('New Relic initialization failed:', { error: getErrorMessage(error) });
       }
     }
 
@@ -73,7 +79,7 @@ class ProductionMonitoringMiddleware {
         Sentry.init(monitoringConfig.sentry);
         console.log('✅ Sentry error tracking initialized');
       } catch (error) {
-        console.warn('⚠️ Sentry initialization failed:', error.message);
+        secureLogger.warn('Sentry initialization failed:', { error: getErrorMessage(error) });
       }
     }
 
@@ -83,7 +89,7 @@ class ProductionMonitoringMiddleware {
         this.initializePrometheus();
         console.log('✅ Prometheus metrics initialized');
       } catch (error) {
-        console.warn('⚠️ Prometheus initialization failed:', error.message);
+        secureLogger.warn('Prometheus initialization failed:', { error: getErrorMessage(error) });
       }
     }
   }
@@ -205,15 +211,15 @@ class ProductionMonitoringMiddleware {
       }
 
       // Send to New Relic as custom event
-      if (global.newrelic) {
-        global.newrelic.recordCustomEvent('BusinessMetric', {
+      if ((global as any).newrelic) {
+        (global as any).newrelic.recordCustomEvent('BusinessMetric', {
           metric,
           ...labels,
           timestamp: Date.now()
         });
       }
     } catch (error) {
-      console.warn('Failed to track business metric:', error.message);
+      secureLogger.warn('Failed to track business metric:', { error: getErrorMessage(error) });
     }
   }
 
@@ -239,7 +245,7 @@ class ProductionMonitoringMiddleware {
         });
       }
     } catch (error) {
-      console.warn('Failed to track database query:', error.message);
+      secureLogger.warn('Failed to track database query:', { error: getErrorMessage(error) });
     }
   }
 
@@ -264,7 +270,7 @@ class ProductionMonitoringMiddleware {
         });
       }
     } catch (error) {
-      console.warn('Failed to track Redis operation:', error.message);
+      secureLogger.warn('Failed to track Redis operation:', { error: getErrorMessage(error) });
     }
   }
 
@@ -320,7 +326,7 @@ class ProductionMonitoringMiddleware {
     // Send to New Relic
     if (global.newrelic) {
       global.newrelic.recordCustomEvent('APIError', {
-        errorMessage: error.message,
+        errorMessage: getErrorMessage(error),
         errorStack: error.stack,
         method: req.method,
         route: req.route?.path || req.path,
@@ -430,7 +436,7 @@ class ProductionMonitoringMiddleware {
         this.sendEmailAlert(level, title, message);
       }
     } catch (error) {
-      console.error('Failed to send alert:', error.message);
+      console.error('Failed to send alert:', getErrorMessage(error));
     }
   }
 

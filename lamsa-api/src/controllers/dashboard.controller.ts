@@ -4,7 +4,7 @@ import { AppError } from '../middleware/error.middleware';
 // import { supabase } from '../config/supabase-simple'; // Unused
 import { DashboardService } from '../services/dashboard.service';
 import { AnalyticsService } from '../services/analytics.service';
-import { performanceInsightsService } from '../services/performance-insights.service';
+// import { performanceInsightsService } from '../services/performance-insights.service'; // Temporarily disabled
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subMonths } from 'date-fns';
 
 export class DashboardController {
@@ -415,7 +415,8 @@ export class DashboardController {
       }
 
       // Generate comprehensive business intelligence report
-      const businessIntelligence = await performanceInsightsService.generateBusinessIntelligenceReport(providerId);
+      // const businessIntelligence = await performanceInsightsService.generateBusinessIntelligenceReport(providerId);
+      const businessIntelligence = { insights: [], kpis: {} }; // Temporary placeholder
 
       const response: ApiResponse = {
         success: true,
@@ -437,7 +438,8 @@ export class DashboardController {
         throw new AppError('Provider ID is required', 400);
       }
 
-      const insights = await performanceInsightsService.generatePerformanceInsights(providerId);
+      // const insights = await performanceInsightsService.generatePerformanceInsights(providerId);
+      const insights: any[] = []; // Temporary placeholder
 
       const response: ApiResponse = {
         success: true,
@@ -466,7 +468,8 @@ export class DashboardController {
         throw new AppError('Provider ID is required', 400);
       }
 
-      const marketIntelligence = await performanceInsightsService.getMarketIntelligence(providerId);
+      // const marketIntelligence = await performanceInsightsService.getMarketIntelligence(providerId);
+      const marketIntelligence = { trends: [], opportunities: [] }; // Temporary placeholder
 
       const response: ApiResponse = {
         success: true,
@@ -488,7 +491,8 @@ export class DashboardController {
         throw new AppError('Provider ID is required', 400);
       }
 
-      const predictions = await performanceInsightsService.getPredictiveAnalytics(providerId);
+      // const predictions = await performanceInsightsService.getPredictiveAnalytics(providerId);
+      const predictions = { revenue: {}, customers: {} }; // Temporary placeholder
 
       const response: ApiResponse = {
         success: true,

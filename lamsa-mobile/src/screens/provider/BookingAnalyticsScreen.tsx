@@ -7,11 +7,10 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import { Text, Card, ActivityIndicator, SegmentedButtons } from 'react-native-paper';
+import { Text, Card, ActivityIndicator, SegmentedButtons, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '../../hooks/useTranslation';
-import { colors } from '../../constants/colors';
 import { useAuth } from '../../contexts/AuthContext';
 import { ProviderAnalyticsService, BookingAnalytics } from '../../services/analytics/ProviderAnalyticsService';
 import { BarChart, LineChart } from 'react-native-chart-kit';
@@ -23,6 +22,7 @@ export default function BookingAnalyticsScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { user } = useAuth();
+  const theme = useTheme();
   
   const [loading, setLoading] = useState(true);
   const [bookingData, setBookingData] = useState<BookingAnalytics | null>(null);
@@ -62,7 +62,7 @@ export default function BookingAnalyticsScreen() {
         <Card style={styles.metricCard}>
           <Card.Content>
             <View style={styles.metricHeader}>
-              <Ionicons name="calendar" size={24} color={colors.primary} />
+              <Ionicons name="calendar" size={24} color={theme.colors.primary} />
               <Text style={styles.metricLabel}>{t('totalBookings')}</Text>
             </View>
             <Text style={styles.metricValue}>{bookingData.totalBookings}</Text>
@@ -72,7 +72,7 @@ export default function BookingAnalyticsScreen() {
         <Card style={styles.metricCard}>
           <Card.Content>
             <View style={styles.metricHeader}>
-              <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+              <Ionicons name="checkmark-circle" size={24} color={theme.colors.primary} />
               <Text style={styles.metricLabel}>{t('completionRate')}</Text>
             </View>
             <Text style={styles.metricValue}>{completionRate}%</Text>
@@ -82,7 +82,7 @@ export default function BookingAnalyticsScreen() {
         <Card style={styles.metricCard}>
           <Card.Content>
             <View style={styles.metricHeader}>
-              <Ionicons name="close-circle" size={24} color={colors.error} />
+              <Ionicons name="close-circle" size={24} color={theme.colors.error} />
               <Text style={styles.metricLabel}>{t('cancellationRate')}</Text>
             </View>
             <Text style={styles.metricValue}>{bookingData.cancellationRate.toFixed(1)}%</Text>
@@ -92,7 +92,7 @@ export default function BookingAnalyticsScreen() {
         <Card style={styles.metricCard}>
           <Card.Content>
             <View style={styles.metricHeader}>
-              <Ionicons name="time" size={24} color={colors.warning} />
+              <Ionicons name="time" size={24} color={theme.colors.tertiary} />
               <Text style={styles.metricLabel}>{t('avgDuration')}</Text>
             </View>
             <Text style={styles.metricValue}>{bookingData.averageBookingDuration} {t('min')}</Text>
@@ -123,19 +123,19 @@ export default function BookingAnalyticsScreen() {
             yAxisLabel=""
             yAxisSuffix=""
             chartConfig={{
-              backgroundColor: colors.white,
-              backgroundGradientFrom: colors.white,
-              backgroundGradientTo: colors.white,
+              backgroundColor: theme.colors.surface,
+              backgroundGradientFrom: theme.colors.surface,
+              backgroundGradientTo: theme.colors.surface,
               decimalPlaces: 0,
-              color: (opacity = 1) => colors.primary,
-              labelColor: (opacity = 1) => colors.text,
+              color: (opacity = 1) => theme.colors.primary,
+              labelColor: (opacity = 1) => theme.colors.onSurface,
               style: {
                 borderRadius: 16,
               },
               propsForDots: {
                 r: '4',
                 strokeWidth: '2',
-                stroke: colors.primary,
+                stroke: theme.colors.primary,
               },
             }}
             bezier
@@ -183,7 +183,7 @@ export default function BookingAnalyticsScreen() {
                         style={[
                           styles.heatmapCell,
                           {
-                            backgroundColor: `rgba(107, 70, 193, ${intensity})`,
+                            backgroundColor: theme.colors.primary + Math.round(intensity * 255).toString(16).padStart(2, '0'),
                           },
                         ]}
                       />
@@ -270,7 +270,7 @@ export default function BookingAnalyticsScreen() {
                     'call'
                   }
                   size={20}
-                  color={colors.primary}
+                  color={theme.colors.primary}
                 />
               </View>
               <View style={styles.sourceInfo}>
@@ -298,17 +298,17 @@ export default function BookingAnalyticsScreen() {
     const insights = [
       {
         icon: 'trending-up',
-        color: colors.success,
+        color: theme.colors.primary,
         text: t('bookingInsight1', { day: bookingData.peakDays[0]?.day }),
       },
       {
         icon: 'time',
-        color: colors.warning,
+        color: theme.colors.tertiary,
         text: t('bookingInsight2', { time: bookingData.peakHours[0]?.hour }),
       },
       {
         icon: 'alert-circle',
-        color: colors.error,
+        color: theme.colors.error,
         text: t('bookingInsight3', { rate: bookingData.noShowRate.toFixed(1) }),
       },
     ];
@@ -331,20 +331,22 @@ export default function BookingAnalyticsScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
   
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('bookingAnalytics')}</Text>
         <TouchableOpacity onPress={() => console.log('Export')}>
-          <Ionicons name="download-outline" size={24} color={colors.text} />
+          <Ionicons name="download-outline" size={24} color={theme.colors.onSurface} />
         </TouchableOpacity>
       </View>
       
@@ -376,10 +378,10 @@ export default function BookingAnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -393,14 +395,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 50 : 16,
     paddingBottom: 16,
-    backgroundColor: colors.white,
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.colors.outlineVariant,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   periodSelector: {
     margin: 16,
@@ -426,12 +428,12 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   metricValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   chartCard: {
     marginHorizontal: 16,
@@ -456,7 +458,7 @@ const styles = StyleSheet.create({
   dayLabel: {
     width: 50,
     fontSize: 12,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   heatmapCells: {
     flexDirection: 'row',
@@ -467,7 +469,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 20,
     borderRadius: 4,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
   },
   heatmapLegend: {
     flexDirection: 'row',
@@ -478,13 +480,13 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   legendGradient: {
     width: 100,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     opacity: 0.5,
   },
   peakHoursList: {
@@ -493,7 +495,7 @@ const styles = StyleSheet.create({
   peakHoursTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 12,
   },
   peakHourItem: {
@@ -505,7 +507,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -513,16 +515,16 @@ const styles = StyleSheet.create({
   rankText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: colors.white,
+    color: theme.colors.onPrimary,
   },
   peakHourTime: {
     flex: 1,
     fontSize: 14,
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   peakHourCount: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   servicesCard: {
     marginHorizontal: 16,
@@ -533,13 +535,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.colors.outlineVariant,
   },
   serviceRank: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.lightPrimary,
+    backgroundColor: theme.colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -547,7 +549,7 @@ const styles = StyleSheet.create({
   serviceRankText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: theme.colors.primary,
   },
   serviceInfo: {
     flex: 1,
@@ -555,7 +557,7 @@ const styles = StyleSheet.create({
   serviceName: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   serviceStats: {
     flexDirection: 'row',
@@ -564,23 +566,23 @@ const styles = StyleSheet.create({
   },
   serviceStat: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
   },
   statDivider: {
     fontSize: 12,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginHorizontal: 8,
   },
   servicePercentageContainer: {
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
   },
   servicePercentage: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: theme.colors.onSurface,
   },
   sourcesCard: {
     marginHorizontal: 16,
@@ -595,7 +597,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.lightPrimary,
+    backgroundColor: theme.colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -606,22 +608,22 @@ const styles = StyleSheet.create({
   sourceName: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: theme.colors.onSurface,
     marginBottom: 4,
   },
   sourceBarContainer: {
     height: 6,
-    backgroundColor: colors.lightGray,
+    backgroundColor: theme.colors.surfaceVariant,
     borderRadius: 3,
     overflow: 'hidden',
   },
   sourceBar: {
     height: '100%',
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   sourceCount: {
     fontSize: 14,
-    color: colors.gray,
+    color: theme.colors.onSurfaceVariant,
     marginLeft: 12,
   },
   insightsCard: {
@@ -637,7 +639,7 @@ const styles = StyleSheet.create({
   insightText: {
     flex: 1,
     fontSize: 14,
-    color: colors.text,
+    color: theme.colors.onSurface,
     lineHeight: 20,
   },
   bottomPadding: {

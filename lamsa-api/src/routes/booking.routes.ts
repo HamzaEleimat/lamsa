@@ -123,7 +123,8 @@ router.post(
 router.get(
   '/:id/history',
   param('id').isUUID().withMessage('Booking ID must be a valid UUID'),
-  ...validateBookingQuery.filter(v => v.builder.fields.includes('page') || v.builder.fields.includes('limit')),
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
   enhancedValidate,
   bookingController.getBookingHistory
 );
