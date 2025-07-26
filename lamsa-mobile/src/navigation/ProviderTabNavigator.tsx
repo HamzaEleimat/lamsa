@@ -11,7 +11,15 @@ import ServiceListScreen from '../screens/provider/ServiceListScreen';
 import ProfileScreen from '../screens/provider/ProfileScreen';
 import MoreScreen from '../screens/provider/MoreScreen';
 
-const Tab = createBottomTabNavigator();
+export type ProviderTabParamList = {
+  Dashboard: undefined;
+  Bookings: undefined;
+  Services: undefined;
+  Profile: undefined;
+  More: undefined;
+};
+
+const Tab = createBottomTabNavigator<ProviderTabParamList>();
 
 export default function ProviderTabNavigator() {
   const { t } = useTranslation();
@@ -63,27 +71,27 @@ export default function ProviderTabNavigator() {
       <Tab.Screen
         name="Dashboard"
         component={ProviderDashboardScreen}
-        options={{ tabBarLabel: t('dashboard') }}
+        options={{ tabBarLabel: t('dashboard.title') }}
       />
       <Tab.Screen
         name="Bookings"
         component={BookingListScreen}
-        options={{ tabBarLabel: t('bookings') }}
+        options={{ tabBarLabel: t('navigation.bookings') }}
       />
       <Tab.Screen
         name="Services"
         component={ServiceListScreen}
-        options={{ tabBarLabel: t('services') }}
+        options={{ tabBarLabel: t('serviceManagement.services') }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ tabBarLabel: t('profile') }}
+        options={{ tabBarLabel: t('navigation.profile') }}
       />
       <Tab.Screen
         name="More"
         component={MoreScreen}
-        options={{ tabBarLabel: t('more') }}
+        options={{ tabBarLabel: t('common.more') }}
       />
     </Tab.Navigator>
   );

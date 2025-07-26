@@ -14,7 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '../../hooks/useTranslation';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../../contexts/AuthContext';
-import { ProviderAnalyticsService } from '../../services/analytics/ProviderAnalyticsService';
+import { analyticsService } from '../../services/analyticsService';
+import { providerBookingService } from '../../services/providerBookingService';
 import { LineChart } from 'react-native-chart-kit';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -46,22 +47,71 @@ export default function ProviderDashboardScreen() {
   
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [providerId, setProviderId] = useState<string | null>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<any>(null);
+  const [bookingStats, setBookingStats] = useState<any>(null);
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('week');
   
-  const analyticsService = ProviderAnalyticsService.getInstance();
+  useEffect(() => {
+    fetchProviderId();
+  }, [user]);
   
   useEffect(() => {
-    loadDashboardData();
-  }, [selectedPeriod]);
+    if (providerId) {
+      loadDashboardData();
+    }
+  }, [providerId, selectedPeriod]);
+  
+  const fetchProviderId = async () => {
+    if (!user?.email) return;
+    
+    try {
+      // Import supabase from services
+      const { supabase } = await import('../../services/supabase');
+      
+      // Get provider ID from providers table using email
+      const { data, error } = await supabase
+        .from('providers')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching provider ID:', error);
+        return;
+      }
+      
+      if (data) {
+        setProviderId(data.id);
+      }
+    } catch (error) {
+      console.error('Error in fetchProviderId:', error);
+    }
+  };
   
   const loadDashboardData = async () => {
-    if (!user?.id) return;
+    if (!providerId) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
-      const data = await analyticsService.getDashboardSummary(user.id, selectedPeriod);
-      setDashboardData(data);
+      
+      // Load all data in parallel
+      const [metrics, stats, revenue, todayBookings] = await Promise.all([
+        analyticsService.getPerformanceMetrics(providerId),
+        providerBookingService.getBookingStats(providerId),
+        analyticsService.getDailyRevenue(providerId, 30),
+        providerBookingService.getTodayUpcomingBookings(providerId)
+      ]);
+      
+      setPerformanceMetrics(metrics);
+      setBookingStats(stats);
+      setRevenueData(revenue);
+      setUpcomingBookings(todayBookings);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -75,44 +125,49 @@ export default function ProviderDashboardScreen() {
     setRefreshing(false);
   };
   
-  const metrics: DashboardMetric[] = dashboardData ? [
+  const metrics: DashboardMetric[] = performanceMetrics && bookingStats ? [
     {
       label: t('todayRevenue'),
-      value: `${dashboardData.todayRevenue.toFixed(2)} ${t('jod')}`,
-      change: dashboardData.revenueChangePercent,
-      changeLabel: t('vsYesterday'),
+      value: `${performanceMetrics.revenue_today.toFixed(2)} ${t('jod')}`,
+      change: calculatePercentageChange(performanceMetrics.revenue_today, performanceMetrics.revenue_last_7_days / 7),
+      changeLabel: t('vsAverage'),
       icon: 'cash',
       color: colors.success,
       screen: 'RevenueAnalytics',
     },
     {
       label: t('todayBookings'),
-      value: dashboardData.todayBookings.toString(),
-      change: dashboardData.bookingsChangePercent,
-      changeLabel: t('vsYesterday'),
+      value: bookingStats.todayBookings.toString(),
+      change: calculatePercentageChange(bookingStats.todayBookings, bookingStats.weekBookings / 7),
+      changeLabel: t('vsAverage'),
       icon: 'calendar',
       color: colors.primary,
       screen: 'BookingAnalytics',
     },
     {
-      label: t('newCustomers'),
-      value: dashboardData.newCustomersToday.toString(),
-      change: dashboardData.newCustomersChangePercent,
-      changeLabel: t('thisWeek'),
+      label: t('totalCustomers'),
+      value: performanceMetrics.unique_customers.toString(),
+      change: calculatePercentageChange(performanceMetrics.new_customers_last_30_days, performanceMetrics.unique_customers / 12),
+      changeLabel: t('newThisMonth'),
       icon: 'people',
       color: colors.info,
       screen: 'CustomerAnalytics',
     },
     {
       label: t('avgRating'),
-      value: dashboardData.averageRating.toFixed(1),
-      change: dashboardData.ratingChangePercent,
-      changeLabel: t('thisMonth'),
+      value: performanceMetrics.avg_rating.toFixed(1),
+      change: 0, // Rating changes are typically small
+      changeLabel: `${performanceMetrics.total_reviews} ${t('reviews')}`,
       icon: 'star',
       color: colors.warning,
       screen: 'PerformanceAnalytics',
     },
   ] : [];
+  
+  const calculatePercentageChange = (current: number, previous: number): number => {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return Math.round(((current - previous) / previous) * 100);
+  };
   
   const quickActions: QuickAction[] = [
     {
@@ -181,12 +236,15 @@ export default function ProviderDashboardScreen() {
   };
   
   const renderRevenueChart = () => {
-    if (!dashboardData?.revenueChart) return null;
+    if (!revenueData || revenueData.length === 0) return null;
+    
+    // Get last 7 days of revenue
+    const last7Days = revenueData.slice(0, 7).reverse();
     
     const data = {
-      labels: dashboardData.revenueChart.labels,
+      labels: last7Days.map(d => format(new Date(d.date), 'EEE', { locale })),
       datasets: [{
-        data: dashboardData.revenueChart.data,
+        data: last7Days.map(d => d.revenue),
       }],
     };
     
@@ -232,21 +290,21 @@ export default function ProviderDashboardScreen() {
   };
   
   const renderUpcomingBookings = () => {
-    if (!dashboardData?.upcomingBookings) return null;
+    if (!upcomingBookings || upcomingBookings.length === 0) return null;
     
     return (
       <Card style={styles.bookingsCard}>
         <Card.Title
           title={t('upcomingBookings')}
-          subtitle={`${dashboardData.upcomingBookings.length} ${t('bookingsToday')}`}
+          subtitle={`${upcomingBookings.length} ${t('bookingsToday')}`}
           right={(props) => (
-            <TouchableOpacity onPress={() => navigation.navigate('BookingsList' as any)}>
+            <TouchableOpacity onPress={() => navigation.navigate('Bookings' as any)}>
               <Text style={styles.viewAllText}>{t('viewAll')}</Text>
             </TouchableOpacity>
           )}
         />
         <Card.Content>
-          {dashboardData.upcomingBookings.slice(0, 3).map((booking: any) => (
+          {upcomingBookings.slice(0, 3).map((booking: any) => (
             <View key={booking.id} style={styles.bookingItem}>
               <View style={styles.bookingTime}>
                 <Text style={styles.bookingTimeText}>{booking.time}</Text>
@@ -311,6 +369,17 @@ export default function ProviderDashboardScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+  
+  // Show message if no provider profile exists
+  if (!providerId) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="alert-circle-outline" size={48} color={colors.gray} />
+        <Text style={styles.noProviderText}>{t('noProviderProfile')}</Text>
+        <Text style={styles.noProviderSubtext}>{t('pleaseCompleteProfile')}</Text>
       </View>
     );
   }
@@ -616,5 +685,18 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 100,
+  },
+  noProviderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  noProviderSubtext: {
+    fontSize: 14,
+    color: colors.gray,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

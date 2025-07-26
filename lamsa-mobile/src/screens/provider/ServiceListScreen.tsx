@@ -16,7 +16,7 @@ import {
 import { MaterialTopTabBar, createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   EnhancedService, 
@@ -26,7 +26,8 @@ import {
   ServiceTag
 } from '../../types/service.types';
 import { colors } from '../../constants/colors';
-import { API_URL } from '../../config';
+import { serviceManagementService } from '../../services/serviceManagementService';
+import { useAuth } from '../../contexts/AuthContext';
 import ServiceCard from '../../components/service/ServiceCard';
 import ServiceFiltersModal from '../../components/service/ServiceFilters';
 
@@ -35,6 +36,7 @@ const Tab = createMaterialTopTabNavigator();
 export default function ServiceListScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
+  const { user } = useAuth();
   const isRTL = I18nManager.isRTL;
 
   const [services, setServices] = useState<EnhancedService[]>([]);
@@ -81,22 +83,10 @@ export default function ServiceListScreen() {
 
   const fetchServices = async () => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      const providerId = await AsyncStorage.getItem('providerId');
+      if (!user?.id) return;
       
-      const response = await fetch(
-        `${API_URL}/api/providers/${providerId}/services?includeInactive=true`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setServices(data.data.services || []);
-      }
+      const providerServices = await serviceManagementService.getProviderServices(user.id);
+      setServices(providerServices);
     } catch (error) {
       console.error('Error fetching services:', error);
       Alert.alert(t('error'), t('failedToLoadServices'));
@@ -105,22 +95,9 @@ export default function ServiceListScreen() {
 
   const fetchPackages = async () => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      const providerId = await AsyncStorage.getItem('providerId');
-      
-      const response = await fetch(
-        `${API_URL}/api/services/packages/${providerId}?includeInactive=true`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setPackages(data.data || []);
-      }
+      // TODO: Implement package fetching from Supabase
+      // For now, packages functionality will be added later
+      setPackages([]);
     } catch (error) {
       console.error('Error fetching packages:', error);
     }
@@ -128,11 +105,8 @@ export default function ServiceListScreen() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/services/categories`);
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data.data || []);
-      }
+      const categories = await serviceManagementService.getCategories();
+      setCategories(categories);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -140,11 +114,8 @@ export default function ServiceListScreen() {
 
   const fetchTags = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/services/tags`);
-      if (response.ok) {
-        const data = await response.json();
-        setTags(data.data || []);
-      }
+      const tags = await serviceManagementService.getTags();
+      setTags(tags);
     } catch (error) {
       console.error('Error fetching tags:', error);
     }
@@ -163,28 +134,26 @@ export default function ServiceListScreen() {
     }
 
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      const response = await fetch(`${API_URL}/api/services/bulk`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_ids: selectedServices,
-          operation,
-        }),
-      });
-
-      if (response.ok) {
-        Alert.alert(t('success'), t('bulkOperationSuccess'));
-        setBulkMode(false);
-        setSelectedServices([]);
-        await fetchServices();
-      } else {
-        Alert.alert(t('error'), t('bulkOperationFailed'));
+      // TODO: Implement bulk operations in serviceManagementService
+      // For now, we'll process them one by one
+      for (const serviceId of selectedServices) {
+        if (operation === 'activate' || operation === 'deactivate') {
+          const service = services.find(s => s.id === serviceId);
+          if (service) {
+            await serviceManagementService.updateService(serviceId, {
+              ...service,
+              active: operation === 'activate'
+            });
+          }
+        } else if (operation === 'delete') {
+          await serviceManagementService.deleteService(serviceId);
+        }
       }
+      
+      Alert.alert(t('success'), t('bulkOperationSuccess'));
+      setBulkMode(false);
+      setSelectedServices([]);
+      await fetchServices();
     } catch (error) {
       console.error('Error performing bulk operation:', error);
       Alert.alert(t('error'), t('somethingWentWrong'));
@@ -232,22 +201,20 @@ export default function ServiceListScreen() {
 
   const handleDuplicateService = async (serviceId: string) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      const response = await fetch(`${API_URL}/api/services/duplicate/${serviceId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const service = services.find(s => s.id === serviceId);
+      if (!service || !user?.id) return;
 
-      if (response.ok) {
-        Alert.alert(t('success'), t('serviceDuplicated'));
-        await fetchServices();
-      } else {
-        Alert.alert(t('error'), t('failedToDuplicate'));
-      }
+      // Create a duplicate with a new name
+      const duplicatedService = {
+        ...service,
+        name_en: `${service.name_en} (Copy)`,
+        name_ar: `${service.name_ar} (نسخة)`,
+        active: false // Start as inactive
+      };
+
+      await serviceManagementService.createService(user.id, duplicatedService);
+      Alert.alert(t('success'), t('serviceDuplicated'));
+      await fetchServices();
     } catch (error) {
       console.error('Error duplicating service:', error);
       Alert.alert(t('error'), t('somethingWentWrong'));
@@ -256,27 +223,17 @@ export default function ServiceListScreen() {
 
   const handleQuickToggle = async (serviceId: string) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
       const service = services.find(s => s.id === serviceId);
-      
-      const response = await fetch(`${API_URL}/api/services/${serviceId}/toggle`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          active: !service?.active,
-        }),
+      if (!service) return;
+
+      await serviceManagementService.updateService(serviceId, {
+        ...service,
+        active: !service.active
       });
 
-      if (response.ok) {
-        setServices(prev => prev.map(s => 
-          s.id === serviceId ? { ...s, active: !s.active } : s
-        ));
-      } else {
-        Alert.alert(t('error'), t('failedToToggleService'));
-      }
+      setServices(prev => prev.map(s => 
+        s.id === serviceId ? { ...s, active: !s.active } : s
+      ));
     } catch (error) {
       console.error('Error toggling service:', error);
       Alert.alert(t('error'), t('somethingWentWrong'));
@@ -294,21 +251,9 @@ export default function ServiceListScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('authToken');
-              
-              const response = await fetch(`${API_URL}/api/services/${serviceId}`, {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                },
-              });
-
-              if (response.ok) {
-                setServices(prev => prev.filter(s => s.id !== serviceId));
-                Alert.alert(t('success'), t('serviceDeleted'));
-              } else {
-                Alert.alert(t('error'), t('failedToDeleteService'));
-              }
+              await serviceManagementService.deleteService(serviceId);
+              setServices(prev => prev.filter(s => s.id !== serviceId));
+              Alert.alert(t('success'), t('serviceDeleted'));
             } catch (error) {
               console.error('Error deleting service:', error);
               Alert.alert(t('error'), t('somethingWentWrong'));
@@ -331,10 +276,12 @@ export default function ServiceListScreen() {
       return;
     }
     
-    navigation.navigate('BulkActions', {
-      serviceIds: selectedServices,
-      selectedCount: selectedServices.length,
-    });
+    // TODO: Implement BulkActions screen
+    console.log('Navigate to BulkActions with serviceIds:', selectedServices);
+    // navigation.navigate('BulkActions', {
+    //   serviceIds: selectedServices,
+    //   selectedCount: selectedServices.length,
+    // });
   };
 
   const ServicesTab = ({ status }: { status: 'active' | 'inactive' }) => {
@@ -365,7 +312,10 @@ export default function ServiceListScreen() {
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.packageCard}
-          onPress={() => navigation.navigate('PackageForm', { packageId: item.id })}
+          onPress={() => {
+            // TODO: Implement PackageForm screen
+            console.log('Navigate to PackageForm with packageId:', item.id);
+          }}
         >
           <View style={styles.packageHeader}>
             <Text style={styles.packageName}>
@@ -399,7 +349,10 @@ export default function ServiceListScreen() {
           <Text style={styles.emptyText}>{t('noPackagesFound')}</Text>
           <TouchableOpacity
             style={styles.createButton}
-            onPress={() => navigation.navigate('PackageForm')}
+            onPress={() => {
+              // TODO: Implement PackageForm screen
+              console.log('Navigate to PackageForm for new package');
+            }}
           >
             <Text style={styles.createButtonText}>{t('createFirstPackage')}</Text>
           </TouchableOpacity>
@@ -442,14 +395,20 @@ export default function ServiceListScreen() {
             
             <TouchableOpacity
               style={styles.headerActionButton}
-              onPress={() => navigation.navigate('ServiceAnalytics')}
+              onPress={() => {
+                // TODO: Implement ServiceAnalytics screen
+                console.log('Navigate to ServiceAnalytics');
+              }}
             >
               <Ionicons name="analytics-outline" size={20} color={colors.primary} />
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.headerActionButton}
-              onPress={() => navigation.navigate('ServiceTemplates')}
+              onPress={() => {
+                // TODO: Implement ServiceTemplates screen
+                console.log('Navigate to ServiceTemplates');
+              }}
             >
               <Ionicons name="library-outline" size={20} color={colors.primary} />
             </TouchableOpacity>
@@ -542,7 +501,10 @@ export default function ServiceListScreen() {
         <View style={styles.fabContainer}>
           <TouchableOpacity
             style={styles.secondaryFab}
-            onPress={() => navigation.navigate('QuickService')}
+            onPress={() => {
+              // TODO: Implement QuickService screen
+              console.log('Navigate to QuickService');
+            }}
           >
             <Ionicons name="flash" size={20} color={colors.white} />
           </TouchableOpacity>

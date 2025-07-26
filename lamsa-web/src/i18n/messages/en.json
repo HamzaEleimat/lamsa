@@ -17,8 +17,31 @@
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot password?",
       "signIn": "Sign In",
+      "signingIn": "Signing in...",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign Up"
+      "signUp": "Sign Up",
+      "emailTab": "Email",
+      "phoneTab": "Phone",
+      "mfaCode": "2FA Code",
+      "mfaCodePlaceholder": "Enter 6-digit code",
+      "verifyMFA": "Verify",
+      "verifying": "Verifying...",
+      "backToLogin": "Back to login"
+    },
+    "phoneAuth": {
+      "phoneNumber": "Phone Number",
+      "acceptTerms": "I accept the",
+      "termsLink": "terms and conditions",
+      "sendOTP": "Send OTP",
+      "sendingOTP": "Sending...",
+      "verifyPhone": "Verify Phone",
+      "otpSentTo": "OTP sent to",
+      "otpCode": "Enter OTP Code",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "resendOTP": "Resend OTP",
+      "resendIn": "Resend in {seconds}s",
+      "changeNumber": "Change phone number"
     },
     "dashboard": {
       "title": "Provider Dashboard",

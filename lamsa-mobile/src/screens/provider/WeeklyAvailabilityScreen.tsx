@@ -30,7 +30,8 @@ import {
 import { ar, enUS } from 'date-fns/locale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../../constants/colors';
-import { API_URL } from '../../config';
+import { availabilityService, WeeklyAvailability } from '../../services/availabilityService';
+import { useAuth } from '../../contexts/AuthContext';
 import TouchTimeSelector from '../../components/availability/TouchTimeSelector';
 import FridayPrayerManager from '../../components/availability/FridayPrayerManager';
 import ScheduleTemplatesModal from '../../components/availability/ScheduleTemplatesModal';
@@ -61,6 +62,7 @@ interface DaySchedule {
 export default function WeeklyAvailabilityScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
+  const { user } = useAuth();
   const isRTL = I18nManager.isRTL;
   const locale = i18n.language === 'ar' ? ar : enUS;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -90,27 +92,66 @@ export default function WeeklyAvailabilityScreen() {
   const loadWeeklySchedule = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('authToken');
-      const providerId = await AsyncStorage.getItem('providerId');
+      if (!user?.id) return;
 
+      // Get weekly availability from Supabase
+      const weeklyAvailability = await availabilityService.getWeeklyAvailability(user.id);
+      
+      // Get exception dates for the current week
       const startDate = format(currentWeek, 'yyyy-MM-dd');
       const endDate = format(addDays(currentWeek, 6), 'yyyy-MM-dd');
+      const exceptionDates = await availabilityService.getExceptionDates(user.id, startDate, endDate);
 
-      const response = await fetch(
-        `${API_URL}/api/providers/${providerId}/availability?start=${startDate}&end=${endDate}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+      // Build week schedule
+      const schedule: DaySchedule[] = [];
+      const weekDays = getWeekDays();
+
+      for (const day of weekDays) {
+        const dayOfWeek = day.getDay();
+        const availability = weeklyAvailability.find(a => a.day_of_week === dayOfWeek);
+        const exception = exceptionDates.find(e => e.date === format(day, 'yyyy-MM-dd'));
+
+        if (exception) {
+          // Use exception date settings
+          schedule.push({
+            date: day,
+            isWorkingDay: exception.is_working_day,
+            startTime: exception.start_time ? parseISO(`${format(day, 'yyyy-MM-dd')}T${exception.start_time}`) : undefined,
+            endTime: exception.end_time ? parseISO(`${format(day, 'yyyy-MM-dd')}T${exception.end_time}`) : undefined,
+            breaks: [],
+            bookings: [],
+            availability: []
+          });
+        } else if (availability) {
+          // Use regular weekly schedule
+          schedule.push({
+            date: day,
+            isWorkingDay: availability.is_working_day,
+            startTime: availability.start_time ? parseISO(`${format(day, 'yyyy-MM-dd')}T${availability.start_time}`) : undefined,
+            endTime: availability.end_time ? parseISO(`${format(day, 'yyyy-MM-dd')}T${availability.end_time}`) : undefined,
+            breaks: availability.break_start && availability.break_end ? [{
+              id: `break-${day.getTime()}`,
+              startTime: parseISO(`${format(day, 'yyyy-MM-dd')}T${availability.break_start}`),
+              endTime: parseISO(`${format(day, 'yyyy-MM-dd')}T${availability.break_end}`),
+              type: 'break' as const,
+              title: t('break')
+            }] : [],
+            bookings: [],
+            availability: []
+          });
+        } else {
+          // No schedule defined
+          schedule.push({
+            date: day,
+            isWorkingDay: false,
+            breaks: [],
+            bookings: [],
+            availability: []
+          });
         }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setWeekSchedule(data.schedule || []);
-      } else {
-        Alert.alert(t('error'), t('failedToLoadSchedule'));
       }
+
+      setWeekSchedule(schedule);
     } catch (error) {
       console.error('Error loading weekly schedule:', error);
       Alert.alert(t('error'), t('somethingWentWrong'));

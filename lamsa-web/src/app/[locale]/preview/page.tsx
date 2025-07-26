@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { setRequestLocale } from 'next-intl/server';
 
 interface PageProps {

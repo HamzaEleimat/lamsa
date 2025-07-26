@@ -28,7 +28,8 @@ import {
   EnhancedService,
 } from '../../types/service.types';
 import { colors } from '../../constants/colors';
-import { API_URL } from '../../config';
+import { serviceManagementService } from '../../services/serviceManagementService';
+import { useAuth } from '../../contexts/AuthContext';
 
 type ServiceFormRouteProp = RouteProp<{ ServiceForm: { serviceId?: string } }, 'ServiceForm'>;
 
@@ -36,6 +37,7 @@ export default function ServiceFormScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute<ServiceFormRouteProp>();
+  const { user } = useAuth();
   const isRTL = I18nManager.isRTL;
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -88,11 +90,8 @@ export default function ServiceFormScreen() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/services/categories`);
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data.data || []);
-      }
+      const categories = await serviceManagementService.getCategories();
+      setCategories(categories);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -100,11 +99,8 @@ export default function ServiceFormScreen() {
 
   const fetchTags = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/services/tags`);
-      if (response.ok) {
-        const data = await response.json();
-        setAvailableTags(data.data || []);
-      }
+      const tags = await serviceManagementService.getTags();
+      setAvailableTags(tags);
     } catch (error) {
       console.error('Error fetching tags:', error);
     }
@@ -112,17 +108,11 @@ export default function ServiceFormScreen() {
 
   const fetchServiceDetails = async () => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      const response = await fetch(`${API_URL}/api/services/${serviceId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const service: EnhancedService = data.data;
-        
+      if (!serviceId) return;
+      
+      const service = await serviceManagementService.getServiceById(serviceId);
+      
+      if (service) {
         setFormData({
           name_en: service.name_en,
           name_ar: service.name_ar,
@@ -172,46 +162,59 @@ export default function ServiceFormScreen() {
       return;
     }
 
+    if (!user?.id) {
+      Alert.alert(t('error'), t('notAuthenticated'));
+      return;
+    }
+
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('authToken');
       
-      const url = isEditing 
-        ? `${API_URL}/api/services/${serviceId}`
-        : `${API_URL}/api/services`;
-      
-      const method = isEditing ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          category: formData.category_id, // API expects 'category' field
-        }),
-      });
-
-      if (response.ok) {
-        Alert.alert(
-          t('success'),
-          isEditing ? t('serviceUpdated') : t('serviceCreated'),
-          [
-            {
-              text: t('ok'),
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
-      } else {
-        const error = await response.json();
-        Alert.alert(t('error'), error.message || t('failedToSaveService'));
+      // Upload images if any
+      const uploadedImageUrls: string[] = [];
+      for (const imageUrl of formData.image_urls || []) {
+        if (imageUrl.startsWith('http')) {
+          // Already uploaded
+          uploadedImageUrls.push(imageUrl);
+        } else {
+          // Need to upload
+          try {
+            const uploadedUrl = await serviceManagementService.uploadServiceImage(
+              user.id,
+              imageUrl
+            );
+            uploadedImageUrls.push(uploadedUrl);
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            // Continue with other images
+          }
+        }
       }
+      
+      const updatedFormData = {
+        ...formData,
+        image_urls: uploadedImageUrls
+      };
+      
+      if (isEditing && serviceId) {
+        await serviceManagementService.updateService(serviceId, updatedFormData);
+      } else {
+        await serviceManagementService.createService(user.id, updatedFormData);
+      }
+
+      Alert.alert(
+        t('success'),
+        isEditing ? t('serviceUpdated') : t('serviceCreated'),
+        [
+          {
+            text: t('ok'),
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
     } catch (error) {
       console.error('Error saving service:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('error'), t('failedToSaveService'));
     } finally {
       setLoading(false);
     }

@@ -1,19 +1,19 @@
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
-import { getTranslations } from 'next-intl/server';
-import { setRequestLocale } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
+import { LoginForm } from '@/components/auth/login-form';
+import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Mail, Phone } from 'lucide-react';
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default async function ProviderLoginPage({ params }: PageProps) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  
-  const t = await getTranslations('provider.login');
+export default function ProviderLoginPage() {
+  const t = useTranslations('provider.login');
+  const [activeTab, setActiveTab] = useState('email');
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center p-4">
       <div className="bg-card rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="flex justify-center mb-6">
           <Image
@@ -33,57 +33,26 @@ export default async function ProviderLoginPage({ params }: PageProps) {
           </p>
         </div>
         
-        <form className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-card-foreground mb-2">
-              {t('email')}
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background"
-              placeholder={t('emailPlaceholder')}
-            />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="email" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              {t('emailTab')}
+            </TabsTrigger>
+            <TabsTrigger value="phone" className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              {t('phoneTab')}
+            </TabsTrigger>
+          </TabsList>
           
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-card-foreground mb-2">
-              {t('password')}
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background"
-              placeholder={t('passwordPlaceholder')}
-            />
-          </div>
+          <TabsContent value="email">
+            <LoginForm />
+          </TabsContent>
           
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-primary focus:ring-ring border-input rounded"
-              />
-              <span className="ml-2 text-sm text-muted-foreground">
-                {t('rememberMe')}
-              </span>
-            </label>
-            <a href="#" className="text-sm text-primary hover:text-primary/80">
-              {t('forgotPassword')}
-            </a>
-          </div>
-          
-          <button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold transition-colors"
-          >
-            {t('signIn')}
-          </button>
-        </form>
+          <TabsContent value="phone">
+            <PhoneAuthForm />
+          </TabsContent>
+        </Tabs>
         
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">

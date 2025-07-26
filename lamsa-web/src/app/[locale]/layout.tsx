@@ -4,6 +4,9 @@ import { Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { locales, localeConfig, type Locale } from '../../i18n/request';
+import { ThemeProvider } from '@/components/theme-provider';
+import { AuthProvider } from '@/contexts/auth-context';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import '../globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -42,7 +45,21 @@ export default async function RootLayout({
     >
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider>
+              <div className="relative min-h-screen">
+                <div className="absolute top-4 right-4 z-10">
+                  <LanguageSwitcher />
+                </div>
+                {children}
+              </div>
+            </AuthProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

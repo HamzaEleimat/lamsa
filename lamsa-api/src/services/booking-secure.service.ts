@@ -70,8 +70,7 @@ export class SecureBookingService {
       const { limit, offset } = SecureQueryBuilder.validatePagination(filters.limit, filters.offset);
       query = query
         .order('booking_date', { ascending: false })
-        .limit(limit)
-        .offset(offset);
+        .range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 
@@ -130,7 +129,7 @@ export class SecureBookingService {
   }
 
   /**
-   * Get booking statistics (secure aggregation)
+   * Get booking statistics using database aggregation (secure)
    */
   async getBookingStats(providerId: string, period: 'day' | 'week' | 'month' | 'year') {
     try {
@@ -145,6 +144,7 @@ export class SecureBookingService {
       // Calculate date range
       const now = new Date();
       let startDate: Date;
+      const endDate = new Date();
 
       switch (period) {
         case 'day':
@@ -161,20 +161,20 @@ export class SecureBookingService {
           break;
       }
 
-      // Get booking counts by status
+      // Use database function for efficient aggregation
       const { data, error } = await supabase
-        .from('bookings')
-        .select('status, count')
-        .eq('provider_id', validatedId)
-        .gte('booking_date', startDate.toISOString())
-        .group('status');
+        .rpc('get_booking_stats_by_period', {
+          p_provider_id: validatedId,
+          p_start_date: startDate.toISOString().split('T')[0],
+          p_end_date: endDate.toISOString().split('T')[0]
+        });
 
       if (error) {
         secureLogger.error('Error fetching booking stats', { error, providerId, period });
         throw error;
       }
 
-      return data;
+      return data || [];
     } catch (error) {
       secureLogger.error('Booking stats error', { error });
       throw error;
@@ -223,6 +223,107 @@ export class SecureBookingService {
       return data;
     } catch (error) {
       secureLogger.error('Bulk update error', { error });
+      throw error;
+    }
+  }
+  /**
+   * Get provider performance metrics (secure)
+   */
+  async getProviderPerformanceMetrics(providerId: string) {
+    try {
+      const validatedId = SecureQueryBuilder.validateUUID(providerId, 'providerId');
+      
+      // Get from materialized view for performance
+      const { data, error } = await supabase
+        .from('provider_performance_summary')
+        .select('*')
+        .eq('provider_id', validatedId)
+        .single();
+
+      if (error) {
+        secureLogger.error('Error fetching performance metrics', { error, providerId });
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      secureLogger.error('Performance metrics error', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get daily revenue statistics (secure)
+   */
+  async getDailyRevenueStats(providerId: string, days: number = 30) {
+    try {
+      const validatedId = SecureQueryBuilder.validateUUID(providerId, 'providerId');
+      const validatedDays = Math.min(Math.max(1, days), 365); // Limit to 1-365 days
+      
+      const { data, error } = await supabase
+        .rpc('get_daily_revenue_stats', {
+          p_provider_id: validatedId,
+          p_days: validatedDays
+        });
+
+      if (error) {
+        secureLogger.error('Error fetching daily revenue stats', { error, providerId, days });
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      secureLogger.error('Daily revenue stats error', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get hourly booking patterns (secure)
+   */
+  async getHourlyBookingPatterns(providerId: string, days: number = 90) {
+    try {
+      const validatedId = SecureQueryBuilder.validateUUID(providerId, 'providerId');
+      const validatedDays = Math.min(Math.max(1, days), 365); // Limit to 1-365 days
+      
+      const { data, error } = await supabase
+        .rpc('get_hourly_booking_patterns', {
+          p_provider_id: validatedId,
+          p_days: validatedDays
+        });
+
+      if (error) {
+        secureLogger.error('Error fetching hourly patterns', { error, providerId, days });
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      secureLogger.error('Hourly patterns error', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get customer retention statistics (secure)
+   */
+  async getCustomerRetentionStats(providerId: string) {
+    try {
+      const validatedId = SecureQueryBuilder.validateUUID(providerId, 'providerId');
+      
+      const { data, error } = await supabase
+        .rpc('get_customer_retention_stats', {
+          p_provider_id: validatedId
+        });
+
+      if (error) {
+        secureLogger.error('Error fetching retention stats', { error, providerId });
+        throw error;
+      }
+
+      return data?.[0] || null; // RPC returns array, we need first row
+    } catch (error) {
+      secureLogger.error('Customer retention stats error', { error });
       throw error;
     }
   }

@@ -5,18 +5,21 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../contexts/AuthContext';
 import { isRTL } from '../i18n';
+import { UserRole } from '../types';
 import AuthNavigator from './AuthNavigator';
-import MainTabNavigator from './MainTabNavigator';
+import CustomerTabNavigator from './CustomerTabNavigator';
+import ProviderTabNavigator from './ProviderTabNavigator';
 
 export type RootStackParamList = {
   Auth: undefined;
-  Main: undefined;
+  CustomerMain: undefined;
+  ProviderMain: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const theme = useTheme();
 
   useEffect(() => {
@@ -36,8 +39,12 @@ const RootNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainTabNavigator} />
+        {isAuthenticated && user ? (
+          user.role === UserRole.PROVIDER ? (
+            <Stack.Screen name="ProviderMain" component={ProviderTabNavigator} />
+          ) : (
+            <Stack.Screen name="CustomerMain" component={CustomerTabNavigator} />
+          )
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}

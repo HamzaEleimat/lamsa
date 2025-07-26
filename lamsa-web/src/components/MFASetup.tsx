@@ -7,7 +7,6 @@
  */
 
 import React, { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import { Shield, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface MFASetupProps {

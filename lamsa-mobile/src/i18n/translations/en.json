@@ -48,6 +48,7 @@
     "activate": "activate",
     "deactivate": "deactivate",
     "duplicate": "duplicate",
+    "more": "More",
     "time": "time",
     "date": "date",
     "start": "start",

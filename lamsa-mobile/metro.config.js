@@ -9,25 +9,34 @@ config.resolver.alias = {
   'react-native-maps': 'react-native-web-maps',
 };
 
-// Add resolver configuration for better module resolution
-config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName === 'invariant') {
-    return {
-      filePath: require.resolve('invariant'),
-      type: 'sourceFile',
-    };
-  }
-  
-  // Let Metro handle other modules
-  return context.resolveRequest(context, moduleName, platform);
-};
-
 // Ensure node_modules are properly resolved
 config.watchFolders = [
   path.resolve(__dirname, 'node_modules'),
 ];
 
-// Reset cache on start
+// Add node_modules to resolver search paths
+config.resolver.nodeModulesPaths = [
+  path.resolve(__dirname, 'node_modules'),
+];
+
+// Ensure assets are resolved correctly
+config.resolver.assetExts = [...config.resolver.assetExts, 'db'];
+
+// Ensure source extensions are handled
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'ts', 'tsx', 'js', 'jsx'];
+
+// Clear Metro cache
 config.resetCache = true;
+
+// Increase transformer timeout for slow builds
+config.transformer = {
+  ...config.transformer,
+  minifierConfig: {
+    keep_fnames: true,
+    mangle: {
+      keep_fnames: true,
+    },
+  },
+};
 
 module.exports = config;

@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { TokenInfo } from '../core/types';
 
@@ -145,10 +144,11 @@ export class TokenManager {
   async clearTokens(): Promise<void> {
     this.tokens = null;
     try {
+      // Only use SecureStore - no fallback to insecure storage
       await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
     } catch (error) {
-      // Fallback to AsyncStorage for web compatibility
-      await AsyncStorage.removeItem(TOKEN_STORAGE_KEY);
+      // Log error but continue - tokens are already cleared from memory
+      console.error('Error clearing tokens from secure storage:', error);
     }
   }
 
@@ -157,15 +157,8 @@ export class TokenManager {
    */
   private async loadTokens(): Promise<void> {
     try {
-      let storedTokens: string | null = null;
-      
-      // Try SecureStore first (for native platforms)
-      try {
-        storedTokens = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY);
-      } catch (error) {
-        // Fallback to AsyncStorage for web compatibility
-        storedTokens = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
-      }
+      // Only use SecureStore for security - no fallback to insecure storage
+      const storedTokens = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY);
       
       if (storedTokens) {
         const parsed = JSON.parse(storedTokens);
@@ -179,8 +172,14 @@ export class TokenManager {
         }
       }
     } catch (error) {
-      console.error('Error loading tokens:', error);
+      console.error('Error loading tokens from secure storage:', error);
       this.tokens = null;
+      
+      // If SecureStore is unavailable, the app should not persist sessions
+      // This is a security decision to prevent tokens from being stored insecurely
+      if (error instanceof Error && error.message?.includes('SecureStore is not available')) {
+        console.warn('Secure storage not available - sessions will not persist');
+      }
     }
   }
 
@@ -195,15 +194,16 @@ export class TokenManager {
     try {
       const tokenString = JSON.stringify(this.tokens);
       
-      // Try SecureStore first (for native platforms)
-      try {
-        await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, tokenString);
-      } catch (error) {
-        // Fallback to AsyncStorage for web compatibility
-        await AsyncStorage.setItem(TOKEN_STORAGE_KEY, tokenString);
-      }
+      // Only use SecureStore for security - no fallback to insecure storage
+      await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, tokenString);
     } catch (error) {
-      console.error('Error saving tokens:', error);
+      console.error('Error saving tokens to secure storage:', error);
+      
+      // If SecureStore is unavailable, tokens are kept in memory only
+      // This ensures security but means sessions won't persist across app restarts
+      if (error instanceof Error && error.message?.includes('SecureStore is not available')) {
+        console.warn('Secure storage not available - tokens stored in memory only');
+      }
     }
   }
 

@@ -3,6 +3,7 @@ import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase-simple';
 import { encryptedDb } from '../services/encrypted-db.service';
+import SecureQueryBuilder from '../utils/secure-query';
 
 // TypeScript Interfaces
 interface ProviderSearchQuery {
@@ -238,6 +239,9 @@ export class ProviderController {
         throw new AppError('Provider not found', 404);
       }
       
+      // Create a mutable provider object with additional properties
+      const providerWithDetails: any = { ...provider };
+      
       // Fetch related data separately
       const [servicesResult, reviewsResult, availabilityResult] = await Promise.all([
         supabase
@@ -277,12 +281,12 @@ export class ProviderController {
       ]);
       
       // Add related data to provider object
-      provider.services = servicesResult.data || [];
-      provider.reviews = reviewsResult.data || [];
-      provider.availability = availabilityResult.data || [];
+      providerWithDetails.services = servicesResult.data || [];
+      providerWithDetails.reviews = reviewsResult.data || [];
+      providerWithDetails.availability = availabilityResult.data || [];
       
       // Group services by category
-      const servicesByCategory = provider.services?.reduce((acc: any, service: any) => {
+      const servicesByCategory = providerWithDetails.services?.reduce((acc: any, service: any) => {
         if (!acc[service.category]) {
           acc[service.category] = [];
         }
@@ -291,7 +295,7 @@ export class ProviderController {
       }, {}) || {};
       
       // Calculate reviews summary
-      const ratings = provider.reviews?.map((r: any) => r.rating) || [];
+      const ratings = providerWithDetails.reviews?.map((r: any) => r.rating) || [];
       const reviewsSummary = {
         average_rating: ratings.length > 0 
           ? Math.round((ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length) * 10) / 10 
@@ -309,10 +313,10 @@ export class ProviderController {
       const response: ApiResponse = {
         success: true,
         data: {
-          ...provider,
+          ...providerWithDetails,
           services_by_category: servicesByCategory,
           reviews_summary: reviewsSummary,
-          reviews: provider.reviews?.slice(0, 10) // Latest 10 reviews
+          reviews: providerWithDetails.reviews?.slice(0, 10) // Latest 10 reviews
         },
       };
 
@@ -390,15 +394,16 @@ export class ProviderController {
       
       // Full text search on names and services (SQL injection safe)
       if (searchParams.query) {
-        // Sanitize input to prevent SQL injection
-        const sanitizedQuery = searchParams.query.replace(/[%_\\]/g, '\\$&');
-        const searchPattern = `%${sanitizedQuery}%`;
+        // Use SecureQueryBuilder to prevent SQL injection
+        const escapedTerm = SecureQueryBuilder.escapeLikePattern(
+          SecureQueryBuilder.validateParam(searchParams.query, 'searchTerm')
+        );
         
         query = query.or(
-          `business_name_ar.ilike."${searchPattern}",` +
-          `business_name_en.ilike."${searchPattern}",` +
-          `description_ar.ilike."${searchPattern}",` +
-          `description_en.ilike."${searchPattern}"`
+          `business_name_ar.ilike.%${escapedTerm}%,` +
+          `business_name_en.ilike.%${escapedTerm}%,` +
+          `description_ar.ilike.%${escapedTerm}%,` +
+          `description_en.ilike.%${escapedTerm}%`
         );
       }
       

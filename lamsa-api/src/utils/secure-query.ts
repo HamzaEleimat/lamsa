@@ -232,7 +232,7 @@ export const safeQueryExamples = {
     }
     
     const { limit, offset } = SecureQueryBuilder.validatePagination(filters.limit, filters.offset);
-    query = query.limit(limit).offset(offset);
+    query = query.range(offset, offset + limit - 1);
     
     return query;
   },
