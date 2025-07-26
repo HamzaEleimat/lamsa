@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { Booking, BookingStatus, PaymentMethod, PaymentStatus } from '../types';
 import { validateUUID, validateDate, validateTime, validateAmount, validateCoordinates, sanitizeString } from '../utils/validation';
+import { flexibleValidateUUID } from '../utils/uuidValidator';
 
 export interface CreateBookingData {
   user_id: string;
@@ -47,9 +48,9 @@ export class CustomerBookingService {
   async createBooking(bookingData: CreateBookingData): Promise<string> {
     try {
       // Validate all input data
-      const validatedUserId = validateUUID(bookingData.user_id, 'userId');
-      const validatedProviderId = validateUUID(bookingData.provider_id, 'providerId');
-      const validatedServiceId = validateUUID(bookingData.service_id, 'serviceId');
+      const validatedUserId = flexibleValidateUUID(bookingData.user_id, 'userId');
+      const validatedProviderId = flexibleValidateUUID(bookingData.provider_id, 'providerId');
+      const validatedServiceId = flexibleValidateUUID(bookingData.service_id, 'serviceId');
       const validatedDate = validateDate(bookingData.booking_date, 'bookingDate');
       const validatedStartTime = validateTime(bookingData.start_time);
       const validatedEndTime = validateTime(bookingData.end_time);
@@ -107,7 +108,7 @@ export class CustomerBookingService {
   ): Promise<BookingWithDetails[]> {
     try {
       // Validate user ID
-      const validatedUserId = validateUUID(userId, 'userId');
+      const validatedUserId = flexibleValidateUUID(userId, 'userId');
       
       let query = supabase
         .from('bookings')
@@ -313,7 +314,7 @@ export class CustomerBookingService {
   async getUpcomingBookings(userId: string): Promise<BookingWithDetails[]> {
     try {
       // Validate user ID
-      const validatedUserId = validateUUID(userId, 'userId');
+      const validatedUserId = flexibleValidateUUID(userId, 'userId');
       
       const today = new Date().toISOString().split('T')[0];
       
@@ -416,9 +417,9 @@ export class CustomerBookingService {
   async createRecurringBookings(bookingData: CreateRecurringBookingData): Promise<string[]> {
     try {
       // Validate all input data
-      const validatedUserId = validateUUID(bookingData.user_id, 'userId');
-      const validatedProviderId = validateUUID(bookingData.provider_id, 'providerId');
-      const validatedServiceId = validateUUID(bookingData.service_id, 'serviceId');
+      const validatedUserId = flexibleValidateUUID(bookingData.user_id, 'userId');
+      const validatedProviderId = flexibleValidateUUID(bookingData.provider_id, 'providerId');
+      const validatedServiceId = flexibleValidateUUID(bookingData.service_id, 'serviceId');
       const validatedStartDate = validateDate(bookingData.start_date, 'startDate');
       const validatedEndDate = validateDate(bookingData.end_date, 'endDate');
       const validatedStartTime = validateTime(bookingData.start_time);

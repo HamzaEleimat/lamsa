@@ -137,6 +137,9 @@ export const lightTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
+    success: brandColors.success,
+    warning: brandColors.warning,
+    info: brandColors.info,
     primary: brandColors.primary,
     primaryContainer: brandColors.accent,
     secondary: brandColors.secondary,
@@ -187,6 +190,9 @@ export const darkTheme: MD3Theme = {
   ...MD3DarkTheme,
   colors: {
     ...MD3DarkTheme.colors,
+    success: brandColors.success,
+    warning: brandColors.warning,
+    info: brandColors.info,
     primary: brandColors.primary,
     primaryContainer: brandColors.dark,
     secondary: brandColors.secondary,

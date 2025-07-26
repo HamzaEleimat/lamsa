@@ -248,7 +248,7 @@ export default function NotificationCenter({ onNotificationPress }: Notification
     return (
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
-          {t('notifications')} {unreadCount > 0 && `(${unreadCount})`}
+          {t('notifications.title')} {unreadCount > 0 && `(${unreadCount})`}
         </Text>
         <View style={styles.headerActions}>
           {unreadCount > 0 && (

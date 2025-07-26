@@ -47,7 +47,7 @@ export default function NotificationPreferencesScreen() {
       setPreferences(prefs);
     } catch (error) {
       console.error('Error loading preferences:', error);
-      Alert.alert(t('error'), t('failedToLoadPreferences'));
+      Alert.alert(t('common.error'), t('notifications.failedToLoadPreferences'));
     } finally {
       setLoading(false);
     }
@@ -59,10 +59,10 @@ export default function NotificationPreferencesScreen() {
     try {
       setSaving(true);
       await preferencesManager.savePreferences(user.id, preferences);
-      Alert.alert(t('success'), t('preferencesUpdated'));
+      Alert.alert(t('common.success'), t('notifications.preferencesUpdated'));
     } catch (error) {
       console.error('Error saving preferences:', error);
-      Alert.alert(t('error'), t('failedToSavePreferences'));
+      Alert.alert(t('common.error'), t('notifications.failedToSavePreferences'));
     } finally {
       setSaving(false);
     }
@@ -138,12 +138,12 @@ export default function NotificationPreferencesScreen() {
 
   const resetToDefaults = async () => {
     Alert.alert(
-      t('resetToDefaults'),
-      t('resetToDefaultsConfirm'),
+      t('notifications.resetToDefaults'),
+      t('notifications.resetToDefaultsConfirm'),
       [
-        { text: t('cancel'), style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: t('reset'),
+          text: t('common.reset'),
           style: 'destructive',
           onPress: async () => {
             if (!user?.id) return;
@@ -160,9 +160,9 @@ export default function NotificationPreferencesScreen() {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('notificationChannels')}</Text>
+        <Text style={styles.sectionTitle}>{t('notifications.channels.title')}</Text>
         <Text style={styles.sectionDescription}>
-          {t('chooseHowToReceiveNotifications')}
+          {t('notifications.channels.description')}
         </Text>
 
         <View style={styles.settingsList}>
@@ -170,8 +170,8 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.settingInfo}>
               <Ionicons name="phone-portrait" size={24} color={theme.colors.primary} />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('pushNotifications')}</Text>
-                <Text style={styles.settingSubtitle}>{t('freeAndInstant')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.channels.push')}</Text>
+                <Text style={styles.settingSubtitle}>{t('notifications.channels.pushDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -185,8 +185,8 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.settingInfo}>
               <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('whatsApp')}</Text>
-                <Text style={styles.settingSubtitle}>{t('preferredInJordan')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.channels.whatsapp')}</Text>
+                <Text style={styles.settingSubtitle}>{t('notifications.channels.whatsappDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -200,9 +200,9 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.settingInfo}>
               <Ionicons name="chatbox" size={24} color={theme.colors.secondary} />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('sms')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.channels.sms')}</Text>
                 <Text style={styles.settingSubtitle}>
-                  {t('limitedTo')} {preferences.smsSettings.monthlyLimit} {t('perMonth')}
+                  {t('notifications.channels.smsLimitedTo')} {preferences.smsSettings.monthlyLimit} {t('common.perMonth')}
                 </Text>
               </View>
             </View>
@@ -217,8 +217,8 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.settingInfo}>
               <Ionicons name="mail" size={24} color={theme.colors.tertiary} />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('email')}</Text>
-                <Text style={styles.settingSubtitle}>{t('weeklyDigests')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.channels.email')}</Text>
+                <Text style={styles.settingSubtitle}>{t('notifications.channels.emailDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -260,7 +260,7 @@ export default function NotificationPreferencesScreen() {
               <View style={styles.settingInfo}>
                 <Ionicons name={icon} size={24} color={color} />
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>{t(type.toLowerCase())}</Text>
+                  <Text style={styles.settingTitle}>{t(`notifications.types.${type.toLowerCase()}`)}</Text>
                 </View>
               </View>
               <Switch
@@ -276,15 +276,15 @@ export default function NotificationPreferencesScreen() {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('notificationTypes')}</Text>
+        <Text style={styles.sectionTitle}>{t('notifications.types.title')}</Text>
         <Text style={styles.sectionDescription}>
-          {t('chooseWhatNotificationsToReceive')}
+          {t('notifications.types.description')}
         </Text>
 
         <View style={styles.settingsList}>
-          {renderTypeGroup(criticalTypes, t('criticalNotifications'))}
+          {renderTypeGroup(criticalTypes, t('notifications.types.critical'))}
           <View style={styles.divider} />
-          {renderTypeGroup(importantTypes, t('importantNotifications'))}
+          {renderTypeGroup(importantTypes, t('notifications.types.important'))}
         </View>
       </View>
     );
@@ -295,14 +295,14 @@ export default function NotificationPreferencesScreen() {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('timingAndDelivery')}</Text>
+        <Text style={styles.sectionTitle}>{t('notifications.timing.title')}</Text>
 
         <View style={styles.settingsList}>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <Ionicons name="moon" size={24} color={theme.colors.primary} />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('quietHours')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.timing.quietHours')}</Text>
                 <Text style={styles.settingSubtitle}>
                   {preferences.timing.quietHours.start} - {preferences.timing.quietHours.end}
                 </Text>
@@ -321,7 +321,7 @@ export default function NotificationPreferencesScreen() {
                 style={styles.timePicker}
                 onPress={() => setShowStartTimePicker(true)}
               >
-                <Text style={styles.timePickerLabel}>{t('from')}</Text>
+                <Text style={styles.timePickerLabel}>{t('common.from')}</Text>
                 <Text style={styles.timePickerValue}>
                   {preferences.timing.quietHours.start}
                 </Text>
@@ -331,7 +331,7 @@ export default function NotificationPreferencesScreen() {
                 style={styles.timePicker}
                 onPress={() => setShowEndTimePicker(true)}
               >
-                <Text style={styles.timePickerLabel}>{t('to')}</Text>
+                <Text style={styles.timePickerLabel}>{t('common.to')}</Text>
                 <Text style={styles.timePickerValue}>
                   {preferences.timing.quietHours.end}
                 </Text>
@@ -343,8 +343,8 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.settingInfo}>
               <Ionicons name="layers" size={24} color={theme.colors.secondary} />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('notificationBatching')}</Text>
-                <Text style={styles.settingSubtitle}>{t('reducesInterruptions')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.timing.batching')}</Text>
+                <Text style={styles.settingSubtitle}>{t('notifications.timing.batchingDesc')}</Text>
               </View>
             </View>
           </View>
@@ -365,7 +365,7 @@ export default function NotificationPreferencesScreen() {
                     preferences.timing.batchingPreference === option && styles.activeBatchingOptionText,
                   ]}
                 >
-                  {t(option)}
+                  {t(`notifications.timing.${option}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -383,13 +383,13 @@ export default function NotificationPreferencesScreen() {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('smsSettings')}</Text>
+        <Text style={styles.sectionTitle}>{t('notifications.sms.title')}</Text>
 
         <View style={styles.smsQuotaCard}>
           <View style={styles.smsQuotaHeader}>
-            <Text style={styles.smsQuotaTitle}>{t('monthlyQuota')}</Text>
+            <Text style={styles.smsQuotaTitle}>{t('notifications.sms.monthlyQuota')}</Text>
             <Text style={styles.smsQuotaValue}>
-              {remainingQuota} {t('remaining')}
+              {remainingQuota} {t('common.remaining')}
             </Text>
           </View>
 
@@ -404,7 +404,7 @@ export default function NotificationPreferencesScreen() {
           </View>
 
           <Text style={styles.smsQuotaSubtext}>
-            {preferences.smsSettings.currentUsage} / {preferences.smsSettings.monthlyLimit} {t('used')}
+            {preferences.smsSettings.currentUsage} / {preferences.smsSettings.monthlyLimit} {t('common.used')}
           </Text>
         </View>
 
@@ -413,9 +413,9 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.settingInfo}>
               <Ionicons name="alert-circle" size={24} color={theme.colors.tertiary} />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>{t('criticalOnly')}</Text>
+                <Text style={styles.settingTitle}>{t('notifications.sms.criticalOnly')}</Text>
                 <Text style={styles.settingSubtitle}>
-                  {t('smsOnlyForCriticalAlerts')}
+                  {t('notifications.sms.criticalOnlyDesc')}
                 </Text>
               </View>
             </View>
@@ -429,7 +429,7 @@ export default function NotificationPreferencesScreen() {
 
         <TouchableOpacity style={styles.upgradeButton}>
           <Ionicons name="rocket" size={20} color={theme.colors.primary} />
-          <Text style={styles.upgradeButtonText}>{t('upgradeSMSPlan')}</Text>
+          <Text style={styles.upgradeButtonText}>{t('notifications.sms.upgradePlan')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -438,7 +438,7 @@ export default function NotificationPreferencesScreen() {
   if (loading || !preferences) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>{t('loading')}</Text>
+        <Text>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -452,7 +452,7 @@ export default function NotificationPreferencesScreen() {
         {renderSMSSection()}
 
         <TouchableOpacity style={styles.resetButton} onPress={resetToDefaults}>
-          <Text style={styles.resetButtonText}>{t('resetToDefaults')}</Text>
+          <Text style={styles.resetButtonText}>{t('notifications.resetToDefaults')}</Text>
         </TouchableOpacity>
 
         <View style={styles.bottomPadding} />
@@ -465,7 +465,7 @@ export default function NotificationPreferencesScreen() {
           disabled={saving}
         >
           <Text style={styles.saveButtonText}>
-            {saving ? t('saving') : t('saveChanges')}
+            {saving ? t('common.saving') : t('notifications.saveSettings')}
           </Text>
         </TouchableOpacity>
       </View>

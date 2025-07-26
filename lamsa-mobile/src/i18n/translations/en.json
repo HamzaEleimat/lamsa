@@ -6,6 +6,15 @@
     "providerLink": "I'm a Provider"
   },
   "common": {
+    "guest": "Guest",
+    "findYourBeauty": "Find your perfect beauty service",
+    "searchServices": "Search for services...",
+    "categories": "Categories",
+    "upcomingBookings": "Upcoming Bookings",
+    "seeAll": "See All",
+    "featuredProviders": "Featured Providers",
+    "startingFrom": "Starting from",
+    "popularServices": "Popular Services",
     "language": "Language",
     "english": "English",
     "arabic": "Arabic",
@@ -75,6 +84,8 @@
     "month": "month",
     "year": "year",
     "currency": "JOD",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
     "reviews": "reviews",
     "viewAll": "view all",
     "analytics": "analytics",
@@ -202,6 +213,9 @@
     "somethingWentWrong": "something went wrong",
     "permissionRequired": "Permission Required"
   },
+  "auth": {
+    "invalidPhone": "Invalid phone number"
+  },
   "phoneAuth": {
     "title": "Enter your phone number",
     "subtitle": "We'll send you a verification code",
@@ -269,7 +283,57 @@
     "home": "Home",
     "search": "Search",
     "bookings": "Bookings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "more": "More"
+  },
+  "more": {
+    "subtitle": "Manage your business and grow",
+    "footer_text": "More features coming soon!",
+    "business_tools": "Business Tools",
+    "analytics_dashboard": "Analytics Dashboard",
+    "analytics_dashboard_description": "View insights and trends",
+    "service_management": "Service Management",
+    "service_management_description": "Manage your services and packages",
+    "availability_settings": "Availability Settings",
+    "availability_settings_description": "Set your working hours and breaks",
+    "quick_service": "Quick Service Creation",
+    "quick_service_description": "Create services in seconds",
+    "service_packages": "Service Packages",
+    "service_packages_description": "Bundle services for better deals",
+    "performance_insights": "Performance Insights",
+    "revenue_analytics": "Revenue Analytics",
+    "revenue_analytics_description": "Track your earnings and growth",
+    "customer_analytics": "Customer Analytics",
+    "customer_analytics_description": "Understand your client base",
+    "booking_analytics": "Booking Analytics",
+    "booking_analytics_description": "Analyze booking patterns",
+    "service_analytics": "Service Analytics",
+    "service_analytics_description": "See which services perform best",
+    "performance_metrics": "Performance Metrics",
+    "performance_metrics_description": "Track your service quality",
+    "scheduling_tools": "Scheduling Tools",
+    "weekly_availability": "Weekly Availability",
+    "weekly_availability_description": "Set your regular schedule",
+    "exception_dates": "Exception Dates",
+    "exception_dates_description": "Manage holidays and time off",
+    "ramadan_schedule": "Ramadan Schedule",
+    "ramadan_schedule_description": "Special hours for Ramadan",
+    "bulk_actions": "Bulk Actions",
+    "bulk_actions_description": "Update multiple services at once",
+    "marketing_growth": "Marketing & Growth",
+    "notification_campaigns": "Notification Campaigns",
+    "notification_campaigns_description": "Send targeted messages",
+    "service_templates": "Service Templates",
+    "service_templates_description": "Use pre-made service templates",
+    "support_resources": "Support & Resources",
+    "help_center": "Help Center",
+    "help_center_description": "Get answers to common questions",
+    "best_practices": "Best Practices",
+    "best_practices_description": "Learn how to succeed",
+    "video_tutorials": "Video Tutorials",
+    "video_tutorials_description": "Watch how-to videos",
+    "community_tips": "Community Tips",
+    "community_tips_description": "Learn from other providers"
   },
   "serviceManagement": {
     "services": "Services",
@@ -555,6 +619,25 @@
     "settingsError": "Error saving settings"
   },
   "dashboard": {
+    "todayRevenue": "Today's Revenue",
+    "vsAverage": "vs average",
+    "todayBookings": "Today's Bookings",
+    "totalCustomers": "Total Customers",
+    "newThisMonth": "new this month",
+    "avgRating": "Average Rating",
+    "viewAllBookings": "View All Bookings",
+    "addService": "Add Service",
+    "viewReviews": "View Reviews",
+    "revenueOverview": "Revenue Overview",
+    "upcomingBookings": "Upcoming Bookings",
+    "bookingsToday": "bookings today",
+    "quickActions": "Quick Actions",
+    "todayInsights": "Today's Insights",
+    "noProviderProfile": "No Provider Profile Found",
+    "pleaseCompleteProfile": "Please complete your provider profile to access the dashboard",
+    "goodMorning": "Good Morning",
+    "goodAfternoon": "Good Afternoon",
+    "goodEvening": "Good Evening",
     "title": "Dashboard",
     "welcome": "Welcome back",
     "overview": "Overview",
@@ -683,6 +766,14 @@
     "recommendationScore": "Recommendation Score"
   },
   "customer": {
+    "locationPermission": "Location Permission",
+    "locationPermissionMessage": "We need your location to show nearby providers",
+    "failedToLoadProviders": "Failed to load providers",
+    "searchProviders": "Search providers...",
+    "listView": "List View",
+    "mapView": "Map View",
+    "showingResults": "Showing {{count}} results",
+    "noProvidersMatchSearch": "No providers match your search",
     "onboarding": {
       "basicInfo": "Let's get to know you",
       "basicInfoSubtitle": "We need a few details to personalize your experience",
@@ -710,6 +801,7 @@
     }
   },
   "service": {
+    "errorLoading": "Error loading services",
     "description": "Description",
     "whatsIncluded": "What's Included",
     "professionalService": "Professional service by certified specialist",
@@ -838,7 +930,7 @@
     "profileDescription": "Manage your personal information",
     "paymentMethods": "Payment Methods",
     "paymentMethodsDescription": "Manage your cards and payment options",
-    "notifications": "Notifications",
+    "notificationsText": "Notifications",
     "notificationsDescription": "Configure notification preferences",
     "appSettings": "App Settings",
     "language": "Language",
@@ -925,5 +1017,82 @@
       "cvvRequired": "CVV is required",
       "invalidCvv": "Invalid CVV"
     }
+  },
+  "provider": {
+    "errorLoadingProfile": "Error loading provider profile",
+    "profileNotFound": "Provider profile not found. Please complete your provider registration."
+  },
+  "screens": {
+    "bookings": {
+      "title": "My Bookings"
+    },
+    "profile": {
+      "title": "My Profile"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "totalRevenue": "Total Revenue",
+    "totalBookings": "Total Bookings",
+    "avgRating": "Average Rating",
+    "repeatClients": "Repeat Clients",
+    "revenueTrend": "Revenue Trend",
+    "servicePerformance": "Service Performance",
+    "bookingPatterns": "Booking Patterns",
+    "keyInsights": "Key Insights",
+    "insight1": "Your morning slots are most popular",
+    "insight2": "Hair coloring brings highest revenue",
+    "insight3": "Client retention improved by 15%",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "thisYear": "This Year"
+  },
+  "services": {
+    "haircut": "Haircut",
+    "coloring": "Hair Coloring",
+    "styling": "Hair Styling",
+    "treatment": "Hair Treatment",
+    "other": "Other Services"
+  },
+  "bookings": {
+    "errorLoading": "Error loading bookings",
+    "errorUpdatingStatus": "Error updating booking status",
+    "unknown_customer": "Unknown Customer",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "mark_completed": "Mark as Completed",
+    "view_details": "View Details",
+    "search_placeholder": "Search by customer name or phone...",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "payment": {
+      "online": "Online",
+      "cash": "Cash",
+      "on_site": "On Site"
+    },
+    "no_bookings": "No bookings yet",
+    "no_bookings_filtered": "No bookings found for the selected filter",
+    "create_booking": "Create Booking",
+    "createNew": "Create New Booking",
+    "selectService": "Select Service",
+    "tapToSelect": "Tap to select",
+    "customerInfo": "Customer Information",
+    "customerName": "Customer Name",
+    "customerPhone": "Customer Phone",
+    "customerEmail": "Customer Email (Optional)",
+    "dateTime": "Date & Time",
+    "date": "Date",
+    "time": "Time",
+    "additionalInfo": "Additional Information",
+    "create": "Create Booking",
+    "selectService": "Select a service",
+    "enterCustomerName": "Please enter customer name",
+    "enterCustomerPhone": "Please enter customer phone number",
+    "createdSuccessfully": "Booking created successfully",
+    "errorCreating": "Error creating booking"
   }
 }

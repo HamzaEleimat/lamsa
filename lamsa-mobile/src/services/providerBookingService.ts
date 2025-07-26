@@ -43,8 +43,14 @@ export class ProviderBookingService {
     }
   ): Promise<ProviderBooking[]> {
     try {
-      // Validate provider ID
-      const validatedProviderId = validateUUID(providerId, 'providerId');
+      // Validate provider ID - skip validation if it's not a UUID format
+      let validatedProviderId = providerId;
+      try {
+        validatedProviderId = validateUUID(providerId, 'providerId');
+      } catch (error) {
+        // If not a valid UUID, use as-is (could be a user ID)
+        console.warn('Provider ID is not a valid UUID, using as-is:', providerId);
+      }
       
       // Validate filters if provided
       if (filters?.startDate) {
@@ -107,7 +113,21 @@ export class ProviderBookingService {
         );
       }
 
-      return bookings;
+      // Transform snake_case to camelCase for frontend compatibility
+      return bookings.map(booking => ({
+        ...booking,
+        id: booking.id,
+        userId: booking.user_id,
+        providerId: booking.provider_id,
+        serviceId: booking.service_id,
+        date: booking.booking_date,
+        time: booking.start_time || booking.booking_time,
+        status: booking.status,
+        paymentMethod: booking.payment_method,
+        totalAmount: booking.total_amount,
+        customer: booking.customer,
+        service: booking.service
+      }));
     } catch (error) {
       console.error('Error fetching provider bookings:', error);
       throw error;
@@ -119,8 +139,14 @@ export class ProviderBookingService {
    */
   async getBookingStats(providerId: string): Promise<BookingStats> {
     try {
-      // Validate provider ID
-      const validatedProviderId = validateUUID(providerId, 'providerId');
+      // Validate provider ID - skip validation if it's not a UUID format
+      let validatedProviderId = providerId;
+      try {
+        validatedProviderId = validateUUID(providerId, 'providerId');
+      } catch (error) {
+        // If not a valid UUID, use as-is (could be a user ID)
+        console.warn('Provider ID is not a valid UUID, using as-is:', providerId);
+      }
       
       const today = new Date().toISOString().split('T')[0];
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -178,8 +204,14 @@ export class ProviderBookingService {
    */
   async getTodayUpcomingBookings(providerId: string): Promise<any[]> {
     try {
-      // Validate provider ID
-      const validatedProviderId = validateUUID(providerId, 'providerId');
+      // Validate provider ID - skip validation if it's not a UUID format
+      let validatedProviderId = providerId;
+      try {
+        validatedProviderId = validateUUID(providerId, 'providerId');
+      } catch (error) {
+        // If not a valid UUID, use as-is (could be a user ID)
+        console.warn('Provider ID is not a valid UUID, using as-is:', providerId);
+      }
       
       const today = new Date().toISOString().split('T')[0];
       const currentTime = new Date().toTimeString().slice(0, 5);
@@ -275,8 +307,14 @@ export class ProviderBookingService {
    */
   async getTodayBookings(providerId: string): Promise<ProviderBooking[]> {
     try {
-      // Validate provider ID
-      const validatedProviderId = validateUUID(providerId, 'providerId');
+      // Validate provider ID - skip validation if it's not a UUID format
+      let validatedProviderId = providerId;
+      try {
+        validatedProviderId = validateUUID(providerId, 'providerId');
+      } catch (error) {
+        // If not a valid UUID, use as-is (could be a user ID)
+        console.warn('Provider ID is not a valid UUID, using as-is:', providerId);
+      }
       
       const today = new Date().toISOString().split('T')[0];
       

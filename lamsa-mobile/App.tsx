@@ -1,3 +1,4 @@
+/// <reference path="./src/types/theme.d.ts" />
 import React, { useEffect, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Provider as PaperProvider } from 'react-native-paper';

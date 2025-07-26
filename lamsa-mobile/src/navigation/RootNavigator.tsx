@@ -8,7 +8,7 @@ import { isRTL } from '../i18n';
 import { UserRole } from '../types';
 import AuthNavigator from './AuthNavigator';
 import CustomerTabNavigator from './CustomerTabNavigator';
-import ProviderTabNavigator from './ProviderTabNavigator';
+import ProviderStackNavigator from './ProviderStackNavigator';
 
 export type RootStackParamList = {
   Auth: undefined;
@@ -41,7 +41,7 @@ const RootNavigator: React.FC = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated && user ? (
           user.role === UserRole.PROVIDER ? (
-            <Stack.Screen name="ProviderMain" component={ProviderTabNavigator} />
+            <Stack.Screen name="ProviderMain" component={ProviderStackNavigator} />
           ) : (
             <Stack.Screen name="CustomerMain" component={CustomerTabNavigator} />
           )

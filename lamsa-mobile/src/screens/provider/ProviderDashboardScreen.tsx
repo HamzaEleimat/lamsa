@@ -16,6 +16,8 @@ import { colors } from '../../constants/colors';
 import { useAuth } from '../../contexts/AuthContext';
 import { analyticsService } from '../../services/analyticsService';
 import { providerBookingService } from '../../services/providerBookingService';
+import { getProviderIdForUser } from '../../utils/providerUtils';
+import { handleSupabaseError, logError } from '../../utils/errorHandler';
 import { LineChart } from 'react-native-chart-kit';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -65,29 +67,15 @@ export default function ProviderDashboardScreen() {
   }, [providerId, selectedPeriod]);
   
   const fetchProviderId = async () => {
-    if (!user?.email) return;
+    if (!user?.id) return;
     
     try {
-      // Import supabase from services
-      const { supabase } = await import('../../services/supabase');
-      
-      // Get provider ID from providers table using email
-      const { data, error } = await supabase
-        .from('providers')
-        .select('id')
-        .eq('email', user.email)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching provider ID:', error);
-        return;
-      }
-      
-      if (data) {
-        setProviderId(data.id);
+      const providerId = await getProviderIdForUser(user.id);
+      if (providerId) {
+        setProviderId(providerId);
       }
     } catch (error) {
-      console.error('Error in fetchProviderId:', error);
+      logError('fetchProviderId', error);
     }
   };
   
@@ -113,7 +101,9 @@ export default function ProviderDashboardScreen() {
       setRevenueData(revenue);
       setUpcomingBookings(todayBookings);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logError('loadDashboardData', error);
+      const appError = handleSupabaseError(error);
+      // You can show an alert or toast here if needed
     } finally {
       setLoading(false);
     }
@@ -189,7 +179,7 @@ export default function ProviderDashboardScreen() {
       screen: 'ReviewsList',
     },
     {
-      label: t('notifications'),
+      label: t('notificationsText'),
       icon: 'notifications',
       color: colors.secondary,
       screen: 'NotificationPreferences',
@@ -344,13 +334,37 @@ export default function ProviderDashboardScreen() {
   );
   
   const renderInsights = () => {
-    if (!dashboardData?.insights) return null;
+    // Generate insights based on actual data
+    const insights = [];
+    
+    if (bookingStats?.todayBookings > 5) {
+      insights.push({
+        type: 'positive',
+        message: t('analytics.insight1')
+      });
+    }
+    
+    if (performanceMetrics?.avg_rating >= 4.5) {
+      insights.push({
+        type: 'positive',
+        message: t('analytics.insight2')
+      });
+    }
+    
+    if (bookingStats?.monthRevenue > 1000) {
+      insights.push({
+        type: 'positive',
+        message: t('analytics.insight3')
+      });
+    }
+    
+    if (insights.length === 0) return null;
     
     return (
       <Card style={styles.insightsCard}>
         <Card.Title title={t('todayInsights')} />
         <Card.Content>
-          {dashboardData.insights.map((insight: any, index: number) => (
+          {insights.map((insight: any, index: number) => (
             <View key={index} style={styles.insightItem}>
               <Ionicons
                 name={insight.type === 'positive' ? 'checkmark-circle' : 'information-circle'}
@@ -398,13 +412,6 @@ export default function ProviderDashboardScreen() {
         <TouchableOpacity onPress={() => navigation.navigate('NotificationCenter' as any)}>
           <View style={styles.notificationIcon}>
             <Ionicons name="notifications-outline" size={24} color={colors.text} />
-            {dashboardData?.unreadNotifications > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationBadgeText}>
-                  {dashboardData.unreadNotifications}
-                </Text>
-              </View>
-            )}
           </View>
         </TouchableOpacity>
       </View>

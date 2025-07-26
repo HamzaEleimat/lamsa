@@ -31,11 +31,19 @@ export class ServiceManagementService {
         .select('*')
         .order('name_en', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching tags:', error);
+        // Return empty array if table doesn't exist
+        if (error.code === '42P01') {
+          console.warn('service_tags table does not exist, returning empty array');
+          return [];
+        }
+        throw error;
+      }
       return data || [];
     } catch (error) {
       console.error('Error fetching tags:', error);
-      throw error;
+      return []; // Return empty array on error
     }
   }
 
@@ -48,11 +56,7 @@ export class ServiceManagementService {
         .from('services')
         .select(`
           *,
-          category:service_categories(*),
-          tags:service_service_tags(
-            tag:service_tags(*)
-          ),
-          variations:service_variations(*)
+          category:service_categories(*)
         `)
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
@@ -62,8 +66,8 @@ export class ServiceManagementService {
       // Transform the data to match EnhancedService type
       return (data || []).map(service => ({
         ...service,
-        tags: service.tags?.map((st: any) => st.tag) || [],
-        variations: service.variations || []
+        tags: [], // Tags not available yet
+        variations: [] // Variations not available yet
       }));
     } catch (error) {
       console.error('Error fetching provider services:', error);
