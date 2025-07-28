@@ -1,5 +1,4 @@
 import { I18n } from 'i18n-js';
-import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import en from './translations/en.json';
 import ar from './translations/ar.json';
@@ -20,19 +19,17 @@ export const initializeI18n = async () => {
     if (savedLanguage) {
       i18n.locale = savedLanguage;
     } else {
-      // Use Expo's localization API
-      const languageTag = Localization.locale;
-      const locale = languageTag && languageTag.startsWith('ar') ? 'ar' : 'en';
-      i18n.locale = locale;
-      await AsyncStorage.setItem(LANGUAGE_KEY, locale);
+      // Default to English
+      i18n.locale = 'en';
+      await AsyncStorage.setItem(LANGUAGE_KEY, 'en');
     }
   } catch (error) {
     console.error('Error initializing i18n:', error);
-    i18n.locale = 'ar';
+    i18n.locale = 'en';
   }
   
   i18n.enableFallback = true;
-  i18n.defaultLocale = 'ar';
+  i18n.defaultLocale = 'en';
 };
 
 export const changeLanguage = async (language: 'ar' | 'en') => {

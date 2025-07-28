@@ -13,6 +13,7 @@ import {
   I18nManager,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -150,22 +151,22 @@ export default function ServicePackageScreen() {
   const handleSubmit = async () => {
     // Validation
     if (!formData.name_en || !formData.name_ar) {
-      Alert.alert(t('error'), t('packageNameRequired'));
+      Alert.alert(t('common.error'), t('common.packageNameRequired'));
       return;
     }
 
     if (selectedServices.length === 0) {
-      Alert.alert(t('error'), t('atLeastOneServiceRequired'));
+      Alert.alert(t('common.error'), t('common.atLeastOneServiceRequired'));
       return;
     }
 
     if (formData.package_price <= 0) {
-      Alert.alert(t('error'), t('validPackagePriceRequired'));
+      Alert.alert(t('common.error'), t('common.validPackagePriceRequired'));
       return;
     }
 
     if (formData.package_price >= totalOriginalPrice) {
-      Alert.alert(t('error'), t('packagePriceMustBeLessThanOriginal'));
+      Alert.alert(t('common.error'), t('common.packagePriceMustBeLessThanOriginal'));
       return;
     }
 
@@ -200,22 +201,22 @@ export default function ServicePackageScreen() {
 
       if (response.ok) {
         Alert.alert(
-          t('success'),
-          isEditing ? t('packageUpdated') : t('packageCreated'),
+          t('common.success'),
+          isEditing ? t('common.packageUpdated') : t('common.packageCreated'),
           [
             {
-              text: t('ok'),
+              text: t('common.ok'),
               onPress: () => navigation.goBack(),
             },
           ]
         );
       } else {
         const error = await response.json();
-        Alert.alert(t('error'), error.message || t('failedToSavePackage'));
+        Alert.alert(t('common.error'), error.message || t('common.failedToSavePackage'));
       }
     } catch (error) {
       console.error('Error saving package:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -237,7 +238,7 @@ export default function ServicePackageScreen() {
         <View style={styles.serviceItemContent}>
           <Text style={styles.serviceItemName}>{serviceName}</Text>
           <Text style={styles.serviceItemPrice}>
-            {item.price} {t('jod')} • {item.duration_minutes} {t('minutes')}
+            {item.price} {t('common.jod')} • {item.duration_minutes} {t('common.minutes')}
           </Text>
         </View>
         
@@ -261,14 +262,14 @@ export default function ServicePackageScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {isEditing ? t('editPackage') : t('createPackage')}
+          {isEditing ? t('common.editPackage') : t('common.createPackage')}
         </Text>
         <View style={styles.headerRight} />
       </View>
@@ -276,37 +277,37 @@ export default function ServicePackageScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Basic Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('basicInformation')}</Text>
+          <Text style={styles.sectionTitle}>{t('serviceForm.basicInformation')}</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('packageNameEnglish')} *</Text>
+            <Text style={styles.label}>{t('common.packageNameEnglish')} *</Text>
             <TextInput
               style={styles.input}
               value={formData.name_en}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name_en: text }))}
-              placeholder={t('enterPackageNameEnglish')}
+              placeholder={t('common.enterPackageNameEnglish')}
               placeholderTextColor={colors.gray}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('packageNameArabic')} *</Text>
+            <Text style={styles.label}>{t('common.packageNameArabic')} *</Text>
             <TextInput
               style={[styles.input, isRTL && styles.rtlText]}
               value={formData.name_ar}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name_ar: text }))}
-              placeholder={t('enterPackageNameArabic')}
+              placeholder={t('common.enterPackageNameArabic')}
               placeholderTextColor={colors.gray}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('descriptionEnglish')}</Text>
+            <Text style={styles.label}>{t('serviceForm.descriptionEnglish')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={formData.description_en}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description_en: text }))}
-              placeholder={t('enterDescriptionEnglish')}
+              placeholder={t('serviceForm.enterDescriptionEnglish')}
               placeholderTextColor={colors.gray}
               multiline
               numberOfLines={3}
@@ -314,12 +315,12 @@ export default function ServicePackageScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('descriptionArabic')}</Text>
+            <Text style={styles.label}>{t('serviceForm.descriptionArabic')}</Text>
             <TextInput
               style={[styles.input, styles.textArea, isRTL && styles.rtlText]}
               value={formData.description_ar}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description_ar: text }))}
-              placeholder={t('enterDescriptionArabic')}
+              placeholder={t('serviceForm.enterDescriptionArabic')}
               placeholderTextColor={colors.gray}
               multiline
               numberOfLines={3}
@@ -329,25 +330,25 @@ export default function ServicePackageScreen() {
 
         {/* Package Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('packageSettings')}</Text>
+          <Text style={styles.sectionTitle}>{t('common.packageSettings')}</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('packageType')}</Text>
+            <Text style={styles.label}>{t('common.packageType')}</Text>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={formData.package_type}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, package_type: value }))}
                 style={styles.picker}
               >
-                <Picker.Item label={t('bundle')} value="bundle" />
-                <Picker.Item label={t('subscription')} value="subscription" />
-                <Picker.Item label={t('promotional')} value="promotional" />
+                <Picker.Item label={t('common.bundle')} value="bundle" />
+                <Picker.Item label={t('common.subscription')} value="subscription" />
+                <Picker.Item label={t('common.promotional')} value="promotional" />
               </Picker>
             </View>
           </View>
 
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{t('featuredPackage')}</Text>
+            <Text style={styles.switchLabel}>{t('common.featuredPackage')}</Text>
             <Switch
               value={formData.featured}
               onValueChange={(value) => setFormData(prev => ({ ...prev, featured: value }))}
@@ -360,7 +361,7 @@ export default function ServicePackageScreen() {
         {/* Service Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t('selectServices')} ({selectedServices.length})
+            {t('common.selectServices')} ({selectedServices.length})
           </Text>
           
           <FlatList
@@ -374,18 +375,18 @@ export default function ServicePackageScreen() {
 
         {/* Pricing */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('pricing')}</Text>
+          <Text style={styles.sectionTitle}>{t('common.pricing')}</Text>
           
           <View style={styles.pricingContainer}>
             <View style={styles.pricingRow}>
-              <Text style={styles.pricingLabel}>{t('originalPrice')}:</Text>
+              <Text style={styles.pricingLabel}>{t('common.originalPrice')}:</Text>
               <Text style={styles.pricingValue}>
-                {totalOriginalPrice.toFixed(2)} {t('jod')}
+                {totalOriginalPrice.toFixed(2)} {t('common.jod')}
               </Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>{t('packagePrice')} ({t('jod')}) *</Text>
+              <Text style={styles.label}>{t('common.packagePrice')} ({t('common.jod')}) *</Text>
               <TextInput
                 style={styles.input}
                 value={formData.package_price.toString()}
@@ -400,16 +401,16 @@ export default function ServicePackageScreen() {
             </View>
 
             <View style={styles.pricingRow}>
-              <Text style={styles.pricingLabel}>{t('discount')}:</Text>
+              <Text style={styles.pricingLabel}>{t('common.discount')}:</Text>
               <Text style={[styles.pricingValue, styles.discountValue]}>
                 {discountPercentage.toFixed(1)}%
               </Text>
             </View>
 
             <View style={styles.pricingRow}>
-              <Text style={styles.pricingLabel}>{t('savings')}:</Text>
+              <Text style={styles.pricingLabel}>{t('common.savings')}:</Text>
               <Text style={[styles.pricingValue, styles.savingsValue]}>
-                {(totalOriginalPrice - formData.package_price).toFixed(2)} {t('jod')}
+                {(totalOriginalPrice - formData.package_price).toFixed(2)} {t('common.jod')}
               </Text>
             </View>
           </View>
@@ -427,12 +428,12 @@ export default function ServicePackageScreen() {
             <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.submitButtonText}>
-              {isEditing ? t('updatePackage') : t('createPackage')}
+              {isEditing ? t('common.updatePackage') : t('common.createPackage')}
             </Text>
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

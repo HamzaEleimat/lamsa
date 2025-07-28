@@ -109,6 +109,7 @@
       "expo-image-picker",
       "expo-contacts",
       "expo-calendar",
+      "expo-updates",
       [
         "expo-build-properties",
         {

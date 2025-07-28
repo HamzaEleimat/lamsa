@@ -13,6 +13,7 @@ import {
   Platform,
   LayoutAnimation,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialTopTabBar, createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -89,7 +90,7 @@ export default function ServiceListScreen() {
       setServices(providerServices);
     } catch (error) {
       console.error('Error fetching services:', error);
-      Alert.alert(t('error'), t('failedToLoadServices'));
+      Alert.alert(t('common.error'), t('serviceManagement.failedToLoadServices'));
     }
   };
 
@@ -129,7 +130,7 @@ export default function ServiceListScreen() {
 
   const handleBulkOperation = async (operation: BulkServiceOperation['operation']) => {
     if (selectedServices.length === 0) {
-      Alert.alert(t('error'), t('noServicesSelected'));
+      Alert.alert(t('common.error'), t('serviceManagement.noServicesSelected'));
       return;
     }
 
@@ -150,13 +151,13 @@ export default function ServiceListScreen() {
         }
       }
       
-      Alert.alert(t('success'), t('bulkOperationSuccess'));
+      Alert.alert(t('common.success'), t('serviceManagement.bulkOperationSuccess'));
       setBulkMode(false);
       setSelectedServices([]);
       await fetchServices();
     } catch (error) {
       console.error('Error performing bulk operation:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
     }
   };
 
@@ -213,11 +214,11 @@ export default function ServiceListScreen() {
       };
 
       await serviceManagementService.createService(user.id, duplicatedService);
-      Alert.alert(t('success'), t('serviceDuplicated'));
+      Alert.alert(t('common.success'), t('serviceManagement.serviceDuplicated'));
       await fetchServices();
     } catch (error) {
       console.error('Error duplicating service:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
     }
   };
 
@@ -236,27 +237,27 @@ export default function ServiceListScreen() {
       ));
     } catch (error) {
       console.error('Error toggling service:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
     }
   };
 
   const handleDeleteService = async (serviceId: string) => {
     Alert.alert(
-      t('confirmDelete'),
-      t('deleteServiceConfirmation'),
+      t('common.confirmDelete'),
+      t('common.deleteServiceConfirmation'),
       [
-        { text: t('cancel'), style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: t('delete'),
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await serviceManagementService.deleteService(serviceId);
               setServices(prev => prev.filter(s => s.id !== serviceId));
-              Alert.alert(t('success'), t('serviceDeleted'));
+              Alert.alert(t('common.success'), t('serviceManagement.serviceDeleted'));
             } catch (error) {
               console.error('Error deleting service:', error);
-              Alert.alert(t('error'), t('somethingWentWrong'));
+              Alert.alert(t('common.error'), t('common.somethingWentWrong'));
             }
           },
         },
@@ -272,7 +273,7 @@ export default function ServiceListScreen() {
 
   const handleBulkActions = () => {
     if (selectedServices.length === 0) {
-      Alert.alert(t('error'), t('noServicesSelected'));
+      Alert.alert(t('common.error'), t('serviceManagement.noServicesSelected'));
       return;
     }
     
@@ -299,7 +300,7 @@ export default function ServiceListScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="clipboard-outline" size={48} color={colors.gray} />
-            <Text style={styles.emptyText}>{t('noServicesFound')}</Text>
+            <Text style={styles.emptyText}>{t('serviceManagement.noServicesFound')}</Text>
           </View>
         }
       />
@@ -323,18 +324,18 @@ export default function ServiceListScreen() {
             </Text>
             {item.featured && (
               <View style={styles.featuredBadge}>
-                <Text style={styles.featuredText}>{t('featured')}</Text>
+                <Text style={styles.featuredText}>{t('common.featured')}</Text>
               </View>
             )}
           </View>
           <Text style={styles.packageDetails}>
-            {t('originalPrice')}: <Text style={styles.strikethrough}>{item.original_price} {t('jod')}</Text>
+            {t('serviceManagement.originalPrice')}: <Text style={styles.strikethrough}>{item.original_price} {t('common.jod')}</Text>
           </Text>
           <Text style={styles.packagePrice}>
-            {t('packagePrice')}: {item.package_price} {t('jod')} ({item.discount_percentage.toFixed(0)}% {t('off')})
+            {t('serviceManagement.packagePrice')}: {item.package_price} {t('common.jod')} ({item.discount_percentage.toFixed(0)}% {t('serviceManagement.off')})
           </Text>
           <Text style={styles.packageServices}>
-            {item.package_services?.length || 0} {t('services')} • {item.total_duration_minutes} {t('minutes')}
+            {item.package_services?.length || 0} {t('common.services')} • {item.total_duration_minutes} {t('common.minutes')}
           </Text>
         </TouchableOpacity>
       )}
@@ -346,7 +347,7 @@ export default function ServiceListScreen() {
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
           <Ionicons name="gift-outline" size={48} color={colors.gray} />
-          <Text style={styles.emptyText}>{t('noPackagesFound')}</Text>
+          <Text style={styles.emptyText}>{t('serviceManagement.noPackagesFound')}</Text>
           <TouchableOpacity
             style={styles.createButton}
             onPress={() => {
@@ -354,7 +355,7 @@ export default function ServiceListScreen() {
               console.log('Navigate to PackageForm for new package');
             }}
           >
-            <Text style={styles.createButtonText}>{t('createFirstPackage')}</Text>
+            <Text style={styles.createButtonText}>{t('serviceManagement.createFirstPackage')}</Text>
           </TouchableOpacity>
         </View>
       }
@@ -370,7 +371,7 @@ export default function ServiceListScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
@@ -378,7 +379,7 @@ export default function ServiceListScreen() {
             <Ionicons name="search" size={20} color={colors.gray} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder={t('searchServices')}
+              placeholder={t('serviceManagement.searchServices')}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor={colors.gray}
@@ -445,7 +446,7 @@ export default function ServiceListScreen() {
       {bulkMode && (
         <View style={styles.bulkActionsContainer}>
           <Text style={styles.bulkText}>
-            {selectedServices.length} {t('selected')}
+            {selectedServices.length} {t('common.selected')}
           </Text>
           <View style={styles.bulkActions}>
             <TouchableOpacity
@@ -453,7 +454,7 @@ export default function ServiceListScreen() {
               onPress={handleBulkActions}
             >
               <Ionicons name="cog-outline" size={20} color={colors.primary} />
-              <Text style={styles.bulkButtonText}>{t('bulkActions')}</Text>
+              <Text style={styles.bulkButtonText}>{t('common.bulkActions')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.bulkButton}
@@ -463,7 +464,7 @@ export default function ServiceListScreen() {
               }}
             >
               <Ionicons name="close" size={20} color={colors.error} />
-              <Text style={styles.bulkButtonText}>{t('cancel')}</Text>
+              <Text style={styles.bulkButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -479,20 +480,20 @@ export default function ServiceListScreen() {
       >
         <Tab.Screen 
           name="Active" 
-          options={{ title: t('activeServices') }}
+          options={{ title: t('serviceManagement.activeServices') }}
         >
           {() => <ServicesTab status="active" />}
         </Tab.Screen>
         <Tab.Screen 
           name="Inactive" 
-          options={{ title: t('inactiveServices') }}
+          options={{ title: t('serviceManagement.inactiveServices') }}
         >
           {() => <ServicesTab status="inactive" />}
         </Tab.Screen>
         <Tab.Screen 
           name="Packages" 
           component={PackagesTab}
-          options={{ title: t('packages') }}
+          options={{ title: t('common.packages') }}
         />
       </Tab.Navigator>
 
@@ -527,7 +528,7 @@ export default function ServiceListScreen() {
         categories={categories}
         tags={tags}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

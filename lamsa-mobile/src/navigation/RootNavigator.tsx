@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { isRTL } from '../i18n';
 import { UserRole } from '../types';
 import AuthNavigator from './AuthNavigator';
-import CustomerTabNavigator from './CustomerTabNavigator';
+import CustomerStackNavigator from './CustomerStackNavigator';
 import ProviderStackNavigator from './ProviderStackNavigator';
 
 export type RootStackParamList = {
@@ -43,7 +43,7 @@ const RootNavigator: React.FC = () => {
           user.role === UserRole.PROVIDER ? (
             <Stack.Screen name="ProviderMain" component={ProviderStackNavigator} />
           ) : (
-            <Stack.Screen name="CustomerMain" component={CustomerTabNavigator} />
+            <Stack.Screen name="CustomerMain" component={CustomerStackNavigator} />
           )
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />

@@ -14,6 +14,7 @@ import {
   FlatList,
   Modal,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from '../../components/MapView';
@@ -508,7 +509,7 @@ export default function ProviderDetailScreen() {
   const styles = createStyles(theme);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['bottom', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -530,7 +531,7 @@ export default function ProviderDetailScreen() {
       </ScrollView>
 
       {renderServiceModal()}
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -219,16 +219,23 @@ VALUES
 ON CONFLICT (phone) DO NOTHING;
 
 -- ====================================================================
--- SAMPLE BOOKINGS (Past bookings for reviews)
+-- SAMPLE BOOKINGS (Skipped - violates future booking constraint)
 -- ====================================================================
+-- Note: Sample bookings and reviews are commented out because the schema
+-- has a constraint that bookings must be in the future.
+-- To test reviews, you'll need to:
+-- 1. Create a booking with a future date
+-- 2. Update its status to 'completed'
+-- 3. Then create a review
 
+/*
 -- Create some completed bookings for review data
 INSERT INTO bookings (
   user_id,
   provider_id,
   service_id,
   booking_date,
-  start_time,
+  start_time, 
   end_time,
   service_amount,
   total_amount,
@@ -286,6 +293,7 @@ SELECT
 FROM bookings b
 WHERE b.status = 'completed'
 LIMIT 1;
+*/
 
 -- ====================================================================
 -- NOTES

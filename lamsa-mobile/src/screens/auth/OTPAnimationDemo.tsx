@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 /**
  * OTP Screen Animation Features Demo
@@ -126,7 +127,7 @@ Animated.parallel(
 
 export const OTPAnimationDemo: React.FC = () => {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#fff' }]} edges={['bottom', 'left', 'right']}>
       <Text style={styles.title}>OTP Screen Animations</Text>
       
       <View style={styles.section}>
@@ -155,7 +156,7 @@ export const OTPAnimationDemo: React.FC = () => {
           run at 60 FPS on most devices without affecting the UI responsiveness.
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

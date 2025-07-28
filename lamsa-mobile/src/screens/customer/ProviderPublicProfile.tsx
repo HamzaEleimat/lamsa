@@ -15,6 +15,7 @@ import {
   Animated,
   Share,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -329,7 +330,7 @@ export default function ProviderPublicProfile() {
   const profileUrl = `https://lamsa.com/provider/${providerSlug || providerId}`;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       <StatusBar barStyle="light-content" />
       
       {/* SEO Meta Tags */}
@@ -514,7 +515,7 @@ export default function ProviderPublicProfile() {
           avatarUrl={provider.avatarUrl}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

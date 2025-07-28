@@ -7,47 +7,63 @@ CREATE INDEX IF NOT EXISTS idx_bookings_availability_check
 ON bookings(provider_id, booking_date, start_time, end_time) 
 WHERE status IN ('pending', 'confirmed');
 
+-- Note: Partial index with NOW() removed as it's not IMMUTABLE
 CREATE INDEX IF NOT EXISTS idx_bookings_user_activity 
-ON bookings(user_id, created_at DESC) 
-WHERE created_at > NOW() - INTERVAL '90 days';
+ON bookings(user_id, created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_bookings_financial 
 ON bookings(created_at, status) 
 WHERE status = 'completed';
 
 CREATE INDEX IF NOT EXISTS idx_providers_search 
-ON providers(verified, active, rating) 
-WHERE active = true AND verified = true;
+ON providers(status, rating) 
+WHERE status = 'active';
 
 CREATE INDEX IF NOT EXISTS idx_services_provider_lookup 
 ON services(provider_id, active, category_id, price) 
 WHERE active = true;
 
--- Add missing unique constraints to prevent double-booking
-ALTER TABLE bookings 
-ADD CONSTRAINT IF NOT EXISTS unique_provider_timeslot 
-UNIQUE (provider_id, booking_date, start_time, status) 
-WHERE status IN ('pending', 'confirmed');
+-- Add missing constraints with proper error handling
+DO $$ 
+BEGIN
+  -- Add unique constraint to prevent double-booking using a unique index
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'unique_provider_timeslot') THEN
+    CREATE UNIQUE INDEX unique_provider_timeslot 
+    ON bookings(provider_id, booking_date, start_time) 
+    WHERE status IN ('pending', 'confirmed');
+  END IF;
 
--- Add check constraints for data integrity
-ALTER TABLE bookings 
-ADD CONSTRAINT IF NOT EXISTS check_booking_future_date 
-CHECK (
-  (status = 'completed' OR status = 'cancelled') OR 
-  (booking_date >= CURRENT_DATE)
-);
+  -- Add check constraints for data integrity
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_booking_future_date') THEN
+    ALTER TABLE bookings 
+    ADD CONSTRAINT check_booking_future_date 
+    CHECK (
+      (status = 'completed' OR status = 'cancelled') OR 
+      (booking_date >= CURRENT_DATE)
+    );
+  END IF;
 
-ALTER TABLE services 
-ADD CONSTRAINT IF NOT EXISTS check_service_duration 
-CHECK (duration_minutes > 0 AND duration_minutes <= 480); -- Max 8 hours
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_service_duration') THEN
+    ALTER TABLE services 
+    ADD CONSTRAINT check_service_duration 
+    CHECK (duration_minutes > 0 AND duration_minutes <= 480); -- Max 8 hours
+  END IF;
 
-ALTER TABLE services 
-ADD CONSTRAINT IF NOT EXISTS check_service_price 
-CHECK (price >= 0);
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_service_price') THEN
+    ALTER TABLE services 
+    ADD CONSTRAINT check_service_price 
+    CHECK (price >= 0);
+  END IF;
 
-ALTER TABLE providers 
-ADD CONSTRAINT IF NOT EXISTS check_provider_rating 
-CHECK (rating >= 0 AND rating <= 5);
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_provider_rating') THEN
+    ALTER TABLE providers 
+    ADD CONSTRAINT check_provider_rating 
+    CHECK (rating >= 0 AND rating <= 5);
+  END IF;
+EXCEPTION WHEN OTHERS THEN
+  -- Ignore errors if constraints already exist
+  NULL;
+END $$;
 
 -- Add composite indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_services_search 
@@ -62,33 +78,37 @@ ON bookings(booking_date, provider_id, status);
 -- Add spatial index if not exists (for provider location queries)
 CREATE INDEX IF NOT EXISTS idx_providers_location 
 ON providers USING GIST (location) 
-WHERE active = true AND verified = true;
+WHERE status = 'active';
 
 -- Create partial indexes for performance
 CREATE INDEX IF NOT EXISTS idx_active_providers 
 ON providers(created_at DESC) 
-WHERE active = true AND verified = true;
+WHERE status = 'active';
 
 CREATE INDEX IF NOT EXISTS idx_pending_bookings 
 ON bookings(created_at DESC) 
 WHERE status = 'pending';
 
 -- Add missing foreign key constraints with proper CASCADE behavior
-ALTER TABLE bookings 
-DROP CONSTRAINT IF EXISTS bookings_user_id_fkey,
-ADD CONSTRAINT bookings_user_id_fkey 
-FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT;
-
-ALTER TABLE bookings 
-DROP CONSTRAINT IF EXISTS bookings_provider_id_fkey,
-ADD CONSTRAINT bookings_provider_id_fkey 
-FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE RESTRICT;
-
--- Update services foreign key to prevent accidental deletion of booking history
-ALTER TABLE services 
-DROP CONSTRAINT IF EXISTS services_provider_id_fkey,
-ADD CONSTRAINT services_provider_id_fkey 
-FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE RESTRICT;
+DO $$ 
+BEGIN
+  -- Update bookings foreign keys
+  ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_user_id_fkey;
+  ALTER TABLE bookings ADD CONSTRAINT bookings_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT;
+  
+  ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_provider_id_fkey;
+  ALTER TABLE bookings ADD CONSTRAINT bookings_provider_id_fkey 
+    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE RESTRICT;
+  
+  -- Update services foreign key to prevent accidental deletion of booking history
+  ALTER TABLE services DROP CONSTRAINT IF EXISTS services_provider_id_fkey;
+  ALTER TABLE services ADD CONSTRAINT services_provider_id_fkey 
+    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE RESTRICT;
+EXCEPTION WHEN OTHERS THEN
+  -- Ignore errors if constraints already exist with the same definition
+  NULL;
+END $$;
 
 -- Add audit columns if missing
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP WITH TIME ZONE;
@@ -145,9 +165,8 @@ BEFORE INSERT OR UPDATE ON bookings
 FOR EACH ROW
 EXECUTE FUNCTION validate_booking_time();
 
--- Add indexes for the new PII encryption columns
-CREATE INDEX IF NOT EXISTS idx_users_phone_hash ON users(phone_hash);
-CREATE INDEX IF NOT EXISTS idx_users_email_hash ON users(email_hash);
+-- Note: PII encryption columns are only on providers table, not users
+-- Indexes for these columns are created in the encrypt_provider_phones migration
 
 -- Create materialized view for provider analytics
 CREATE MATERIALIZED VIEW IF NOT EXISTS provider_analytics AS
@@ -165,7 +184,7 @@ SELECT
 FROM providers p
 LEFT JOIN bookings b ON p.id = b.provider_id
 LEFT JOIN reviews r ON p.id = r.provider_id
-WHERE p.active = true
+WHERE p.status = 'active'
 GROUP BY p.id, p.business_name_en, p.business_name_ar;
 
 -- Create index on materialized view
@@ -183,7 +202,7 @@ $$ LANGUAGE plpgsql;
 COMMENT ON COLUMN providers.pii_encrypted IS 'Indicates if PII fields have been encrypted';
 COMMENT ON COLUMN providers.pii_encrypted_at IS 'Timestamp when PII was encrypted';
 COMMENT ON COLUMN bookings.platform_fee IS 'Platform fee: 2 JOD for services ≤25 JOD, 5 JOD for services >25 JOD';
-COMMENT ON COLUMN bookings.provider_earning IS 'Provider earning = service_amount - platform_fee';
+COMMENT ON COLUMN bookings.provider_fee IS 'Provider earning = service_amount - platform_fee';
 
 -- Grant appropriate permissions
 GRANT SELECT ON provider_analytics TO authenticated;

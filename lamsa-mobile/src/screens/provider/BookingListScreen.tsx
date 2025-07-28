@@ -20,6 +20,7 @@ import {
   Divider,
   Menu,
 } from "react-native-paper";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -328,7 +329,7 @@ const BookingListScreen: React.FC = () => {
   const filteredBookings = getFilteredBookings();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
         <Text variant="headlineMedium" style={styles.title}>
           {t("navigation.bookings")}
@@ -397,7 +398,7 @@ const BookingListScreen: React.FC = () => {
         onPress={() => navigation.navigate("CreateBooking")}
         label={t("bookings.create_booking")}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

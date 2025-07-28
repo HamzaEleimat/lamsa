@@ -7,6 +7,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Switch, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -444,7 +445,7 @@ export default function NotificationPreferencesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {renderChannelSection()}
         {renderNotificationTypes()}
@@ -503,7 +504,7 @@ export default function NotificationPreferencesScreen() {
           }}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

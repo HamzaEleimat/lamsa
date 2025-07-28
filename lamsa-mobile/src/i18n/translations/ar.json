@@ -1052,7 +1052,17 @@
     "lastMonth": "الشهر الماضي",
     "thisYear": "هذه السنة",
     "custom": "مخصص",
-    "selectPeriod": "اختر الفترة"
+    "selectPeriod": "اختر الفترة",
+    "bookingStatus": "حالة الحجوزات",
+    "totalBookings": "إجمالي الحجوزات",
+    "employeePerformance": "أداء الموظفين",
+    "activeEmployees": "الموظفون النشطون",
+    "manage": "إدارة",
+    "totalEmployees": "إجمالي الموظفين",
+    "topPerformerToday": "أفضل موظف اليوم",
+    "recentReviews": "التقييمات الأخيرة",
+    "averageRating": "متوسط التقييم",
+    "anonymous": "مجهول"
   },
   "screens": {
     "bookings": {

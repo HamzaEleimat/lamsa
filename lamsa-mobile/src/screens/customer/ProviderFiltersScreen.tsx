@@ -7,6 +7,7 @@ import {
   Platform,
   I18nManager,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
@@ -56,26 +57,26 @@ export default function ProviderFiltersScreen() {
   const styles = createStyles(theme);
 
   const serviceCategories = [
-    { key: ServiceCategory.HAIR, label: t('hair') },
-    { key: ServiceCategory.NAILS, label: t('nails') },
-    { key: ServiceCategory.MAKEUP, label: t('makeup') },
-    { key: ServiceCategory.SPA, label: t('spa') },
-    { key: ServiceCategory.AESTHETIC, label: t('aesthetic') },
+    { key: ServiceCategory.HAIR, label: t('categories.hair') },
+    { key: ServiceCategory.NAILS, label: t('categories.nails') },
+    { key: ServiceCategory.MAKEUP, label: t('categories.makeup') },
+    { key: ServiceCategory.SPA, label: t('categories.spa') },
+    { key: ServiceCategory.AESTHETIC, label: t('categories.aesthetic') },
   ];
 
   const businessTypes = [
-    { key: BusinessType.SALON, label: t('salon') },
-    { key: BusinessType.SPA, label: t('spa') },
-    { key: BusinessType.MOBILE, label: t('mobileService') },
-    { key: BusinessType.HOME_BASED, label: t('homeBased') },
-    { key: BusinessType.CLINIC, label: t('clinic') },
+    { key: BusinessType.SALON, label: t('businessTypes.salon') },
+    { key: BusinessType.SPA, label: t('businessTypes.spa') },
+    { key: BusinessType.MOBILE, label: t('businessTypes.mobileService') },
+    { key: BusinessType.HOME_BASED, label: t('businessTypes.homeBased') },
+    { key: BusinessType.CLINIC, label: t('businessTypes.clinic') },
   ];
 
   const sortOptions = [
-    { key: 'distance', label: t('distance') },
-    { key: 'rating', label: t('rating') },
-    { key: 'price', label: t('price') },
-    { key: 'reviews', label: t('reviews') },
+    { key: 'distance', label: t('filters.distance') },
+    { key: 'rating', label: t('filters.rating') },
+    { key: 'price', label: t('common.price') },
+    { key: 'reviews', label: t('common.reviews') },
   ];
 
   const handleCategoryToggle = (category: ServiceCategory) => {
@@ -140,19 +141,19 @@ export default function ProviderFiltersScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['bottom', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="close" size={24} color={theme.colors.onSurface} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('filters')}</Text>
+        <Text style={styles.headerTitle}>{t('filters.title')}</Text>
         <TouchableOpacity onPress={handleReset} disabled={!hasActiveFilters()}>
           <Text style={[
             styles.resetText,
             !hasActiveFilters() && styles.disabledText,
           ]}>
-            {t('reset')}
+            {t('common.reset')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -160,7 +161,7 @@ export default function ProviderFiltersScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Sort By */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('sortBy')}</Text>
+          <Text style={styles.sectionTitle}>{t('filters.sortBy')}</Text>
           <View style={styles.chipContainer}>
             {sortOptions.map(option => (
               <FilterChip
@@ -175,7 +176,7 @@ export default function ProviderFiltersScreen() {
 
         {/* Service Categories */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('serviceCategories')}</Text>
+          <Text style={styles.sectionTitle}>{t('filters.serviceCategories')}</Text>
           <View style={styles.chipContainer}>
             {serviceCategories.map(category => (
               <FilterChip
@@ -190,7 +191,7 @@ export default function ProviderFiltersScreen() {
 
         {/* Business Types */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('businessType')}</Text>
+          <Text style={styles.sectionTitle}>{t('filters.businessType')}</Text>
           <View style={styles.chipContainer}>
             {businessTypes.map(type => (
               <FilterChip
@@ -206,7 +207,7 @@ export default function ProviderFiltersScreen() {
         {/* Distance Radius */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t('distanceRadius')}: {filters.radiusKm || 50} {t('km')}
+            {t('filters.distanceRadius')}: {filters.radiusKm || 50} {t('common.km')}
           </Text>
           <Slider
             style={styles.slider}
@@ -219,15 +220,15 @@ export default function ProviderFiltersScreen() {
             thumbTintColor={theme.colors.primary}
           />
           <View style={styles.sliderLabels}>
-            <Text style={styles.sliderLabel}>1 {t('km')}</Text>
-            <Text style={styles.sliderLabel}>100 {t('km')}</Text>
+            <Text style={styles.sliderLabel}>1 {t('common.km')}</Text>
+            <Text style={styles.sliderLabel}>100 {t('common.km')}</Text>
           </View>
         </View>
 
         {/* Minimum Rating */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t('minimumRating')}: {filters.minRating || 0} ★
+            {t('filters.minimumRating')}: {filters.minRating || 0} ★
           </Text>
           <View style={styles.ratingContainer}>
             {[1, 2, 3, 4, 5].map(rating => (
@@ -251,7 +252,7 @@ export default function ProviderFiltersScreen() {
 
         {/* Availability */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('availability')}</Text>
+          <Text style={styles.sectionTitle}>{t('filters.availability')}</Text>
           <TouchableOpacity
             style={styles.checkboxRow}
             onPress={() => setFilters({ ...filters, availableNow: !filters.availableNow })}
@@ -261,7 +262,7 @@ export default function ProviderFiltersScreen() {
                 <Ionicons name="checkmark" size={16} color={theme.colors.onPrimary} />
               )}
             </View>
-            <Text style={styles.checkboxLabel}>{t('availableNow')}</Text>
+            <Text style={styles.checkboxLabel}>{t('filters.availableNow')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -273,7 +274,7 @@ export default function ProviderFiltersScreen() {
                 <Ionicons name="checkmark" size={16} color={theme.colors.onPrimary} />
               )}
             </View>
-            <Text style={styles.checkboxLabel}>{t('availableToday')}</Text>
+            <Text style={styles.checkboxLabel}>{t('filters.availableToday')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -288,7 +289,7 @@ export default function ProviderFiltersScreen() {
                 <Ionicons name="checkmark" size={16} color={theme.colors.onPrimary} />
               )}
             </View>
-            <Text style={styles.checkboxLabel}>{t('showNewProviders')}</Text>
+            <Text style={styles.checkboxLabel}>{t('filters.showNewProviders')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -299,10 +300,10 @@ export default function ProviderFiltersScreen() {
           style={styles.applyButton}
           onPress={handleApply}
         >
-          <Text style={styles.applyButtonText}>{t('applyFilters')}</Text>
+          <Text style={styles.applyButtonText}>{t('filters.applyFilters')}</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

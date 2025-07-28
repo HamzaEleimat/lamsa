@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../hooks/useTranslation';
 import { colors } from '../constants/colors';
 
@@ -23,6 +24,7 @@ const Tab = createBottomTabNavigator<ProviderTabParamList>();
 
 export default function ProviderTabNavigator() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -57,9 +59,9 @@ export default function ProviderTabNavigator() {
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: colors.border,
-          paddingBottom: 5,
+          paddingBottom: insets.bottom,
           paddingTop: 5,
-          height: 60,
+          height: 60 + insets.bottom,
         },
         tabBarLabelStyle: {
           fontSize: 12,

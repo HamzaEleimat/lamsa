@@ -12,6 +12,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { Text } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
@@ -70,9 +71,9 @@ export default function SearchScreen() {
       if (status !== 'granted') {
         setLocationEnabled(false);
         Alert.alert(
-          t('locationPermission'),
-          t('locationPermissionMessage'),
-          [{ text: t('ok') }]
+          t('customer.locationPermission'),
+          t('customer.locationPermissionMessage'),
+          [{ text: t('common.ok') }]
         );
         return;
       }
@@ -124,7 +125,7 @@ export default function SearchScreen() {
       setHasMore(response.hasMore);
     } catch (error) {
       console.error('Error searching providers:', error);
-      Alert.alert(t('error'), t('failedToLoadProviders'));
+      Alert.alert(t('common.error'), t('customer.failedToLoadProviders'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -196,7 +197,7 @@ export default function SearchScreen() {
           <TextInput
             ref={searchInputRef}
             style={[styles.searchInput, isRTL && styles.rtlText]}
-            placeholder={t('searchProviders')}
+            placeholder={t('customer.searchProviders')}
             placeholderTextColor={colors.gray}
             value={searchQuery}
             onChangeText={handleSearchChange}
@@ -260,7 +261,7 @@ export default function SearchScreen() {
               viewMode === 'list' && styles.activeViewModeText,
             ]}
           >
-            {t('listView')}
+            {t('customer.listView')}
           </Text>
         </TouchableOpacity>
 
@@ -282,7 +283,7 @@ export default function SearchScreen() {
               viewMode === 'map' && styles.activeViewModeText,
             ]}
           >
-            {t('mapView')}
+            {t('customer.mapView')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -299,11 +300,12 @@ export default function SearchScreen() {
   );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <StatusBar barStyle="dark-content" />
       
       {renderHeader()}
 
@@ -317,7 +319,7 @@ export default function SearchScreen() {
           hasMore={hasMore}
           onProviderPress={handleProviderPress}
           currentLocation={userLocation}
-          emptyMessage={searchQuery ? t('noProvidersMatchSearch') : undefined}
+          emptyMessage={searchQuery ? t('customer.noProvidersMatchSearch') : undefined}
         />
       ) : (
         <ProviderMapView
@@ -330,7 +332,8 @@ export default function SearchScreen() {
           }}
         />
       )}
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -341,7 +344,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.white,
-    paddingTop: Platform.OS === 'ios' ? 50 : (StatusBar.currentHeight || 0) + 10,
+    paddingTop: 10,
     ...Platform.select({
       ios: {
         shadowColor: '#000',

@@ -8,6 +8,7 @@ import {
   Switch,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMultiplePermissions } from '@hooks/usePermissions';
 import PermissionFlow from '@components/permissions/PermissionFlow';
@@ -141,8 +142,9 @@ export default function PermissionsDemo() {
   ];
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#fff' }]} edges={['bottom', 'left', 'right']}>
+      <ScrollView>
+        <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.onBackground }]}>
           Permissions Demo
         </Text>
@@ -275,7 +277,8 @@ export default function PermissionsDemo() {
           ? 'نحتاج إلى بعض الأذونات لتوفير أفضل تجربة'
           : 'We need a few permissions to provide the best experience'}
       />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

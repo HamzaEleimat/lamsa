@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { Text, Card, ActivityIndicator, SegmentedButtons, Avatar, ProgressBar } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -52,27 +53,27 @@ export default function CustomerAnalyticsScreen() {
     
     const cards = [
       {
-        title: t('totalCustomers'),
+        title: t('customerAnalytics.totalCustomers'),
         value: customerData.totalCustomers.toString(),
         icon: 'people',
         color: colors.primary,
       },
       {
-        title: t('newCustomers'),
+        title: t('customerAnalytics.newCustomers'),
         value: customerData.newCustomers.toString(),
-        subtitle: t('thisperiod', { period: t(selectedPeriod) }),
+        subtitle: t('customerAnalytics.thisPeriod', { period: t(`common.${selectedPeriod}`) }),
         icon: 'person-add',
         color: colors.success,
       },
       {
-        title: t('retentionRate'),
+        title: t('customerAnalytics.retentionRate'),
         value: `${customerData.retentionRate}%`,
         icon: 'heart',
         color: colors.error,
       },
       {
-        title: t('avgLifetimeValue'),
-        value: `${customerData.averageLifetimeValue} ${t('jod')}`,
+        title: t('customerAnalytics.avgCustomerSpend'),
+        value: `${customerData.averageLifetimeValue} ${t('common.jod')}`,
         icon: 'cash',
         color: colors.warning,
       },
@@ -112,7 +113,7 @@ export default function CustomerAnalyticsScreen() {
     
     return (
       <Card style={styles.chartCard}>
-        <Card.Title title={t('customerGrowth')} />
+        <Card.Title title={t('customerAnalytics.customerGrowth')} />
         <Card.Content>
           <LineChart
             data={data}
@@ -149,9 +150,9 @@ export default function CustomerAnalyticsScreen() {
     
     return (
       <Card style={styles.demographicsCard}>
-        <Card.Title title={t('customerDemographics')} />
+        <Card.Title title={t('customerAnalytics.customerDemographics')} />
         <Card.Content>
-          <Text style={styles.subsectionTitle}>{t('ageDistribution')}</Text>
+          <Text style={styles.subsectionTitle}>{t('customerAnalytics.ageGroups')}</Text>
           {customerData.customersByAge.map((age, index) => (
             <View key={index} style={styles.demographicItem}>
               <Text style={styles.demographicLabel}>{age.range}</Text>
@@ -168,12 +169,12 @@ export default function CustomerAnalyticsScreen() {
           ))}
           
           <View style={styles.genderSection}>
-            <Text style={styles.subsectionTitle}>{t('genderDistribution')}</Text>
+            <Text style={styles.subsectionTitle}>{t('customerAnalytics.genderDistribution')}</Text>
             <View style={styles.genderContainer}>
               <View style={styles.genderItem}>
                 <Ionicons name="female" size={32} color={colors.primary} />
                 <Text style={styles.genderValue}>100%</Text>
-                <Text style={styles.genderLabel}>{t('female')}</Text>
+                <Text style={styles.genderLabel}>{t('common.female')}</Text>
               </View>
             </View>
           </View>
@@ -188,10 +189,10 @@ export default function CustomerAnalyticsScreen() {
     return (
       <Card style={styles.topCustomersCard}>
         <Card.Title 
-          title={t('topCustomers')}
+          title={t('customerAnalytics.topCustomers')}
           right={(props) => (
             <TouchableOpacity onPress={() => navigation.navigate('CustomersList' as any)}>
-              <Text style={styles.viewAllText}>{t('viewAll')}</Text>
+              <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
             </TouchableOpacity>
           )}
         />
@@ -211,11 +212,11 @@ export default function CustomerAnalyticsScreen() {
                 <Text style={styles.customerName}>{customer.name}</Text>
                 <View style={styles.customerStats}>
                   <Text style={styles.customerStat}>
-                    {customer.visitCount} {t('visits')}
+                    {customer.visitCount} {t('customerAnalytics.visits')}
                   </Text>
                   <Text style={styles.customerDot}>•</Text>
                   <Text style={styles.customerStat}>
-                    {customer.totalSpent} {t('jod')}
+                    {customer.totalSpent} {t('common.jod')}
                   </Text>
                 </View>
               </View>
@@ -234,11 +235,11 @@ export default function CustomerAnalyticsScreen() {
     
     return (
       <Card style={styles.retentionCard}>
-        <Card.Title title={t('retentionMetrics')} />
+        <Card.Title title={t('customerAnalytics.retentionMetrics')} />
         <Card.Content>
           <View style={styles.metricRow}>
             <View style={styles.metricItem}>
-              <Text style={styles.metricLabel}>{t('retentionRate')}</Text>
+              <Text style={styles.metricLabel}>{t('customerAnalytics.customerRetention')}</Text>
               <Text style={styles.metricValue}>{customerData.retentionRate}%</Text>
               <ProgressBar
                 progress={customerData.retentionRate / 100}
@@ -250,7 +251,7 @@ export default function CustomerAnalyticsScreen() {
           
           <View style={styles.metricRow}>
             <View style={styles.metricItem}>
-              <Text style={styles.metricLabel}>{t('churnRate')}</Text>
+              <Text style={styles.metricLabel}>{t('customerAnalytics.churnRate')}</Text>
               <Text style={styles.metricValue}>{customerData.churnRate}%</Text>
               <ProgressBar
                 progress={customerData.churnRate / 100}
@@ -262,7 +263,7 @@ export default function CustomerAnalyticsScreen() {
           
           <View style={styles.metricRow}>
             <View style={styles.metricItem}>
-              <Text style={styles.metricLabel}>{t('customerSatisfaction')}</Text>
+              <Text style={styles.metricLabel}>{t('customerAnalytics.customerSatisfaction')}</Text>
               <View style={styles.satisfactionRow}>
                 <Text style={styles.metricValue}>{customerData.customerSatisfaction}/5</Text>
                 <View style={styles.starsContainer}>
@@ -285,7 +286,7 @@ export default function CustomerAnalyticsScreen() {
   
   const renderInsights = () => (
     <Card style={styles.insightsCard}>
-      <Card.Title title={t('customerInsights')} />
+      <Card.Title title={t('customerAnalytics.insights')} />
       <Card.Content>
         <View style={styles.insightItem}>
           <Ionicons name="bulb" size={20} color={colors.warning} />
@@ -296,13 +297,13 @@ export default function CustomerAnalyticsScreen() {
         <View style={styles.insightItem}>
           <Ionicons name="trending-up" size={20} color={colors.success} />
           <Text style={styles.insightText}>
-            {t('insight2', { day: t('thursday') })}
+            {t('customerAnalytics.insight2', { day: t('days.thursday') })}
           </Text>
         </View>
         <View style={styles.insightItem}>
           <Ionicons name="gift" size={20} color={colors.primary} />
           <Text style={styles.insightText}>
-            {t('insight3')}
+            {t('customerAnalytics.insight3')}
           </Text>
         </View>
       </Card.Content>
@@ -318,12 +319,12 @@ export default function CustomerAnalyticsScreen() {
   }
   
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('customerAnalytics')}</Text>
+        <Text style={styles.headerTitle}>{t('customerAnalytics.title')}</Text>
         <TouchableOpacity onPress={() => console.log('Export')}>
           <Ionicons name="download-outline" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -333,10 +334,10 @@ export default function CustomerAnalyticsScreen() {
         value={selectedPeriod}
         onValueChange={(value) => setSelectedPeriod(value as any)}
         buttons={[
-          { value: 'week', label: t('week') },
-          { value: 'month', label: t('month') },
-          { value: 'quarter', label: t('quarter') },
-          { value: 'year', label: t('year') },
+          { value: 'week', label: t('common.week') },
+          { value: 'month', label: t('common.month') },
+          { value: 'quarter', label: t('common.quarter') },
+          { value: 'year', label: t('common.year') },
         ]}
         style={styles.periodSelector}
       />
@@ -354,7 +355,7 @@ export default function CustomerAnalyticsScreen() {
         
         <View style={styles.bottomPadding} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -373,7 +374,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 50 : 16,
+    paddingTop: 16,
     paddingBottom: 16,
     backgroundColor: colors.white,
     borderBottomWidth: 1,

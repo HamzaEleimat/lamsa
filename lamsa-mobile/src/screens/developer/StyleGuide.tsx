@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   getTypography,
@@ -85,8 +86,9 @@ export default function StyleGuide() {
   );
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#fff' }]} edges={['bottom', 'left', 'right']}>
+      <ScrollView>
+        <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.onBackground }]}>
           Style Guide
         </Text>
@@ -215,7 +217,8 @@ export default function StyleGuide() {
           </View>
         </View>
       ))}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

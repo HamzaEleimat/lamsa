@@ -7,7 +7,7 @@ SELECT
   COUNT(*) as booking_count,
   SUM(total_amount) as total_revenue,
   SUM(platform_fee) as total_platform_fees,
-  SUM(provider_earnings) as total_provider_earnings,
+  SUM(provider_fee) as total_provider_earnings,
   AVG(total_amount) as avg_booking_value,
   COUNT(DISTINCT user_id) as unique_customers
 FROM bookings
@@ -29,7 +29,7 @@ SELECT
   COUNT(DISTINCT user_id) as total_unique_customers,
   COUNT(DISTINCT user_id) FILTER (WHERE booking_date >= CURRENT_DATE - INTERVAL '30 days') as unique_customers_30d,
   SUM(total_amount) FILTER (WHERE status = 'completed') as total_revenue,
-  SUM(provider_earnings) FILTER (WHERE status = 'completed') as total_earnings,
+  SUM(provider_fee) FILTER (WHERE status = 'completed') as total_earnings,
   AVG(total_amount) FILTER (WHERE status = 'completed') as avg_booking_value,
   MAX(booking_date) as last_booking_date,
   MIN(booking_date) as first_booking_date
@@ -93,7 +93,7 @@ BEGIN
     COUNT(*)::BIGINT as total_bookings,
     COALESCE(SUM(b.total_amount) FILTER (WHERE b.status = 'completed'), 0)::NUMERIC as revenue,
     COALESCE(SUM(b.platform_fee) FILTER (WHERE b.status = 'completed'), 0)::NUMERIC as platform_fees,
-    COALESCE(SUM(b.provider_earnings) FILTER (WHERE b.status = 'completed'), 0)::NUMERIC as net_earnings
+    COALESCE(SUM(b.provider_fee) FILTER (WHERE b.status = 'completed'), 0)::NUMERIC as net_earnings
   FROM bookings b
   WHERE b.provider_id = p_provider_id
     AND b.booking_date >= CURRENT_DATE - INTERVAL '1 day' * p_days

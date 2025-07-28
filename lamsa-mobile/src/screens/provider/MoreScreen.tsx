@@ -9,6 +9,7 @@ import {
   IconButton,
   Badge
 } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -213,7 +214,8 @@ const MoreScreen: React.FC = () => {
   );
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <ScrollView>
       <View style={styles.header}>
         <Text variant="headlineMedium" style={styles.title}>
           {t('navigation.more')}
@@ -246,7 +248,8 @@ const MoreScreen: React.FC = () => {
           {t('more.footer_text')}
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

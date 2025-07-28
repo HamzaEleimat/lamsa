@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   isIOS, 
   isAndroid,
@@ -96,8 +97,9 @@ export default function PlatformDemo() {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#fff' }]} edges={['bottom', 'left', 'right']}>
+      <ScrollView>
+        <View style={styles.content}>
         {renderSection('Platform Detection', (
           <>
             {renderItem('Platform', isIOS ? 'iOS' : isAndroid ? 'Android' : 'Web')}
@@ -185,8 +187,9 @@ export default function PlatformDemo() {
             </View>
           </View>
         ))}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

@@ -12,6 +12,7 @@ import {
   I18nManager,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -86,11 +87,11 @@ export default function ServiceAnalyticsScreen() {
         const data = await response.json();
         setAnalyticsData(data.data);
       } else {
-        Alert.alert(t('error'), t('failedToLoadAnalytics'));
+        Alert.alert(t('common.error'), t('analytics.failedToLoadAnalytics'));
       }
     } catch (error) {
       console.error('Error loading analytics:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -117,13 +118,13 @@ export default function ServiceAnalyticsScreen() {
       );
 
       if (response.ok) {
-        Alert.alert(t('success'), t('analyticsExported'));
+        Alert.alert(t('common.success'), t('analytics.analyticsExported'));
       } else {
-        Alert.alert(t('error'), t('failedToExportAnalytics'));
+        Alert.alert(t('common.error'), t('analytics.failedToExportAnalytics'));
       }
     } catch (error) {
       console.error('Error exporting analytics:', error);
-      Alert.alert(t('error'), t('somethingWentWrong'));
+      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
     }
   };
 
@@ -159,7 +160,7 @@ export default function ServiceAnalyticsScreen() {
     return (
       <View style={styles.chartContainer}>
         <View style={styles.chartHeader}>
-          <Text style={styles.chartTitle}>{t('trends')}</Text>
+          <Text style={styles.chartTitle}>{t('analytics.trends')}</Text>
           <View style={styles.metricSelector}>
             {['bookings', 'revenue', 'views'].map(metric => (
               <TouchableOpacity
@@ -174,7 +175,7 @@ export default function ServiceAnalyticsScreen() {
                   styles.metricButtonText,
                   selectedMetric === metric && styles.selectedMetricButtonText,
                 ]}>
-                  {t(metric)}
+                  {t(`analytics.${metric}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -185,7 +186,7 @@ export default function ServiceAnalyticsScreen() {
           data={data}
           width={width - 32}
           height={220}
-          yAxisLabel={selectedMetric === 'revenue' ? t('jod') + ' ' : ''}
+          yAxisLabel={selectedMetric === 'revenue' ? t('common.jod') + ' ' : ''}
           chartConfig={{
             backgroundColor: colors.white,
             backgroundGradientFrom: colors.white,
@@ -225,7 +226,7 @@ export default function ServiceAnalyticsScreen() {
 
     return (
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>{t('topServices')}</Text>
+        <Text style={styles.chartTitle}>{t('analytics.topServices')}</Text>
         <BarChart
           data={data}
           width={width - 32}
@@ -261,7 +262,7 @@ export default function ServiceAnalyticsScreen() {
 
     return (
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>{t('categoryBreakdown')}</Text>
+        <Text style={styles.chartTitle}>{t('analytics.categoryBreakdown')}</Text>
         <PieChart
           data={data}
           width={width - 32}
@@ -288,9 +289,9 @@ export default function ServiceAnalyticsScreen() {
     return (
       <View style={styles.servicesListContainer}>
         <View style={styles.servicesListHeader}>
-          <Text style={styles.servicesListTitle}>{t('servicePerformance')}</Text>
+          <Text style={styles.servicesListTitle}>{t('analytics.servicePerformance')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('ServiceList')}>
-            <Text style={styles.viewAllText}>{t('viewAll')}</Text>
+            <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
           </TouchableOpacity>
         </View>
         
@@ -304,7 +305,7 @@ export default function ServiceAnalyticsScreen() {
                 {i18n.language === 'ar' ? item.service.name_ar : item.service.name_en}
               </Text>
               <Text style={styles.serviceItemPrice}>
-                {item.service.price} {t('jod')}
+                {item.service.price} {t('common.jod')}
               </Text>
             </View>
             <View style={styles.serviceItemStats}>
@@ -336,13 +337,13 @@ export default function ServiceAnalyticsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('serviceAnalytics')}</Text>
+        <Text style={styles.headerTitle}>{t('analytics.serviceAnalytics')}</Text>
         <TouchableOpacity onPress={handleExport}>
           <Ionicons name="download-outline" size={24} color={colors.primary} />
         </TouchableOpacity>
@@ -363,7 +364,7 @@ export default function ServiceAnalyticsScreen() {
               styles.periodButtonText,
               selectedPeriod === period && styles.selectedPeriodButtonText,
             ]}>
-              {t(period)}
+              {t(`common.${period}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -381,30 +382,30 @@ export default function ServiceAnalyticsScreen() {
           <>
             <View style={styles.overviewContainer}>
               {renderOverviewCard(
-                t('totalServices'),
+                t('analytics.totalServices'),
                 analyticsData.overview.totalServices.toString(),
-                `${analyticsData.overview.activeServices} ${t('active')}`,
+                `${analyticsData.overview.activeServices} ${t('common.active')}`,
                 'grid-outline',
                 colors.primary
               )}
               {renderOverviewCard(
-                t('totalBookings'),
+                t('analytics.totalBookings'),
                 analyticsData.overview.totalBookings.toString(),
-                t('thisMonth'),
+                t('common.thisMonth'),
                 'calendar-outline',
                 colors.success
               )}
               {renderOverviewCard(
-                t('totalRevenue'),
-                `${analyticsData.overview.totalRevenue} ${t('jod')}`,
-                t('thisMonth'),
+                t('analytics.totalRevenue'),
+                `${analyticsData.overview.totalRevenue} ${t('common.jod')}`,
+                t('common.thisMonth'),
                 'cash-outline',
                 colors.warning
               )}
               {renderOverviewCard(
-                t('conversionRate'),
+                t('analytics.conversionRate'),
                 `${analyticsData.overview.conversionRate.toFixed(1)}%`,
-                t('viewsToBookings'),
+                t('analytics.viewsToBookings'),
                 'trending-up-outline',
                 colors.secondary
               )}
@@ -420,7 +421,7 @@ export default function ServiceAnalyticsScreen() {
           </>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

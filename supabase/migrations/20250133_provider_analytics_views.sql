@@ -4,7 +4,7 @@
 CREATE OR REPLACE VIEW provider_performance_metrics AS
 SELECT 
     p.id as provider_id,
-    p.name as provider_name,
+    p.business_name_en as provider_name,
     -- Booking metrics
     COUNT(DISTINCT b.id) as total_bookings,
     COUNT(DISTINCT CASE WHEN b.status = 'completed' THEN b.id END) as completed_bookings,
@@ -46,7 +46,7 @@ FROM
     LEFT JOIN bookings b ON p.id = b.provider_id
     LEFT JOIN reviews r ON b.id = r.booking_id
 GROUP BY 
-    p.id, p.name;
+    p.id, p.business_name_en;
 
 -- View for service performance analytics
 CREATE OR REPLACE VIEW service_performance_analytics AS
@@ -83,7 +83,7 @@ SELECT
     END as popularity_score
 FROM 
     services s
-    LEFT JOIN categories c ON s.category_id = c.id
+    LEFT JOIN service_categories c ON s.category_id = c.id
     LEFT JOIN bookings b ON s.id = b.service_id
     LEFT JOIN reviews r ON b.id = r.booking_id
 GROUP BY 
@@ -98,7 +98,7 @@ SELECT
     COUNT(DISTINCT CASE WHEN b.status = 'completed' THEN b.id END) as completed_bookings,
     COALESCE(SUM(CASE WHEN b.status = 'completed' THEN b.total_amount END), 0) as revenue,
     COALESCE(SUM(CASE WHEN b.status = 'completed' THEN b.platform_fee END), 0) as platform_fees,
-    COALESCE(SUM(CASE WHEN b.status = 'completed' THEN b.provider_earnings END), 0) as net_earnings
+    COALESCE(SUM(CASE WHEN b.status = 'completed' THEN b.provider_fee END), 0) as net_earnings
 FROM 
     bookings b
 WHERE 

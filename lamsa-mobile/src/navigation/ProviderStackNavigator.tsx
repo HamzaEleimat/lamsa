@@ -1,5 +1,8 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import LanguageToggleButton from '../components/LanguageToggleButton';
+import { useTranslation } from '../hooks/useTranslation';
+import { colors } from '../constants/colors';
 
 // Tab Navigator
 import ProviderTabNavigator from './ProviderTabNavigator';
@@ -17,23 +20,42 @@ export type ProviderStackParamList = {
 const Stack = createNativeStackNavigator<ProviderStackParamList>();
 
 export default function ProviderStackNavigator() {
+  const { t } = useTranslation();
+  
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: colors.white,
+        },
+        headerTintColor: colors.text,
+        headerTitleStyle: {
+          fontWeight: '600',
+        },
+        headerRight: () => <LanguageToggleButton style={{ marginRight: 10 }} />,
       }}
     >
       <Stack.Screen 
         name="ProviderTabs" 
-        component={ProviderTabNavigator} 
+        component={ProviderTabNavigator}
+        options={{
+          headerShown: false, // Hide header for tab navigator
+        }}
       />
       <Stack.Screen 
         name="BookingDetails" 
-        component={ProviderBookingDetailsScreen} 
+        component={ProviderBookingDetailsScreen}
+        options={{
+          title: t('bookingDetails.title'),
+        }}
       />
       <Stack.Screen 
         name="CreateBooking" 
-        component={CreateBookingScreen} 
+        component={CreateBookingScreen}
+        options={{
+          title: t('createBooking.title'),
+        }}
       />
     </Stack.Navigator>
   );

@@ -5,6 +5,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider, ThemeContext } from './src/contexts/ThemeContext';
+import { AppStateProvider } from './src/contexts/AppStateContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { initializeI18n } from './src/i18n';
 import { lightTheme, darkTheme } from './src/theme';
@@ -30,10 +31,12 @@ function AppContent() {
     <ErrorBoundary>
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
-          <AuthProvider>
-            <RootNavigator />
-            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-          </AuthProvider>
+          <AppStateProvider>
+            <AuthProvider>
+              <RootNavigator />
+              <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+            </AuthProvider>
+          </AppStateProvider>
         </PaperProvider>
       </SafeAreaProvider>
     </ErrorBoundary>

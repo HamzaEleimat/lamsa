@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ActivityIndicator, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import i18n from '../i18n';
 
@@ -28,11 +29,11 @@ const SplashScreen: React.FC = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.primary }]}>
       <Text style={styles.logo}>Lamsa</Text>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.loadingText}>{i18n.t('common.loading')}</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 

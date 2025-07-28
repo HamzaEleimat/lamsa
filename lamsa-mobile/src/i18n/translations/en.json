@@ -211,10 +211,13 @@
     "validPriceRequired": "valid price is required",
     "validDurationRequired": "valid duration is required",
     "somethingWentWrong": "something went wrong",
-    "permissionRequired": "Permission Required"
+    "permissionRequired": "Permission Required",
+    "km": "km",
+    "quarter": "quarter"
   },
   "auth": {
-    "invalidPhone": "Invalid phone number"
+    "invalidPhone": "Invalid phone number",
+    "notAuthenticated": "Not authenticated"
   },
   "phoneAuth": {
     "title": "Enter your phone number",
@@ -658,7 +661,17 @@
     "lastMonth": "Last Month",
     "thisYear": "This Year",
     "custom": "Custom",
-    "selectPeriod": "Select Period"
+    "selectPeriod": "Select Period",
+    "bookingStatus": "Booking Status",
+    "totalBookings": "Total Bookings",
+    "employeePerformance": "Employee Performance",
+    "activeEmployees": "Active Employees",
+    "manage": "Manage",
+    "totalEmployees": "Total Employees",
+    "topPerformerToday": "Top Performer Today",
+    "recentReviews": "Recent Reviews",
+    "averageRating": "Average Rating",
+    "anonymous": "Anonymous"
   },
   "revenueAnalytics": {
     "title": "Revenue Analytics",
@@ -703,7 +716,13 @@
     "referrals": "Referrals",
     "reviews": "Reviews",
     "complaints": "Complaints",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "thisPeriod": "this {{period}}",
+    "retentionMetrics": "Retention Metrics",
+    "visits": "visits",
+    "insights": "Insights",
+    "insight2": "Most bookings come on {{day}}",
+    "insight3": "Customer loyalty is improving"
   },
   "bookingAnalytics": {
     "title": "Booking Analytics",
@@ -1045,7 +1064,20 @@
     "insight3": "Client retention improved by 15%",
     "thisWeek": "This Week",
     "thisMonth": "This Month",
-    "thisYear": "This Year"
+    "thisYear": "This Year",
+    "serviceAnalytics": "Service Analytics",
+    "failedToLoadAnalytics": "Failed to load analytics",
+    "analyticsExported": "Analytics exported successfully",
+    "failedToExportAnalytics": "Failed to export analytics",
+    "trends": "Trends",
+    "bookings": "Bookings",
+    "revenue": "Revenue",
+    "views": "Views",
+    "topServices": "Top Services",
+    "categoryBreakdown": "Category Breakdown",
+    "totalServices": "Total Services",
+    "conversionRate": "Conversion Rate",
+    "viewsToBookings": "Views to Bookings"
   },
   "services": {
     "haircut": "Haircut",
@@ -1053,6 +1085,44 @@
     "styling": "Hair Styling",
     "treatment": "Hair Treatment",
     "other": "Other Services"
+  },
+  "days": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+  "categories": {
+    "hair": "Hair",
+    "nails": "Nails",
+    "makeup": "Makeup",
+    "spa": "Spa",
+    "aesthetic": "Aesthetic"
+  },
+  "businessTypes": {
+    "salon": "Salon",
+    "spa": "Spa",
+    "mobileService": "Mobile Service",
+    "homeBased": "Home Based",
+    "clinic": "Clinic"
+  },
+  "filters": {
+    "title": "Filters",
+    "sortBy": "Sort By",
+    "serviceCategories": "Service Categories",
+    "businessType": "Business Type",
+    "distance": "Distance",
+    "rating": "Rating",
+    "distanceRadius": "Distance Radius",
+    "minimumRating": "Minimum Rating",
+    "availability": "Availability",
+    "availableNow": "Available Now",
+    "availableToday": "Available Today",
+    "showNewProviders": "Show New Providers",
+    "applyFilters": "Apply Filters"
   },
   "bookings": {
     "errorLoading": "Error loading bookings",

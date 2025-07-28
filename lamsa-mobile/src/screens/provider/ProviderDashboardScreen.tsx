@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { Text, Card, ActivityIndicator } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -21,6 +22,11 @@ import { handleSupabaseError, logError } from '../../utils/errorHandler';
 import { LineChart } from 'react-native-chart-kit';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
+import LanguageToggleButton from '../../components/LanguageToggleButton';
+import { notificationService } from '../../services/notificationService';
+import { employeeService } from '../../services/employeeService';
+import { reviewService } from '../../services/reviewService';
+import DonutChart from '../../components/charts/DonutChart';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -55,6 +61,14 @@ export default function ProviderDashboardScreen() {
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('week');
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [employeeMetrics, setEmployeeMetrics] = useState<any>(null);
+  const [recentReviews, setRecentReviews] = useState<any[]>([]);
+  
+  const calculatePercentageChange = (current: number, previous: number): number => {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return Math.round(((current - previous) / previous) * 100);
+  };
   
   useEffect(() => {
     fetchProviderId();
@@ -65,6 +79,20 @@ export default function ProviderDashboardScreen() {
       loadDashboardData();
     }
   }, [providerId, selectedPeriod]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadNotificationCount();
+      // Subscribe to real-time notifications
+      const subscription = notificationService.subscribeToNotifications(user.id, () => {
+        loadNotificationCount();
+      });
+      
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [user]);
   
   const fetchProviderId = async () => {
     if (!user?.id) return;
@@ -89,17 +117,21 @@ export default function ProviderDashboardScreen() {
       setLoading(true);
       
       // Load all data in parallel
-      const [metrics, stats, revenue, todayBookings] = await Promise.all([
+      const [metrics, stats, revenue, todayBookings, empMetrics, reviews] = await Promise.all([
         analyticsService.getPerformanceMetrics(providerId),
         providerBookingService.getBookingStats(providerId),
         analyticsService.getDailyRevenue(providerId, 30),
-        providerBookingService.getTodayUpcomingBookings(providerId)
+        providerBookingService.getTodayUpcomingBookings(providerId),
+        employeeService.getEmployeeMetrics(providerId),
+        reviewService.getRecentReviews(providerId, 5)
       ]);
       
       setPerformanceMetrics(metrics);
       setBookingStats(stats);
       setRevenueData(revenue);
       setUpcomingBookings(todayBookings);
+      setEmployeeMetrics(empMetrics);
+      setRecentReviews(reviews);
     } catch (error) {
       logError('loadDashboardData', error);
       const appError = handleSupabaseError(error);
@@ -111,75 +143,84 @@ export default function ProviderDashboardScreen() {
   
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadDashboardData();
+    await Promise.all([
+      loadDashboardData(),
+      loadNotificationCount()
+    ]);
     setRefreshing(false);
+  };
+
+  const loadNotificationCount = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const count = await notificationService.getNotificationCount(user.id);
+      setNotificationCount(count.unread);
+    } catch (error) {
+      console.error('Error loading notification count:', error);
+    }
   };
   
   const metrics: DashboardMetric[] = performanceMetrics && bookingStats ? [
     {
-      label: t('todayRevenue'),
-      value: `${performanceMetrics.revenue_today.toFixed(2)} ${t('jod')}`,
+      label: t('dashboard.todayRevenue'),
+      value: `${performanceMetrics.revenue_today.toFixed(2)} ${t('common.jod')}`,
       change: calculatePercentageChange(performanceMetrics.revenue_today, performanceMetrics.revenue_last_7_days / 7),
-      changeLabel: t('vsAverage'),
+      changeLabel: t('dashboard.vsAverage'),
       icon: 'cash',
       color: colors.success,
       screen: 'RevenueAnalytics',
     },
     {
-      label: t('todayBookings'),
+      label: t('dashboard.todayBookings'),
       value: bookingStats.todayBookings.toString(),
       change: calculatePercentageChange(bookingStats.todayBookings, bookingStats.weekBookings / 7),
-      changeLabel: t('vsAverage'),
+      changeLabel: t('dashboard.vsAverage'),
       icon: 'calendar',
       color: colors.primary,
       screen: 'BookingAnalytics',
     },
     {
-      label: t('totalCustomers'),
+      label: t('dashboard.totalCustomers'),
       value: performanceMetrics.unique_customers.toString(),
       change: calculatePercentageChange(performanceMetrics.new_customers_last_30_days, performanceMetrics.unique_customers / 12),
-      changeLabel: t('newThisMonth'),
+      changeLabel: t('dashboard.newThisMonth'),
       icon: 'people',
       color: colors.info,
       screen: 'CustomerAnalytics',
     },
     {
-      label: t('avgRating'),
+      label: t('dashboard.avgRating'),
       value: performanceMetrics.avg_rating.toFixed(1),
       change: 0, // Rating changes are typically small
-      changeLabel: `${performanceMetrics.total_reviews} ${t('reviews')}`,
+      changeLabel: `${performanceMetrics.total_reviews} ${t('common.reviews')}`,
       icon: 'star',
       color: colors.warning,
       screen: 'PerformanceAnalytics',
     },
   ] : [];
   
-  const calculatePercentageChange = (current: number, previous: number): number => {
-    if (previous === 0) return current > 0 ? 100 : 0;
-    return Math.round(((current - previous) / previous) * 100);
-  };
-  
   const quickActions: QuickAction[] = [
     {
-      label: t('viewAllBookings'),
+      label: t('dashboard.viewAllBookings'),
       icon: 'calendar-sharp',
       color: colors.primary,
       screen: 'BookingsList',
     },
     {
-      label: t('addService'),
+      label: t('dashboard.addService'),
       icon: 'add-circle',
       color: colors.success,
       screen: 'ServiceForm',
     },
     {
-      label: t('viewReviews'),
+      label: t('dashboard.viewReviews'),
       icon: 'star',
       color: colors.warning,
       screen: 'ReviewsList',
     },
     {
-      label: t('notificationsText'),
+      label: t('settings.notificationsText'),
       icon: 'notifications',
       color: colors.secondary,
       screen: 'NotificationPreferences',
@@ -241,7 +282,7 @@ export default function ProviderDashboardScreen() {
     return (
       <Card style={styles.chartCard}>
         <Card.Title
-          title={t('revenueOverview')}
+          title={t('dashboard.revenueOverview')}
           right={(props) => (
             <TouchableOpacity onPress={() => navigation.navigate('RevenueAnalytics' as any)}>
               <Ionicons name="arrow-forward" size={20} color={colors.primary} />
@@ -285,11 +326,11 @@ export default function ProviderDashboardScreen() {
     return (
       <Card style={styles.bookingsCard}>
         <Card.Title
-          title={t('upcomingBookings')}
-          subtitle={`${upcomingBookings.length} ${t('bookingsToday')}`}
+          title={t('dashboard.upcomingBookings')}
+          subtitle={`${upcomingBookings.length} ${t('dashboard.bookingsToday')}`}
           right={(props) => (
             <TouchableOpacity onPress={() => navigation.navigate('Bookings' as any)}>
-              <Text style={styles.viewAllText}>{t('viewAll')}</Text>
+              <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
             </TouchableOpacity>
           )}
         />
@@ -304,7 +345,7 @@ export default function ProviderDashboardScreen() {
                 <Text style={styles.bookingService}>{booking.serviceName}</Text>
               </View>
               <View style={styles.bookingStatus}>
-                <Text style={styles.bookingPrice}>{booking.price} {t('jod')}</Text>
+                <Text style={styles.bookingPrice}>{booking.price} {t('common.jod')}</Text>
               </View>
             </View>
           ))}
@@ -315,7 +356,7 @@ export default function ProviderDashboardScreen() {
   
   const renderQuickActions = () => (
     <View style={styles.quickActionsContainer}>
-      <Text style={styles.sectionTitle}>{t('quickActions')}</Text>
+      <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
       <View style={styles.quickActionsGrid}>
         {quickActions.map((action) => (
           <TouchableOpacity
@@ -333,6 +374,167 @@ export default function ProviderDashboardScreen() {
     </View>
   );
   
+  const renderBookingStatusChart = () => {
+    if (!bookingStats) return null;
+
+    const chartData = [
+      { label: t('bookings.status.pending'), value: bookingStats.pending || 0, color: colors.warning },
+      { label: t('bookings.status.confirmed'), value: bookingStats.confirmed || 0, color: colors.info },
+      { label: t('bookings.status.completed'), value: bookingStats.completed || 0, color: colors.success },
+      { label: t('bookings.status.cancelled'), value: bookingStats.cancelled || 0, color: colors.error },
+    ].filter(item => item.value > 0);
+
+    if (chartData.length === 0) return null;
+
+    const totalBookings = chartData.reduce((sum, item) => sum + item.value, 0);
+
+    return (
+      <Card style={styles.chartCard}>
+        <Card.Title
+          title={t('dashboard.bookingStatus')}
+          subtitle={`${totalBookings} ${t('dashboard.totalBookings')}`}
+        />
+        <Card.Content>
+          <View style={styles.donutChartContainer}>
+            <DonutChart
+              data={chartData}
+              size={180}
+              strokeWidth={30}
+              centerContent={
+                <View style={styles.chartCenterContent}>
+                  <Text style={styles.chartCenterValue}>{totalBookings}</Text>
+                  <Text style={styles.chartCenterLabel}>{t('common.bookings')}</Text>
+                </View>
+              }
+            />
+          </View>
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  const renderEmployeeSection = () => {
+    if (!employeeMetrics || employeeMetrics.total_employees === 0) return null;
+
+    return (
+      <Card style={styles.employeeCard}>
+        <Card.Title
+          title={t('dashboard.employeePerformance')}
+          subtitle={`${employeeMetrics.active_employees} ${t('dashboard.activeEmployees')}`}
+          right={(props) => (
+            <TouchableOpacity onPress={() => navigation.navigate('EmployeeList' as any)}>
+              <Text style={styles.viewAllText}>{t('dashboard.manage')}</Text>
+            </TouchableOpacity>
+          )}
+        />
+        <Card.Content>
+          <View style={styles.employeeMetricsGrid}>
+            <View style={styles.employeeMetricItem}>
+              <Ionicons name="people" size={24} color={colors.primary} />
+              <Text style={styles.employeeMetricValue}>
+                {employeeMetrics.total_employees}
+              </Text>
+              <Text style={styles.employeeMetricLabel}>{t('dashboard.totalEmployees')}</Text>
+            </View>
+            <View style={styles.employeeMetricItem}>
+              <Ionicons name="calendar" size={24} color={colors.success} />
+              <Text style={styles.employeeMetricValue}>
+                {employeeMetrics.total_bookings_today}
+              </Text>
+              <Text style={styles.employeeMetricLabel}>{t('dashboard.bookingsToday')}</Text>
+            </View>
+          </View>
+          
+          {employeeMetrics.top_performer && (
+            <View style={styles.topPerformerContainer}>
+              <View style={styles.topPerformerHeader}>
+                <Ionicons name="star" size={20} color={colors.warning} />
+                <Text style={styles.topPerformerTitle}>{t('dashboard.topPerformerToday')}</Text>
+              </View>
+              <View style={styles.topPerformerInfo}>
+                <Text style={styles.topPerformerName}>
+                  {employeeMetrics.top_performer.employee_name}
+                </Text>
+                <View style={styles.topPerformerStats}>
+                  <Text style={styles.topPerformerStat}>
+                    {employeeMetrics.top_performer.bookings_today} {t('common.bookings')}
+                  </Text>
+                  <Text style={styles.topPerformerDivider}>•</Text>
+                  <Text style={styles.topPerformerStat}>
+                    {employeeMetrics.top_performer.revenue_today} {t('common.jod')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  const renderRatingStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Ionicons
+          key={i}
+          name={i <= rating ? 'star' : 'star-outline'}
+          size={16}
+          color={i <= rating ? colors.warning : colors.gray}
+        />
+      );
+    }
+    return <View style={styles.ratingStars}>{stars}</View>;
+  };
+
+  const renderRecentReviews = () => {
+    if (!recentReviews || recentReviews.length === 0) return null;
+
+    return (
+      <Card style={styles.reviewsCard}>
+        <Card.Title
+          title={t('dashboard.recentReviews')}
+          subtitle={`${performanceMetrics?.avg_rating || 0} ${t('dashboard.averageRating')}`}
+          right={(props) => (
+            <TouchableOpacity onPress={() => navigation.navigate('ReviewsList' as any)}>
+              <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
+            </TouchableOpacity>
+          )}
+        />
+        <Card.Content>
+          {recentReviews.map((review, index) => (
+            <View key={review.id} style={[
+              styles.reviewItem,
+              index === recentReviews.length - 1 && styles.lastReviewItem
+            ]}>
+              <View style={styles.reviewHeader}>
+                <View>
+                  <Text style={styles.reviewerName}>{review.user?.name || t('dashboard.anonymous')}</Text>
+                  <View style={styles.reviewMeta}>
+                    {renderRatingStars(review.rating)}
+                    <Text style={styles.reviewDate}>
+                      {format(new Date(review.created_at), 'dd MMM', { locale })}
+                    </Text>
+                  </View>
+                </View>
+                {review.service && (
+                  <Text style={styles.reviewService}>
+                    {i18n.language === 'ar' ? review.service.name_ar : review.service.name_en}
+                  </Text>
+                )}
+              </View>
+              {review.comment && (
+                <Text style={styles.reviewComment} numberOfLines={2}>
+                  {review.comment}
+                </Text>
+              )}
+            </View>
+          ))}
+        </Card.Content>
+      </Card>
+    );
+  };
+
   const renderInsights = () => {
     // Generate insights based on actual data
     const insights = [];
@@ -362,7 +564,7 @@ export default function ProviderDashboardScreen() {
     
     return (
       <Card style={styles.insightsCard}>
-        <Card.Title title={t('todayInsights')} />
+        <Card.Title title={t('dashboard.todayInsights')} />
         <Card.Content>
           {insights.map((insight: any, index: number) => (
             <View key={index} style={styles.insightItem}>
@@ -392,28 +594,41 @@ export default function ProviderDashboardScreen() {
     return (
       <View style={styles.loadingContainer}>
         <Ionicons name="alert-circle-outline" size={48} color={colors.gray} />
-        <Text style={styles.noProviderText}>{t('noProviderProfile')}</Text>
-        <Text style={styles.noProviderSubtext}>{t('pleaseCompleteProfile')}</Text>
+        <Text style={styles.noProviderText}>{t('dashboard.noProviderProfile')}</Text>
+        <Text style={styles.noProviderSubtext}>{t('dashboard.pleaseCompleteProfile')}</Text>
       </View>
     );
   }
   
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>
-            {t('goodMorning')}, {user?.name}
+        <View style={styles.headerLeft}>
+          <Text style={styles.greetingText}>
+            {t('dashboard.goodMorning')}
+          </Text>
+          <Text style={styles.userName}>
+            {user?.name}
           </Text>
           <Text style={styles.date}>
             {format(new Date(), 'EEEE, d MMMM', { locale })}
           </Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('NotificationCenter' as any)}>
-          <View style={styles.notificationIcon}>
-            <Ionicons name="notifications-outline" size={24} color={colors.text} />
-          </View>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <LanguageToggleButton style={{ marginRight: 16 }} />
+          <TouchableOpacity onPress={() => navigation.navigate('NotificationCenter' as any)}>
+            <View style={styles.notificationIcon}>
+              <Ionicons name="notifications-outline" size={24} color={colors.text} />
+              {notificationCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
       
       <View style={styles.periodSelector}>
@@ -430,7 +645,7 @@ export default function ProviderDashboardScreen() {
               styles.periodButtonText,
               selectedPeriod === period && styles.selectedPeriodButtonText,
             ]}>
-              {t(period)}
+              {t(`common.${period}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -448,13 +663,16 @@ export default function ProviderDashboardScreen() {
         </View>
         
         {renderRevenueChart()}
+        {renderBookingStatusChart()}
+        {renderEmployeeSection()}
         {renderUpcomingBookings()}
+        {renderRecentReviews()}
         {renderQuickActions()}
         {renderInsights()}
         
         <View style={styles.bottomPadding} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -471,21 +689,35 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 50 : 16,
-    paddingBottom: 16,
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
     backgroundColor: colors.white,
   },
-  greeting: {
-    fontSize: 24,
+  headerLeft: {
+    flex: 1,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 20,
+  },
+  greetingText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: colors.gray,
+  },
+  userName: {
+    fontSize: 28,
     fontWeight: 'bold',
     color: colors.text,
+    marginTop: 2,
   },
   date: {
-    fontSize: 14,
-    color: colors.gray,
-    marginTop: 4,
+    fontSize: 13,
+    color: colors.textLight,
+    marginTop: 6,
   },
   notificationIcon: {
     position: 'relative',
@@ -509,7 +741,7 @@ const styles = StyleSheet.create({
   periodSelector: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
     gap: 8,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
@@ -517,7 +749,7 @@ const styles = StyleSheet.create({
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 20,
     backgroundColor: colors.lightGray,
     alignItems: 'center',
@@ -539,11 +771,11 @@ const styles = StyleSheet.create({
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     marginBottom: 16,
   },
   metricCard: {
-    width: (screenWidth - 32) / 2,
+    width: (screenWidth - 40) / 2,
     padding: 8,
   },
   card: {
@@ -705,5 +937,129 @@ const styles = StyleSheet.create({
     color: colors.gray,
     marginTop: 8,
     textAlign: 'center',
+  },
+  employeeCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  employeeMetricsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  employeeMetricItem: {
+    alignItems: 'center',
+  },
+  employeeMetricValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginTop: 8,
+  },
+  employeeMetricLabel: {
+    fontSize: 12,
+    color: colors.gray,
+    marginTop: 4,
+  },
+  topPerformerContainer: {
+    backgroundColor: colors.lightGray,
+    borderRadius: 12,
+    padding: 12,
+  },
+  topPerformerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  topPerformerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  topPerformerInfo: {
+    marginLeft: 28,
+  },
+  topPerformerName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  topPerformerStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  topPerformerStat: {
+    fontSize: 14,
+    color: colors.gray,
+  },
+  topPerformerDivider: {
+    marginHorizontal: 8,
+    color: colors.gray,
+  },
+  donutChartContainer: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  chartCenterContent: {
+    alignItems: 'center',
+  },
+  chartCenterValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  chartCenterLabel: {
+    fontSize: 14,
+    color: colors.gray,
+    marginTop: 4,
+  },
+  reviewsCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  reviewItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  lastReviewItem: {
+    borderBottomWidth: 0,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  reviewerName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  reviewMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  ratingStars: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: colors.gray,
+  },
+  reviewService: {
+    fontSize: 12,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  reviewComment: {
+    fontSize: 14,
+    color: colors.text,
+    lineHeight: 20,
   },
 });

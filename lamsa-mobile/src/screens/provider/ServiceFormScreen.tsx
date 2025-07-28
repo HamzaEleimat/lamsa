@@ -14,6 +14,7 @@ import {
   Image,
   Switch,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +83,7 @@ export default function ServiceFormScreen() {
       ]);
     } catch (error) {
       console.error('Error loading initial data:', error);
-      Alert.alert(t('error'), t('failedToLoadData'));
+      Alert.alert(t('common.error'), t('serviceForm.failedToLoadData'));
     } finally {
       setLoading(false);
     }
@@ -136,34 +137,34 @@ export default function ServiceFormScreen() {
       }
     } catch (error) {
       console.error('Error fetching service details:', error);
-      Alert.alert(t('error'), t('failedToLoadService'));
+      Alert.alert(t('common.error'), t('serviceForm.failedToLoadService'));
     }
   };
 
   const handleSubmit = async () => {
     // Validation
     if (!formData.name_en || !formData.name_ar) {
-      Alert.alert(t('error'), t('serviceNameRequired'));
+      Alert.alert(t('common.error'), t('serviceForm.serviceNameRequired'));
       return;
     }
 
     if (!formData.category_id) {
-      Alert.alert(t('error'), t('categoryRequired'));
+      Alert.alert(t('common.error'), t('serviceForm.categoryRequired'));
       return;
     }
 
     if (formData.price <= 0) {
-      Alert.alert(t('error'), t('validPriceRequired'));
+      Alert.alert(t('common.error'), t('serviceForm.validPriceRequired'));
       return;
     }
 
     if (formData.duration_minutes <= 0) {
-      Alert.alert(t('error'), t('validDurationRequired'));
+      Alert.alert(t('common.error'), t('serviceForm.validDurationRequired'));
       return;
     }
 
     if (!user?.id) {
-      Alert.alert(t('error'), t('notAuthenticated'));
+      Alert.alert(t('common.error'), t('auth.notAuthenticated'));
       return;
     }
 
@@ -203,18 +204,18 @@ export default function ServiceFormScreen() {
       }
 
       Alert.alert(
-        t('success'),
-        isEditing ? t('serviceUpdated') : t('serviceCreated'),
+        t('common.success'),
+        isEditing ? t('serviceForm.serviceUpdated') : t('serviceForm.serviceCreated'),
         [
           {
-            text: t('ok'),
+            text: t('common.ok'),
             onPress: () => navigation.goBack(),
           },
         ]
       );
     } catch (error) {
       console.error('Error saving service:', error);
-      Alert.alert(t('error'), t('failedToSaveService'));
+      Alert.alert(t('common.error'), t('serviceForm.failedToSaveService'));
     } finally {
       setLoading(false);
     }
@@ -297,10 +298,11 @@ export default function ServiceFormScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
@@ -308,37 +310,37 @@ export default function ServiceFormScreen() {
       >
         {/* Basic Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('basicInformation')}</Text>
+          <Text style={styles.sectionTitle}>{t('serviceForm.basicInformation')}</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('serviceNameEnglish')} *</Text>
+            <Text style={styles.label}>{t('serviceForm.serviceNameEnglish')} *</Text>
             <TextInput
               style={styles.input}
               value={formData.name_en}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name_en: text }))}
-              placeholder={t('enterServiceNameEnglish')}
+              placeholder={t('serviceForm.enterServiceNameEnglish')}
               placeholderTextColor={colors.gray}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('serviceNameArabic')} *</Text>
+            <Text style={styles.label}>{t('serviceForm.serviceNameArabic')} *</Text>
             <TextInput
               style={[styles.input, isRTL && styles.rtlText]}
               value={formData.name_ar}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name_ar: text }))}
-              placeholder={t('enterServiceNameArabic')}
+              placeholder={t('serviceForm.enterServiceNameArabic')}
               placeholderTextColor={colors.gray}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('descriptionEnglish')}</Text>
+            <Text style={styles.label}>{t('serviceForm.descriptionEnglish')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={formData.description_en}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description_en: text }))}
-              placeholder={t('enterDescriptionEnglish')}
+              placeholder={t('serviceForm.enterDescriptionEnglish')}
               placeholderTextColor={colors.gray}
               multiline
               numberOfLines={3}
@@ -346,12 +348,12 @@ export default function ServiceFormScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('descriptionArabic')}</Text>
+            <Text style={styles.label}>{t('serviceForm.descriptionArabic')}</Text>
             <TextInput
               style={[styles.input, styles.textArea, isRTL && styles.rtlText]}
               value={formData.description_ar}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description_ar: text }))}
-              placeholder={t('enterDescriptionArabic')}
+              placeholder={t('serviceForm.enterDescriptionArabic')}
               placeholderTextColor={colors.gray}
               multiline
               numberOfLines={3}
@@ -361,17 +363,17 @@ export default function ServiceFormScreen() {
 
         {/* Category and Pricing */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('categoryAndPricing')}</Text>
+          <Text style={styles.sectionTitle}>{t('serviceForm.categoryAndPricing')}</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('category')} *</Text>
+            <Text style={styles.label}>{t('serviceForm.category')} *</Text>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={formData.category_id}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
                 style={styles.picker}
               >
-                <Picker.Item label={t('selectCategory')} value="" />
+                <Picker.Item label={t('serviceForm.selectCategory')} value="" />
                 {categories.map(category => (
                   <Picker.Item
                     key={category.id}
@@ -385,7 +387,7 @@ export default function ServiceFormScreen() {
 
           <View style={styles.row}>
             <View style={[styles.inputGroup, styles.halfWidth]}>
-              <Text style={styles.label}>{t('price')} ({t('jod')}) *</Text>
+              <Text style={styles.label}>{t('common.price')} ({t('common.jod')}) *</Text>
               <TextInput
                 style={styles.input}
                 value={formData.price.toString()}
@@ -400,7 +402,7 @@ export default function ServiceFormScreen() {
             </View>
 
             <View style={[styles.inputGroup, styles.halfWidth]}>
-              <Text style={styles.label}>{t('duration')} ({t('minutes')}) *</Text>
+              <Text style={styles.label}>{t('common.duration')} ({t('common.minutes')}) *</Text>
               <TextInput
                 style={styles.input}
                 value={formData.duration_minutes.toString()}
@@ -416,7 +418,7 @@ export default function ServiceFormScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('genderPreference')}</Text>
+            <Text style={styles.label}>{t('serviceForm.genderPreference')}</Text>
             <View style={styles.genderOptions}>
               {['unisex', 'male', 'female'].map(gender => (
                 <TouchableOpacity
@@ -444,7 +446,7 @@ export default function ServiceFormScreen() {
 
         {/* Tags */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('tags')}</Text>
+          <Text style={styles.sectionTitle}>{t('serviceForm.tags')}</Text>
           <View style={styles.tagsContainer}>
             {availableTags.map(tag => (
               <TouchableOpacity
@@ -469,7 +471,7 @@ export default function ServiceFormScreen() {
         {/* Service Variations */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('serviceVariations')}</Text>
+            <Text style={styles.sectionTitle}>{t('serviceForm.serviceVariations')}</Text>
             <TouchableOpacity onPress={addVariation}>
               <Ionicons name="add-circle" size={24} color={colors.primary} />
             </TouchableOpacity>
@@ -479,7 +481,7 @@ export default function ServiceFormScreen() {
             <View key={index} style={styles.variationCard}>
               <View style={styles.variationHeader}>
                 <Text style={styles.variationTitle}>
-                  {t('variation')} {index + 1}
+                  {t('serviceForm.variation')} {index + 1}
                 </Text>
                 <TouchableOpacity onPress={() => removeVariation(index)}>
                   <Ionicons name="trash-outline" size={20} color={colors.error} />
@@ -488,7 +490,7 @@ export default function ServiceFormScreen() {
 
               <View style={styles.row}>
                 <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>{t('nameEnglish')}</Text>
+                  <Text style={styles.label}>{t('serviceForm.nameEnglish')}</Text>
                   <TextInput
                     style={styles.input}
                     value={variation.name_en}
@@ -499,7 +501,7 @@ export default function ServiceFormScreen() {
                 </View>
 
                 <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>{t('nameArabic')}</Text>
+                  <Text style={styles.label}>{t('serviceForm.nameArabic')}</Text>
                   <TextInput
                     style={[styles.input, isRTL && styles.rtlText]}
                     value={variation.name_ar}
@@ -512,7 +514,7 @@ export default function ServiceFormScreen() {
 
               <View style={styles.row}>
                 <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>{t('priceModifier')} ({t('jod')})</Text>
+                  <Text style={styles.label}>{t('serviceForm.priceModifier')} ({t('common.jod')})</Text>
                   <TextInput
                     style={styles.input}
                     value={variation.price_modifier.toString()}
@@ -524,7 +526,7 @@ export default function ServiceFormScreen() {
                 </View>
 
                 <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>{t('durationModifier')} ({t('minutes')})</Text>
+                  <Text style={styles.label}>{t('serviceForm.durationModifier')} ({t('common.minutes')})</Text>
                   <TextInput
                     style={styles.input}
                     value={variation.duration_modifier.toString()}
@@ -541,11 +543,11 @@ export default function ServiceFormScreen() {
 
         {/* Images */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('serviceImages')}</Text>
+          <Text style={styles.sectionTitle}>{t('serviceForm.serviceImages')}</Text>
           
           <TouchableOpacity style={styles.imageUploadButton} onPress={handleImagePick}>
             <Ionicons name="camera" size={24} color={colors.primary} />
-            <Text style={styles.imageUploadText}>{t('addImages')}</Text>
+            <Text style={styles.imageUploadText}>{t('serviceForm.addImages')}</Text>
           </TouchableOpacity>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesScroll}>
@@ -565,10 +567,10 @@ export default function ServiceFormScreen() {
 
         {/* Advanced Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('advancedSettings')}</Text>
+          <Text style={styles.sectionTitle}>{t('serviceForm.advancedSettings')}</Text>
           
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{t('requiresConsultation')}</Text>
+            <Text style={styles.switchLabel}>{t('serviceForm.requiresConsultation')}</Text>
             <Switch
               value={formData.requires_consultation}
               onValueChange={(value) => setFormData(prev => ({ 
@@ -581,7 +583,7 @@ export default function ServiceFormScreen() {
           </View>
 
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{t('allowParallelBooking')}</Text>
+            <Text style={styles.switchLabel}>{t('serviceForm.allowParallelBooking')}</Text>
             <Switch
               value={formData.allow_parallel_booking}
               onValueChange={(value) => setFormData(prev => ({ 
@@ -595,7 +597,7 @@ export default function ServiceFormScreen() {
 
           {formData.allow_parallel_booking && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>{t('maxParallelBookings')}</Text>
+              <Text style={styles.label}>{t('serviceForm.maxParallelBookings')}</Text>
               <TextInput
                 style={styles.input}
                 value={formData.max_parallel_bookings?.toString()}
@@ -612,7 +614,7 @@ export default function ServiceFormScreen() {
 
           <View style={styles.row}>
             <View style={[styles.inputGroup, styles.halfWidth]}>
-              <Text style={styles.label}>{t('preparationTime')} ({t('minutes')})</Text>
+              <Text style={styles.label}>{t('serviceForm.preparationTime')} ({t('common.minutes')})</Text>
               <TextInput
                 style={styles.input}
                 value={formData.preparation_time_minutes?.toString()}
@@ -627,7 +629,7 @@ export default function ServiceFormScreen() {
             </View>
 
             <View style={[styles.inputGroup, styles.halfWidth]}>
-              <Text style={styles.label}>{t('cleanupTime')} ({t('minutes')})</Text>
+              <Text style={styles.label}>{t('serviceForm.cleanupTime')} ({t('common.minutes')})</Text>
               <TextInput
                 style={styles.input}
                 value={formData.cleanup_time_minutes?.toString()}
@@ -653,12 +655,13 @@ export default function ServiceFormScreen() {
             <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.submitButtonText}>
-              {isEditing ? t('updateService') : t('createService')}
+              {isEditing ? t('serviceForm.updateService') : t('serviceForm.createService')}
             </Text>
           )}
         </TouchableOpacity>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

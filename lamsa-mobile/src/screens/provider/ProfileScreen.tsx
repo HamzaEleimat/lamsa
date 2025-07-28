@@ -14,6 +14,7 @@ import {
   Chip,
   Badge
 } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
@@ -126,7 +127,8 @@ const ProfileScreen: React.FC = () => {
   const tierInfo = getQualityTierInfo(provider.qualityTier);
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <ScrollView>
       <View style={styles.header}>
         <View style={styles.profileSection}>
           <Avatar.Image 
@@ -293,7 +295,8 @@ const ProfileScreen: React.FC = () => {
           {t('profile.app_version', { version: '1.0.0' })}
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

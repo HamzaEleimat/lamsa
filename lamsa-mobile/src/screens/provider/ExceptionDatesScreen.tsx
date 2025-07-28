@@ -13,6 +13,7 @@ import {
   Platform,
   I18nManager,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useNavigation } from '@react-navigation/native';
@@ -693,7 +694,7 @@ export default function ExceptionDatesScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -750,7 +751,7 @@ export default function ExceptionDatesScreen() {
 
       {/* Exception Modal */}
       {renderExceptionModal()}
-    </View>
+    </SafeAreaView>
   );
 }
 

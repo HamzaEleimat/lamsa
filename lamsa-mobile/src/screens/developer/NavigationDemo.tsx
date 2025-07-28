@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   PlatformHeader,
@@ -43,8 +44,7 @@ export default function NavigationDemo() {
   );
 
   return (
-    <>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#fff' }]} edges={['bottom', 'left', 'right']}>
         <PlatformHeader
           title={showLargeTitle ? "Navigation Demo" : "Platform Navigation"}
           subtitle="Testing navigation components"
@@ -201,7 +201,7 @@ export default function NavigationDemo() {
           </View>
         </ScrollView>
       </PlatformModal>
-    </>
+    </SafeAreaView>
   );
 }
 

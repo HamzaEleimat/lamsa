@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS service_images (
   display_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   
-  -- Indexes
-  CONSTRAINT unique_main_image_per_service UNIQUE (service_id, is_main) WHERE is_main = true
+  -- Ensure only one main image per service
+  CONSTRAINT unique_main_image_per_service EXCLUDE USING btree (service_id WITH =) WHERE (is_main = true)
 );
 
 -- Create indexes

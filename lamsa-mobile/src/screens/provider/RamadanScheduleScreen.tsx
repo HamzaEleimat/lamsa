@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useNavigation } from '@react-navigation/native';
@@ -715,7 +716,7 @@ export default function RamadanScheduleScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]} edges={['bottom', 'left', 'right']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -838,7 +839,7 @@ export default function RamadanScheduleScreen() {
         onTimeSelect={handleTimeSelect}
         title={t('selectTime')}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
