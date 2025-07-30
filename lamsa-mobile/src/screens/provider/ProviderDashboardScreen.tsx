@@ -6,27 +6,38 @@ import {
   TouchableOpacity,
   RefreshControl,
   Dimensions,
-  Platform,
 } from 'react-native';
-import { Text, Card, ActivityIndicator } from 'react-native-paper';
+import { Text, Card, ActivityIndicator, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useTranslation } from '../../hooks/useTranslation';
 import { colors } from '../../constants/colors';
+import { ProviderStackParamList } from '../../navigation/ProviderStackNavigator';
+import { ProviderTabParamList } from '../../navigation/ProviderTabNavigator';
 import { useAuth } from '../../contexts/AuthContext';
 import { analyticsService } from '../../services/analyticsService';
 import { providerBookingService } from '../../services/providerBookingService';
 import { getProviderIdForUser } from '../../utils/providerUtils';
 import { handleSupabaseError, logError } from '../../utils/errorHandler';
 import { LineChart } from 'react-native-chart-kit';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import LanguageToggleButton from '../../components/LanguageToggleButton';
 import { notificationService } from '../../services/notificationService';
 import { employeeService } from '../../services/employeeService';
 import { reviewService } from '../../services/reviewService';
 import DonutChart from '../../components/charts/DonutChart';
+import BusinessHealthScore from '../../components/dashboard/BusinessHealthScore';
+import QuickStatsGrid from '../../components/dashboard/QuickStatsGrid';
+import ScheduleTimeline from '../../components/dashboard/ScheduleTimeline';
+import SmartAlerts from '../../components/dashboard/SmartAlerts';
+import ServicePerformance from '../../components/dashboard/ServicePerformance';
+import ClientInsights from '../../components/dashboard/ClientInsights';
+import { QuickActions } from '../../components/dashboard/QuickActions';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -37,20 +48,20 @@ interface DashboardMetric {
   changeLabel: string;
   icon: string;
   color: string;
-  screen?: string;
+  screen?: keyof ProviderStackParamList | keyof ProviderTabParamList;
 }
 
-interface QuickAction {
-  label: string;
-  icon: string;
-  color: string;
-  screen: string;
-}
+
+type ProviderDashboardNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<ProviderTabParamList, 'Dashboard'>,
+  NativeStackNavigationProp<ProviderStackParamList>
+>;
 
 export default function ProviderDashboardScreen() {
   const { t, i18n } = useTranslation();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProviderDashboardNavigationProp>();
   const { user } = useAuth();
+  const theme = useTheme();
   const locale = i18n.language === 'ar' ? ar : enUS;
   
   const [loading, setLoading] = useState(true);
@@ -64,10 +75,57 @@ export default function ProviderDashboardScreen() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [employeeMetrics, setEmployeeMetrics] = useState<any>(null);
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
+  const [quickActionsVisible, setQuickActionsVisible] = useState(true);
   
   const calculatePercentageChange = (current: number, previous: number): number => {
     if (previous === 0) return current > 0 ? 100 : 0;
     return Math.round(((current - previous) / previous) * 100);
+  };
+
+  const calculateBusinessHealthScore = () => {
+    if (!performanceMetrics || !bookingStats) return null;
+
+    // Calculate occupancy rate (booked slots / total slots)
+    const totalSlots = 12; // Assuming 12 slots per day (9am-9pm)
+    const occupancyRate = Math.round((bookingStats.todayBookings / totalSlots) * 100);
+
+    // Calculate revenue vs target (assuming daily target is 500 JOD)
+    const dailyTarget = 500;
+    const revenueVsTarget = Math.round((performanceMetrics.revenue_today / dailyTarget) * 100);
+
+    // Customer satisfaction (based on average rating)
+    const satisfaction = Math.round((performanceMetrics.avg_rating / 5) * 100);
+
+    // Staff utilization (placeholder - would need real data)
+    const staffUtilization = 75; // Mock data
+
+    // Calculate overall score (weighted average)
+    const score = Math.round(
+      (occupancyRate * 0.3 + revenueVsTarget * 0.3 + satisfaction * 0.3 + staffUtilization * 0.1)
+    );
+
+    // Determine trend based on week comparison
+    const weeklyChange = calculatePercentageChange(
+      performanceMetrics.revenue_today,
+      performanceMetrics.revenue_last_7_days / 7
+    );
+    const trend: 'up' | 'down' | 'stable' = weeklyChange > 5 ? 'up' : weeklyChange < -5 ? 'down' : 'stable';
+
+    return {
+      score,
+      trend,
+      factors: {
+        occupancyRate,
+        revenueVsTarget,
+        customerSatisfaction: satisfaction,
+        staffUtilization,
+      },
+      tip: score < 60 
+        ? t('dashboard.healthTipLow') 
+        : score < 80 
+        ? t('dashboard.healthTipMedium')
+        : t('dashboard.healthTipHigh'),
+    };
   };
   
   useEffect(() => {
@@ -169,7 +227,7 @@ export default function ProviderDashboardScreen() {
       changeLabel: t('dashboard.vsAverage'),
       icon: 'cash',
       color: colors.success,
-      screen: 'RevenueAnalytics',
+      // screen: 'RevenueAnalytics', // TODO: Add to navigation
     },
     {
       label: t('dashboard.todayBookings'),
@@ -178,7 +236,7 @@ export default function ProviderDashboardScreen() {
       changeLabel: t('dashboard.vsAverage'),
       icon: 'calendar',
       color: colors.primary,
-      screen: 'BookingAnalytics',
+      // screen: 'BookingAnalytics', // TODO: Add to navigation
     },
     {
       label: t('dashboard.totalCustomers'),
@@ -187,7 +245,7 @@ export default function ProviderDashboardScreen() {
       changeLabel: t('dashboard.newThisMonth'),
       icon: 'people',
       color: colors.info,
-      screen: 'CustomerAnalytics',
+      // screen: 'CustomerAnalytics', // TODO: Add to navigation
     },
     {
       label: t('dashboard.avgRating'),
@@ -196,36 +254,356 @@ export default function ProviderDashboardScreen() {
       changeLabel: `${performanceMetrics.total_reviews} ${t('common.reviews')}`,
       icon: 'star',
       color: colors.warning,
-      screen: 'PerformanceAnalytics',
+      // screen: 'PerformanceAnalytics', // TODO: Add to navigation
     },
   ] : [];
   
-  const quickActions: QuickAction[] = [
-    {
-      label: t('dashboard.viewAllBookings'),
-      icon: 'calendar-sharp',
-      color: colors.primary,
-      screen: 'BookingsList',
-    },
-    {
-      label: t('dashboard.addService'),
-      icon: 'add-circle',
-      color: colors.success,
-      screen: 'ServiceForm',
-    },
-    {
-      label: t('dashboard.viewReviews'),
-      icon: 'star',
-      color: colors.warning,
-      screen: 'ReviewsList',
-    },
-    {
-      label: t('settings.notificationsText'),
-      icon: 'notifications',
-      color: colors.secondary,
-      screen: 'NotificationPreferences',
-    },
-  ];
+
+  const getQuickStats = () => {
+    if (!performanceMetrics || !bookingStats) return [];
+
+    return [
+      {
+        label: t('dashboard.todaysAppointments'),
+        value: `${bookingStats.todayBookings}/${12}`,
+        subValue: `${Math.round((bookingStats.todayBookings / 12) * 100)}%`,
+        icon: 'calendar-check',
+        color: colors.primary,
+        onPress: () => navigation.navigate('Bookings'),
+      },
+      {
+        label: t('dashboard.weekRevenue'),
+        value: `${performanceMetrics.revenue_last_7_days.toFixed(0)}`,
+        subValue: t('common.jod'),
+        icon: 'cash-multiple',
+        color: colors.success,
+        onPress: () => navigation.navigate('More'), // TODO: Navigate to RevenueAnalytics when available
+      },
+      {
+        label: t('dashboard.newClients'),
+        value: performanceMetrics.new_customers_this_month.toString(),
+        subValue: t('dashboard.thisWeek'),
+        icon: 'account-plus',
+        color: colors.secondary,
+        onPress: () => navigation.navigate('More'), // TODO: Navigate to CustomerAnalytics when available
+      },
+      {
+        label: t('dashboard.avgRating'),
+        value: performanceMetrics.avg_rating.toFixed(1),
+        subValue: `${performanceMetrics.total_reviews} ${t('dashboard.reviews')}`,
+        icon: 'star',
+        color: colors.warning,
+        onPress: () => navigation.navigate('Profile'), // TODO: Navigate to ReviewsList when available
+      },
+    ];
+  };
+
+  const generateScheduleSlots = (period: 'today' | 'week' | 'month') => {
+    const slots = [];
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay();
+    
+    if (period === 'today') {
+      // Hourly slots for today
+      const startHour = 9;
+      const endHour = 21;
+
+      for (let hour = startHour; hour < endHour; hour++) {
+        const isPast = hour < currentHour;
+        const isBreak = hour === 13; // Lunch break
+        
+        // Mock booking data - in real app, this would come from actual bookings
+        const hasBooking = !isBreak && !isPast && Math.random() > 0.4;
+        
+        slots.push({
+          time: `${hour}:00`,
+          isBooked: hasBooking,
+          isBreak,
+          isPast,
+          booking: hasBooking ? {
+            id: `booking-${hour}`,
+            customerName: ['Sarah Ahmed', 'Fatima Ali', 'Noor Hassan'][Math.floor(Math.random() * 3)],
+            serviceName: ['Hair Cut', 'Manicure', 'Facial'][Math.floor(Math.random() * 3)],
+            duration: 60,
+            status: hour === currentHour ? 'in-progress' : 'confirmed' as any,
+          } : undefined,
+        });
+      }
+    } else if (period === 'week') {
+      // Daily slots for the week
+      const daysOfWeek = i18n.language === 'ar' 
+        ? ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+        : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      
+      for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        const date = new Date(now);
+        date.setDate(now.getDate() + dayOffset);
+        const isPast = dayOffset === 0 && currentHour > 18; // Consider today past if after 6 PM
+        const isToday = dayOffset === 0;
+        
+        // Mock booking count for each day
+        const bookingCount = Math.floor(Math.random() * 8) + 2;
+        const hasBooking = bookingCount > 0;
+        
+        slots.push({
+          time: daysOfWeek[date.getDay()],
+          date: format(date, 'dd/MM', { locale }),
+          isBooked: hasBooking,
+          isPast,
+          isToday,
+          bookingCount,
+          booking: hasBooking ? {
+            id: `day-${dayOffset}`,
+            customerName: `${bookingCount} ${t('common.bookings')}`,
+            serviceName: isToday ? t('dashboard.inProgress') : '',
+            duration: 0,
+            status: isToday ? 'in-progress' : 'confirmed' as any,
+          } : undefined,
+        });
+      }
+    } else {
+      // Weekly summaries for the month
+      const weekNames = i18n.language === 'ar' 
+        ? ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4']
+        : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+      
+      for (let weekOffset = 0; weekOffset < 4; weekOffset++) {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() + (weekOffset * 7));
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        const isPast = weekOffset === 0 && currentDay > 5; // Consider current week past if Friday or later
+        const isCurrentWeek = weekOffset === 0;
+        
+        // Mock weekly stats
+        const bookingCount = Math.floor(Math.random() * 30) + 15;
+        const revenue = bookingCount * (Math.random() * 50 + 30);
+        
+        slots.push({
+          time: weekNames[weekOffset],
+          date: `${format(weekStart, 'dd/MM', { locale })} - ${format(weekEnd, 'dd/MM', { locale })}`,
+          isBooked: true,
+          isPast,
+          isCurrentWeek,
+          bookingCount,
+          revenue: revenue.toFixed(0),
+          booking: {
+            id: `week-${weekOffset}`,
+            customerName: `${bookingCount} ${t('common.bookings')}`,
+            serviceName: `${revenue.toFixed(0)} ${t('common.jod')}`,
+            duration: 0,
+            status: isCurrentWeek ? 'in-progress' : 'confirmed' as any,
+          },
+        });
+      }
+    }
+
+    return slots;
+  };
+
+  const generateSmartAlerts = () => {
+    const alerts = [];
+    
+    // Low booking alert
+    if (bookingStats && bookingStats.todayBookings < 3) {
+      alerts.push({
+        id: 'low-bookings',
+        type: 'warning' as const,
+        title: t('dashboard.lowBookingsAlert'),
+        message: t('dashboard.lowBookingsMessage'),
+        icon: 'calendar-alert',
+        action: {
+          label: t('dashboard.promote'),
+          onPress: () => navigation.navigate('More'),
+        },
+      });
+    }
+
+    // High performance alert
+    if (performanceMetrics && performanceMetrics.avg_rating >= 4.8) {
+      alerts.push({
+        id: 'high-rating',
+        type: 'success' as const,
+        title: t('dashboard.highRatingAlert'),
+        message: t('dashboard.highRatingMessage'),
+        icon: 'star-circle',
+      });
+    }
+
+    // Revenue opportunity
+    if (performanceMetrics && revenueData.length > 0) {
+      const avgRevenue = performanceMetrics.revenue_last_7_days / 7;
+      if (performanceMetrics.revenue_today < avgRevenue * 0.7) {
+        alerts.push({
+          id: 'revenue-opportunity',
+          type: 'info' as const,
+          title: t('dashboard.revenueOpportunity'),
+          message: t('dashboard.revenueOpportunityMessage'),
+          icon: 'cash-plus',
+          action: {
+            label: t('dashboard.viewAnalytics'),
+            onPress: () => navigation.navigate('More'),
+          },
+        });
+      }
+    }
+
+    // New reviews alert
+    if (recentReviews && recentReviews.length > 0) {
+      const unreadReviews = recentReviews.filter((r: any) => !r.read_at).length;
+      if (unreadReviews > 0) {
+        alerts.push({
+          id: 'new-reviews',
+          type: 'info' as const,
+          title: t('dashboard.newReviewsAlert'),
+          message: t('dashboard.newReviewsMessage', { count: unreadReviews }),
+          icon: 'message-star',
+          action: {
+            label: t('dashboard.viewReviews'),
+            onPress: () => navigation.navigate('Profile'),
+          },
+        });
+      }
+    }
+
+    return alerts;
+  };
+
+  const generateServicePerformanceData = () => {
+    // Mock service performance data - in real app, this would come from analytics
+    const services = [
+      {
+        id: '1',
+        name: 'Hair Cut & Style',
+        nameAr: 'قص وتصفيف الشعر',
+        bookings: 45,
+        revenue: 1350,
+        rating: 4.8,
+        trend: 'up' as const,
+        categoryIcon: 'content-cut',
+      },
+      {
+        id: '2',
+        name: 'Hair Coloring',
+        nameAr: 'صبغة الشعر',
+        bookings: 32,
+        revenue: 2240,
+        rating: 4.9,
+        trend: 'up' as const,
+        categoryIcon: 'palette',
+      },
+      {
+        id: '3',
+        name: 'Manicure & Pedicure',
+        nameAr: 'مانيكير وباديكير',
+        bookings: 28,
+        revenue: 840,
+        rating: 4.7,
+        trend: 'stable' as const,
+        categoryIcon: 'hand-heart',
+      },
+      {
+        id: '4',
+        name: 'Facial Treatment',
+        nameAr: 'علاج الوجه',
+        bookings: 22,
+        revenue: 1540,
+        rating: 4.6,
+        trend: 'down' as const,
+        categoryIcon: 'face-woman-shimmer',
+      },
+      {
+        id: '5',
+        name: 'Makeup',
+        nameAr: 'مكياج',
+        bookings: 18,
+        revenue: 900,
+        rating: 4.9,
+        trend: 'up' as const,
+        categoryIcon: 'brush',
+      },
+    ];
+
+    const totalBookings = services.reduce((sum, s) => sum + s.bookings, 0);
+    
+    return { services, totalBookings };
+  };
+
+  const generateClientInsights = () => {
+    const insights = [];
+
+    // New clients this week
+    if (performanceMetrics && performanceMetrics.new_customers_this_month > 0) {
+      insights.push({
+        id: 'new-clients',
+        type: 'new_client' as const,
+        title: t('dashboard.newClientsThisWeek'),
+        subtitle: t('dashboard.firstTimeVisitors'),
+        clients: [
+          { id: '1', name: 'Sarah Ahmed', lastVisit: t('common.today') },
+          { id: '2', name: 'Fatima Ali', lastVisit: t('common.yesterday') },
+          { id: '3', name: 'Noor Hassan', lastVisit: '3 ' + t('common.daysAgo') },
+        ],
+        action: {
+          label: t('dashboard.sendWelcome'),
+          onPress: () => navigation.navigate('More'),
+        },
+      });
+    }
+
+    // VIP clients
+    insights.push({
+      id: 'vip-clients',
+      type: 'vip_client' as const,
+      title: t('dashboard.topSpenders'),
+      subtitle: t('dashboard.yourMostValuableClients'),
+      clients: [
+        { id: '4', name: 'Layla Khalil', totalSpent: 850, visitCount: 24 },
+        { id: '5', name: 'Maya Saeed', totalSpent: 720, visitCount: 18 },
+        { id: '6', name: 'Rania Hamdan', totalSpent: 680, visitCount: 15 },
+      ],
+      action: {
+        label: t('dashboard.rewardLoyalty'),
+        onPress: () => navigation.navigate('More'),
+      },
+    });
+
+    // At risk clients
+    insights.push({
+      id: 'at-risk',
+      type: 'at_risk' as const,
+      title: t('dashboard.atRiskClients'),
+      subtitle: t('dashboard.haventVisitedRecently'),
+      clients: [
+        { id: '7', name: 'Dina Rashid', lastVisit: '45 ' + t('common.daysAgo') },
+        { id: '8', name: 'Hala Yousef', lastVisit: '38 ' + t('common.daysAgo') },
+      ],
+      action: {
+        label: t('dashboard.reachOut'),
+        onPress: () => navigation.navigate('More'),
+      },
+    });
+
+    // Birthday clients
+    insights.push({
+      id: 'birthdays',
+      type: 'birthday' as const,
+      title: t('dashboard.upcomingBirthdays'),
+      subtitle: t('dashboard.celebrateWithClients'),
+      clients: [
+        { id: '9', name: 'Yasmin Abbas', lastVisit: t('dashboard.thisWeek') },
+        { id: '10', name: 'Reem Nasser', lastVisit: t('dashboard.nextWeek') },
+      ],
+      action: {
+        label: t('dashboard.sendGreetings'),
+        onPress: () => navigation.navigate('More'),
+      },
+    });
+
+    return insights;
+  };
   
   const renderMetricCard = (metric: DashboardMetric) => {
     const isPositive = metric.change >= 0;
@@ -234,7 +612,10 @@ export default function ProviderDashboardScreen() {
       <TouchableOpacity
         key={metric.label}
         style={styles.metricCard}
-        onPress={() => metric.screen && navigation.navigate(metric.screen as any)}
+        onPress={() => {
+          // TODO: Add analytics screens to navigation
+          console.log('Navigate to', metric.screen);
+        }}
         activeOpacity={0.8}
       >
         <Card style={[styles.card, { borderLeftColor: metric.color }]}>
@@ -283,8 +664,8 @@ export default function ProviderDashboardScreen() {
       <Card style={styles.chartCard}>
         <Card.Title
           title={t('dashboard.revenueOverview')}
-          right={(props) => (
-            <TouchableOpacity onPress={() => navigation.navigate('RevenueAnalytics' as any)}>
+          right={() => (
+            <TouchableOpacity onPress={() => navigation.navigate('More')}>
               <Ionicons name="arrow-forward" size={20} color={colors.primary} />
             </TouchableOpacity>
           )}
@@ -301,8 +682,8 @@ export default function ProviderDashboardScreen() {
               backgroundGradientFrom: colors.white,
               backgroundGradientTo: colors.white,
               decimalPlaces: 0,
-              color: (opacity = 1) => colors.primary,
-              labelColor: (opacity = 1) => colors.text,
+              color: () => colors.primary,
+              labelColor: () => colors.text,
               style: {
                 borderRadius: 16,
               },
@@ -328,8 +709,8 @@ export default function ProviderDashboardScreen() {
         <Card.Title
           title={t('dashboard.upcomingBookings')}
           subtitle={`${upcomingBookings.length} ${t('dashboard.bookingsToday')}`}
-          right={(props) => (
-            <TouchableOpacity onPress={() => navigation.navigate('Bookings' as any)}>
+          right={() => (
+            <TouchableOpacity onPress={() => navigation.navigate('Bookings')}>
               <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
             </TouchableOpacity>
           )}
@@ -354,25 +735,6 @@ export default function ProviderDashboardScreen() {
     );
   };
   
-  const renderQuickActions = () => (
-    <View style={styles.quickActionsContainer}>
-      <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
-      <View style={styles.quickActionsGrid}>
-        {quickActions.map((action) => (
-          <TouchableOpacity
-            key={action.label}
-            style={styles.quickAction}
-            onPress={() => navigation.navigate(action.screen as any)}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: action.color + '20' }]}>
-              <Ionicons name={action.icon as any} size={24} color={action.color} />
-            </View>
-            <Text style={styles.quickActionLabel}>{action.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
   
   const renderBookingStatusChart = () => {
     if (!bookingStats) return null;
@@ -421,8 +783,8 @@ export default function ProviderDashboardScreen() {
         <Card.Title
           title={t('dashboard.employeePerformance')}
           subtitle={`${employeeMetrics.active_employees} ${t('dashboard.activeEmployees')}`}
-          right={(props) => (
-            <TouchableOpacity onPress={() => navigation.navigate('EmployeeList' as any)}>
+          right={() => (
+            <TouchableOpacity onPress={() => navigation.navigate('More')}>
               <Text style={styles.viewAllText}>{t('dashboard.manage')}</Text>
             </TouchableOpacity>
           )}
@@ -495,8 +857,8 @@ export default function ProviderDashboardScreen() {
         <Card.Title
           title={t('dashboard.recentReviews')}
           subtitle={`${performanceMetrics?.avg_rating || 0} ${t('dashboard.averageRating')}`}
-          right={(props) => (
-            <TouchableOpacity onPress={() => navigation.navigate('ReviewsList' as any)}>
+          right={() => (
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
               <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
             </TouchableOpacity>
           )}
@@ -601,35 +963,36 @@ export default function ProviderDashboardScreen() {
   }
   
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.greetingText}>
-            {t('dashboard.goodMorning')}
-          </Text>
-          <Text style={styles.userName}>
-            {user?.name}
-          </Text>
-          <Text style={styles.date}>
-            {format(new Date(), 'EEEE, d MMMM', { locale })}
-          </Text>
+    <>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.greetingText, { color: theme.colors.onSurfaceVariant }]}>
+              {t('dashboard.goodMorning')}
+            </Text>
+            <Text style={[styles.userName, { color: theme.colors.onSurface }]}>
+              {user?.name}
+            </Text>
+            <Text style={[styles.date, { color: theme.colors.onSurfaceVariant }]}>
+              {format(new Date(), 'EEEE, d MMMM', { locale })}
+            </Text>
+          </View>
+          <View style={styles.headerRight}>
+            <LanguageToggleButton style={{ marginRight: 16 }} />
+            <TouchableOpacity onPress={() => navigation.navigate('More')}>
+              <View style={styles.notificationIcon}>
+                <Ionicons name="notifications-outline" size={24} color={theme.colors.onSurface} />
+                {notificationCount > 0 && (
+                  <View style={[styles.notificationBadge, { backgroundColor: theme.colors.error }]}>
+                    <Text style={styles.notificationBadgeText}>
+                      {notificationCount > 99 ? '99+' : notificationCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.headerRight}>
-          <LanguageToggleButton style={{ marginRight: 16 }} />
-          <TouchableOpacity onPress={() => navigation.navigate('NotificationCenter' as any)}>
-            <View style={styles.notificationIcon}>
-              <Ionicons name="notifications-outline" size={24} color={colors.text} />
-              {notificationCount > 0 && (
-                <View style={styles.notificationBadge}>
-                  <Text style={styles.notificationBadgeText}>
-                    {notificationCount > 99 ? '99+' : notificationCount}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
       
       <View style={styles.periodSelector}>
         {(['today', 'week', 'month'] as const).map((period) => (
@@ -637,13 +1000,14 @@ export default function ProviderDashboardScreen() {
             key={period}
             style={[
               styles.periodButton,
-              selectedPeriod === period && styles.selectedPeriodButton,
+              selectedPeriod === period && [styles.selectedPeriodButton, { backgroundColor: theme.colors.primary }],
             ]}
             onPress={() => setSelectedPeriod(period)}
           >
             <Text style={[
               styles.periodButtonText,
-              selectedPeriod === period && styles.selectedPeriodButtonText,
+              { color: theme.colors.onSurfaceVariant },
+              selectedPeriod === period && [styles.selectedPeriodButtonText, { color: theme.colors.onPrimary }],
             ]}>
               {t(`common.${period}`)}
             </Text>
@@ -658,28 +1022,65 @@ export default function ProviderDashboardScreen() {
         }
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.metricsGrid}>
-          {metrics.map(renderMetricCard)}
-        </View>
+        {/* Business Health Score */}
+        {calculateBusinessHealthScore() && (
+          <BusinessHealthScore {...calculateBusinessHealthScore()!} />
+        )}
         
+        {/* Smart Alerts */}
+        <SmartAlerts alerts={generateSmartAlerts()} />
+        
+        {/* Schedule Timeline */}
+        <ScheduleTimeline
+          slots={generateScheduleSlots(selectedPeriod)}
+          period={selectedPeriod}
+          onSlotPress={(slot) => {
+            if (slot.booking) {
+              navigation.navigate('BookingDetails', { bookingId: slot.booking.id });
+            } else if (!slot.isBreak && !slot.isPast) {
+              navigation.navigate('CreateBooking');
+            }
+          }}
+          onAddPress={() => navigation.navigate('CreateBooking')}
+        />
+        
+        {/* Quick Actions */}
+        <QuickActions
+          style="inline"
+          visible={quickActionsVisible}
+          onToggle={() => setQuickActionsVisible(!quickActionsVisible)}
+        />
+        
+        {/* Quick Stats Grid */}
+        <QuickStatsGrid stats={getQuickStats()} />
+        
+        {/* Service Performance */}
+        <ServicePerformance 
+          {...generateServicePerformanceData()}
+          onServicePress={() => navigation.navigate('Services')}
+          onViewAllPress={() => navigation.navigate('Services')}
+        />
+        
+        {/* Client Insights */}
+        <ClientInsights 
+          insights={generateClientInsights()}
+          onClientPress={() => navigation.navigate('More')}
+        />
+        
+        {/* Keep existing components temporarily */}
         {renderRevenueChart()}
-        {renderBookingStatusChart()}
-        {renderEmployeeSection()}
         {renderUpcomingBookings()}
-        {renderRecentReviews()}
-        {renderQuickActions()}
-        {renderInsights()}
         
         <View style={styles.bottomPadding} />
       </ScrollView>
     </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -693,7 +1094,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 20,
-    backgroundColor: colors.white,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   headerLeft: {
     flex: 1,
@@ -874,38 +1279,39 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.primary,
   },
-  quickActionsContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
+  // Commented out - now using QuickActions component styles
+  // quickActionsContainer: {
+  //   paddingHorizontal: 16,
+  //   marginBottom: 16,
+  // },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 12,
   },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  quickAction: {
-    width: (screenWidth - 44) / 4,
-    alignItems: 'center',
-  },
-  quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  quickActionLabel: {
-    fontSize: 12,
-    color: colors.text,
-    textAlign: 'center',
-  },
+  // quickActionsGrid: {
+  //   flexDirection: 'row',
+  //   flexWrap: 'wrap',
+  //   gap: 12,
+  // },
+  // quickAction: {
+  //   width: (screenWidth - 44) / 4,
+  //   alignItems: 'center',
+  // },
+  // quickActionIcon: {
+  //   width: 48,
+  //   height: 48,
+  //   borderRadius: 24,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   marginBottom: 8,
+  // },
+  // quickActionLabel: {
+  //   fontSize: 12,
+  //   color: colors.text,
+  //   textAlign: 'center',
+  // },
   insightsCard: {
     marginHorizontal: 16,
     marginBottom: 16,

@@ -1,41 +1,41 @@
 export const colors = {
-  // Primary colors - Updated with new pink palette
-  primary: '#FF8FAB',
-  primaryDark: '#50373E',
-  primaryLight: '#FFB3C6',
-  lightPrimary: '#FFE5EC',
+  // Primary colors - Sophisticated beauty palette
+  primary: '#D4A5A5',      // Soft rose/mauve
+  primaryDark: '#4A3643',  // Deep plum
+  primaryLight: '#E8C5C5', // Warm blush
+  lightPrimary: '#F5E6E6', // Cream blush
   
-  // Secondary colors - Updated with new pink palette
-  secondary: '#FFC2D1',
-  secondaryDark: '#FF8FAB',
-  secondaryLight: '#FFE5EC',
-  lightSecondary: '#FFE5EC',
+  // Secondary colors - Complementary tones
+  secondary: '#E8C5C5',    // Warm blush
+  secondaryDark: '#C89B9B', // Dusty rose
+  secondaryLight: '#F5E6E6', // Cream blush
+  lightSecondary: '#FAF2F2', // Almost white blush
   
-  // Status colors
-  success: '#48BB78',
-  lightSuccess: '#C6F6D5',
-  warning: '#F6AD55',
-  lightWarning: '#FEFCBF',
-  error: '#F56565',
-  lightError: '#FED7D7',
-  info: '#4299E1',
+  // Status colors - Softened for elegance
+  success: '#7FB069',      // Sage green
+  lightSuccess: '#D4E5CF', // Light sage
+  warning: '#E8A87C',      // Muted peach
+  lightWarning: '#F5E0D3', // Light peach
+  error: '#CD5C5C',        // Indian red
+  lightError: '#F0D0D0',   // Light rose
+  info: '#7BA7BC',         // Dusty blue
   
-  // Neutral colors
+  // Neutral colors - Warmer tones
   white: '#FFFFFF',
   black: '#000000',
-  text: '#2D3748',
-  textLight: '#718096',
-  gray: '#A0AEC0',
-  lightGray: '#F7FAFC',
-  border: '#E2E8F0',
-  background: '#F7FAFC',
+  text: '#2D2428',         // Warm dark gray
+  textLight: '#6B5D65',    // Warm medium gray
+  gray: '#A69BA3',         // Warm gray
+  lightGray: '#FAF7F6',    // Warm light gray
+  border: '#E8E2E0',       // Warm border
+  background: '#FAF7F6',   // Warm background
   
   // Additional colors for service management
-  gold: '#FFD700',
-  silver: '#C0C0C0',
-  bronze: '#CD7F32',
+  gold: '#D4AF37',         // Antique gold
+  silver: '#B8B8B8',       // Soft silver
+  bronze: '#B87333',       // Soft bronze
   
   // Transparent colors
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlay: 'rgba(74, 54, 67, 0.5)', // Based on deep plum
   transparent: 'transparent',
 };

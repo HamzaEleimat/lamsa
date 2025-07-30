@@ -199,7 +199,7 @@ const MoreScreen: React.FC = () => {
       right={props => (
         <View style={styles.rightContent}>
           {item.badge && (
-            <Badge style={styles.badge}>{item.badge}</Badge>
+            <Badge style={[styles.badge, { backgroundColor: theme.colors.primary }]}>{item.badge}</Badge>
           )}
           <MaterialCommunityIcons 
             name={isRTL() ? "chevron-left" : "chevron-right"} 
@@ -215,12 +215,15 @@ const MoreScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <ScrollView>
-      <View style={styles.header}>
+      <ScrollView 
+        style={{ backgroundColor: theme.colors.background }}
+        contentContainerStyle={styles.scrollContent}
+      >
+      <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
         <Text variant="headlineMedium" style={styles.title}>
           {t('navigation.more')}
         </Text>
-        <Text variant="bodyMedium" style={styles.subtitle}>
+        <Text variant="bodyMedium" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
           {t('more.subtitle')}
         </Text>
       </View>
@@ -231,7 +234,7 @@ const MoreScreen: React.FC = () => {
             <List.Subheader style={styles.sectionHeader}>
               {section.title}
             </List.Subheader>
-            <Card style={styles.sectionCard}>
+            <Card style={[styles.sectionCard, { backgroundColor: theme.colors.surface }]}>
               {section.items.map((item, itemIndex) => (
                 <React.Fragment key={item.route}>
                   {renderMenuItem(item)}
@@ -244,7 +247,7 @@ const MoreScreen: React.FC = () => {
       ))}
 
       <View style={styles.footer}>
-        <Text variant="bodySmall" style={styles.footerText}>
+        <Text variant="bodySmall" style={[styles.footerText, { color: theme.colors.onSurfaceDisabled }]}>
           {t('more.footer_text')}
         </Text>
       </View>
@@ -256,10 +259,11 @@ const MoreScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
-    backgroundColor: 'white',
     padding: 20,
     paddingTop: 48,
     borderBottomLeftRadius: 20,
@@ -269,20 +273,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   title: {
     marginBottom: 4,
     textAlign: isRTL() ? 'right' : 'left',
   },
   subtitle: {
-    color: '#666',
     textAlign: isRTL() ? 'right' : 'left',
   },
   sectionHeader: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingTop: 16,
+    paddingBottom: 8,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -301,7 +304,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   badge: {
-    backgroundColor: '#FF8FAB',
     fontSize: 10,
     paddingHorizontal: 6,
   },
@@ -311,7 +313,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    color: '#999',
     textAlign: 'center',
   },
 });
