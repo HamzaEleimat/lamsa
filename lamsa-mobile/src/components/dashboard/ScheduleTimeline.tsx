@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, Card, useTheme, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing, layout } from '../../constants/spacing';
 
 interface TimeSlot {
   time: string;
@@ -210,34 +211,33 @@ const ScheduleTimeline: React.FC<ScheduleTimelineProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
+    ...layout.cardMargin,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   title: {
     fontWeight: '600',
   },
   subtitle: {
     opacity: 0.7,
-    marginTop: 2,
+    marginTop: spacing.xs / 2,
   },
   timeline: {
-    marginHorizontal: -16,
+    marginHorizontal: -spacing.md,
   },
   timelineContent: {
-    paddingHorizontal: 16,
-    gap: 8,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
   slot: {
     width: 100,
     minHeight: 80,
-    padding: 8,
-    borderRadius: 8,
+    padding: spacing.sm,
+    borderRadius: spacing.sm,
     justifyContent: 'flex-start',
     alignItems: 'center',
     position: 'relative',
@@ -254,12 +254,12 @@ const styles = StyleSheet.create({
   },
   time: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   date: {
     fontSize: 10,
     opacity: 0.7,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   pastText: {
     opacity: 0.5,
@@ -272,14 +272,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     opacity: 0.7,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: spacing.xs / 2,
   },
   availableText: {
     opacity: 0.5,
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   breakIcon: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   statusIcon: {
     position: 'absolute',
@@ -296,16 +296,16 @@ const styles = StyleSheet.create({
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    marginTop: 16,
-    paddingTop: 12,
+    gap: spacing.md,
+    marginTop: spacing.md,
+    paddingTop: spacing.sm + spacing.xs,
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.1)',
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.sm - 2,
   },
   legendDot: {
     width: 8,

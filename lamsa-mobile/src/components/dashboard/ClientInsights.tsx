@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, Card, useTheme, Avatar, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing } from '../../constants/spacing';
 
 interface ClientInsight {
   id: string;
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
   },
   insightTitle: {
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: spacing.xs / 2,
   },
   insightSubtitle: {
     opacity: 0.7,
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   },
   clientName: {
     fontWeight: '500',
-    marginBottom: 2,
+    marginBottom: spacing.xs / 2,
   },
   clientDetail: {
     opacity: 0.6,

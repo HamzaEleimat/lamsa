@@ -94,17 +94,17 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleCreateBooking = async () => {
     if (!selectedService) {
-      Alert.alert(t('common.error'), t('booking.selectService'));
+      Alert.alert(t('common.error'), t('bookings.selectService'));
       return;
     }
 
     if (!customerName.trim()) {
-      Alert.alert(t('common.error'), t('booking.enterCustomerName'));
+      Alert.alert(t('common.error'), t('bookings.enterCustomerName'));
       return;
     }
 
     if (!customerPhone.trim()) {
-      Alert.alert(t('common.error'), t('booking.enterCustomerPhone'));
+      Alert.alert(t('common.error'), t('bookings.enterCustomerPhone'));
       return;
     }
 
@@ -134,7 +134,7 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
       await bookingService.createBooking(bookingData);
       Alert.alert(
         t('common.success'),
-        t('booking.createdSuccessfully'),
+        t('bookings.createdSuccessfully'),
         [
           {
             text: t('common.ok'),
@@ -144,7 +144,7 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
       );
     } catch (error) {
       console.error('Error creating booking:', error);
-      Alert.alert(t('common.error'), t('booking.errorCreating'));
+      Alert.alert(t('common.error'), t('bookings.errorCreating'));
     } finally {
       setLoading(false);
     }
@@ -179,17 +179,17 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
           icon={isRTL ? 'arrow-right' : 'arrow-left'}
           onPress={() => navigation.goBack()}
         />
-        <Text variant="headlineSmall">{t('booking.createNew')}</Text>
+        <Text variant="headlineSmall">{t('bookings.createNew')}</Text>
         <View style={{ width: 48 }} />
       </View>
 
       <ScrollView style={styles.content}>
         <Surface style={styles.section} elevation={1}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('booking.selectService')}
+            {t('bookings.selectService')}
           </Text>
           <List.Item
-            title={selectedService ? selectedService.name : t('booking.tapToSelect')}
+            title={selectedService ? selectedService.name : t('bookings.tapToSelect')}
             description={
               selectedService
                 ? `${selectedService.duration} ${t('common.minutes')} - ${selectedService.price} ${t('common.currency')}`
@@ -203,18 +203,18 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
 
         <Surface style={styles.section} elevation={1}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('booking.customerInfo')}
+            {t('bookings.customerInfo')}
           </Text>
           <TextInput
             mode="outlined"
-            label={t('booking.customerName')}
+            label={t('bookings.customerName')}
             value={customerName}
             onChangeText={setCustomerName}
             style={styles.input}
           />
           <TextInput
             mode="outlined"
-            label={t('booking.customerPhone')}
+            label={t('bookings.customerPhone')}
             value={customerPhone}
             onChangeText={setCustomerPhone}
             keyboardType="phone-pad"
@@ -222,7 +222,7 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             mode="outlined"
-            label={t('booking.customerEmail')}
+            label={t('bookings.customerEmail')}
             value={customerEmail}
             onChangeText={setCustomerEmail}
             keyboardType="email-address"
@@ -232,10 +232,10 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
 
         <Surface style={styles.section} elevation={1}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('booking.dateTime')}
+            {t('bookings.dateTime')}
           </Text>
           <List.Item
-            title={t('booking.date')}
+            title={t('bookings.date')}
             description={formatDate(bookingDate)}
             onPress={() => setShowDatePicker(true)}
             left={(props) => <List.Icon {...props} icon="calendar" />}
@@ -243,7 +243,7 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
           />
           <Divider />
           <List.Item
-            title={t('booking.time')}
+            title={t('bookings.time')}
             description={formatTime(bookingTime)}
             onPress={() => setShowTimePicker(true)}
             left={(props) => <List.Icon {...props} icon="clock-outline" />}
@@ -253,11 +253,11 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
 
         <Surface style={styles.section} elevation={1}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('booking.additionalInfo')}
+            {t('bookings.additionalInfo')}
           </Text>
           <TextInput
             mode="outlined"
-            label={t('booking.specialRequests')}
+            label={t('bookings.specialRequests')}
             value={specialRequests}
             onChangeText={setSpecialRequests}
             multiline
@@ -273,7 +273,7 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
           loading={loading}
           disabled={loading}
         >
-          {t('booking.create')}
+          {t('bookings.create')}
         </Button>
       </ScrollView>
 
@@ -313,7 +313,7 @@ const CreateBookingScreen: React.FC<Props> = ({ navigation }) => {
           contentContainerStyle={styles.modal}
         >
           <Text variant="titleLarge" style={styles.modalTitle}>
-            {t('booking.selectService')}
+            {t('bookings.selectService')}
           </Text>
           <Searchbar
             placeholder={t('common.search')}

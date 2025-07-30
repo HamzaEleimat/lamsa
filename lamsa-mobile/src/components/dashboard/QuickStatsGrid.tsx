@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Card, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing, layout } from '../../constants/spacing';
 
 interface StatCard {
   label: string;
@@ -68,18 +69,18 @@ const QuickStatsGrid: React.FC<QuickStatsGridProps> = ({ stats }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    marginVertical: 8,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -6,
+    marginHorizontal: -spacing.sm + 2,
   },
   cardWrapper: {
     width: '50%',
-    paddingHorizontal: 6,
-    marginBottom: 12,
+    paddingHorizontal: spacing.sm - 2,
+    marginBottom: spacing.sm + spacing.xs,
   },
   card: {
     height: 120,
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
+    padding: spacing.sm + spacing.xs,
   },
   iconContainer: {
     width: 40,
@@ -96,12 +97,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   label: {
     opacity: 0.7,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   value: {
     fontWeight: '700',
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
   },
   subValue: {
     fontSize: 11,
-    marginTop: 2,
+    marginTop: spacing.xs / 2,
     fontWeight: '600',
   },
 });

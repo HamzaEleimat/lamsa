@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Card, useTheme, ProgressBar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing, layout } from '../../constants/spacing';
 
 interface ServiceData {
   id: string;
@@ -198,28 +199,27 @@ const ServicePerformance: React.FC<ServicePerformanceProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
+    ...layout.cardMargin,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   title: {
     fontWeight: '600',
   },
   subtitle: {
     opacity: 0.7,
-    marginTop: 2,
+    marginTop: spacing.xs / 2,
   },
   viewAllText: {
     fontSize: 14,
     fontWeight: '600',
   },
   servicesList: {
-    gap: 12,
+    gap: spacing.sm + spacing.xs,
   },
   serviceItem: {
     paddingBottom: 12,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   serviceInfo: {
     flexDirection: 'row',

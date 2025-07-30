@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, Card, useTheme, IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing } from '../../constants/spacing';
 
 interface Alert {
   id: string;
@@ -182,20 +183,20 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   alertContent: {
-    paddingTop: 8,
+    paddingTop: spacing.sm,
   },
   alertTitle: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   alertMessage: {
     opacity: 0.8,
     lineHeight: 18,
-    marginBottom: 12,
+    marginBottom: spacing.sm + spacing.xs,
   },
   actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.sm + spacing.xs,
+    paddingVertical: spacing.sm - 2,
     borderRadius: 16,
     alignSelf: 'flex-start',
   },

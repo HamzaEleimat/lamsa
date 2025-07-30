@@ -1226,6 +1226,7 @@
     "date": "Date",
     "time": "Time",
     "additionalInfo": "Additional Information",
+    "specialRequests": "Special Requests",
     "create": "Create Booking",
     "selectService": "Select a service",
     "enterCustomerName": "Please enter customer name",

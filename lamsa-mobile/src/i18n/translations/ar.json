@@ -1197,6 +1197,7 @@
     "date": "التاريخ",
     "time": "الوقت",
     "additionalInfo": "معلومات إضافية",
+    "specialRequests": "طلبات خاصة",
     "create": "إنشاء الحجز",
     "selectService": "اختر خدمة",
     "enterCustomerName": "يرجى إدخال اسم العميل",

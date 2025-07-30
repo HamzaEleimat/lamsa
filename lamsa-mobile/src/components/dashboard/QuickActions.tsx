@@ -4,6 +4,7 @@ import { Card, IconButton, Text, Portal, Modal, FAB, useTheme, Divider } from 'r
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing, layout, iconSizes } from '../../constants/spacing';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -106,14 +107,14 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         left={(props) => (
           <MaterialCommunityIcons 
             name="lightning-bolt" 
-            size={24} 
+            size={iconSizes.md} 
             color={theme.colors.primary}
           />
         )}
         right={(props) => (
           <IconButton
             icon="dots-vertical"
-            size={20}
+            size={iconSizes.sm}
             onPress={() => setModalVisible(true)}
           />
         )}
@@ -125,7 +126,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
               <IconButton
                 icon={action.icon}
                 mode="contained"
-                size={28}
+                size={iconSizes.lg}
                 iconColor={theme.colors.onPrimary}
                 containerColor={action.color}
                 onPress={action.onPress}
@@ -152,21 +153,21 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
             { backgroundColor: theme.colors.surface }
           ]}
         >
-          <Text variant="titleLarge" style={{ color: theme.colors.onSurface, marginBottom: 16 }}>
+          <Text variant="titleLarge" style={{ color: theme.colors.onSurface, marginBottom: spacing.md }}>
             {t('dashboard.customizeQuickActions')}
           </Text>
           <Divider />
-          <View style={{ marginTop: 16 }}>
+          <View style={{ marginTop: spacing.md }}>
             {actions.map(action => (
               <View key={action.id} style={styles.modalAction}>
                 <MaterialCommunityIcons 
                   name={action.icon as any} 
-                  size={24} 
+                  size={iconSizes.md} 
                   color={action.color}
                 />
                 <Text 
                   variant="bodyLarge" 
-                  style={{ color: theme.colors.onSurface, marginLeft: 16, flex: 1 }}
+                  style={{ color: theme.colors.onSurface, marginLeft: spacing.md, flex: 1 }}
                 >
                   {action.label}
                 </Text>
@@ -181,35 +182,34 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    margin: 16,
-    marginTop: 8,
+    ...layout.cardMargin,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   actionWrapper: {
     width: '23%',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   actionButton: {
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   actionLabel: {
     textAlign: 'center',
     fontSize: 11,
   },
   modalContent: {
-    margin: 20,
-    padding: 20,
-    borderRadius: 8,
+    margin: spacing.lg - 4,
+    padding: spacing.lg - 4,
+    borderRadius: spacing.sm,
   },
   modalAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.sm + spacing.xs,
   },
 });

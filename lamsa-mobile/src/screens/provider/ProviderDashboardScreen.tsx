@@ -16,6 +16,7 @@ import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useTranslation } from '../../hooks/useTranslation';
 import { colors } from '../../constants/colors';
+import { spacing, layout } from '../../constants/spacing';
 import { ProviderStackParamList } from '../../navigation/ProviderStackNavigator';
 import { ProviderTabParamList } from '../../navigation/ProviderTabNavigator';
 import { useAuth } from '../../contexts/AuthContext';
@@ -1145,9 +1146,9 @@ const styles = StyleSheet.create({
   },
   periodSelector: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + spacing.xs,
+    gap: spacing.sm,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -1171,7 +1172,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scrollContent: {
-    paddingVertical: 16,
+    paddingVertical: spacing.lg,
   },
   metricsGrid: {
     flexDirection: 'row',
@@ -1329,7 +1330,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   bottomPadding: {
-    height: 100,
+    height: spacing.lg,
   },
   noProviderText: {
     fontSize: 18,

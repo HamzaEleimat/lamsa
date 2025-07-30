@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Card, ProgressBar, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { spacing, layout } from '../../constants/spacing';
 
 interface BusinessHealthScoreProps {
   score: number; // 0-100
@@ -176,18 +177,17 @@ const BusinessHealthScore: React.FC<BusinessHealthScoreProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
+    ...layout.cardMargin,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   title: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -238,10 +238,10 @@ const styles = StyleSheet.create({
   tipContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    gap: spacing.sm,
+    padding: spacing.sm + spacing.xs,
+    borderRadius: spacing.sm,
+    marginTop: spacing.md,
   },
   tipText: {
     flex: 1,
