@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, useTheme, Searchbar, Chip, Surface, IconButton } from 'react-native-paper';
+import { Text, useTheme, Searchbar, Surface, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProviderList from '../../components/provider/ProviderList';
 import ProviderMapView from '../../components/provider/ProviderMapView';
@@ -12,6 +12,8 @@ import providerService, { ProviderWithDistance, ProviderSearchParams } from '../
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import { debounce } from 'lodash';
+import { Badge } from '../../components/ui';
+import { spacing, shadows } from '../../theme';
 
 const SearchScreen: React.FC = () => {
   const theme = useTheme();
@@ -152,16 +154,15 @@ const SearchScreen: React.FC = () => {
       contentContainerStyle={styles.categoriesContent}
     >
       {categories.map((category) => (
-        <Chip
+        <Badge
           key={category.id}
           icon={category.icon}
-          selected={selectedCategory === category.id}
+          variant={selectedCategory === category.id ? 'primary' : 'default'}
           onPress={() => setSelectedCategory(category.id === selectedCategory ? null : category.id)}
           style={styles.categoryChip}
-          textStyle={styles.categoryText}
         >
           {category.name}
-        </Chip>
+        </Badge>
       ))}
     </ScrollView>
   );
@@ -256,13 +257,13 @@ const styles = StyleSheet.create({
   searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
   searchBar: {
     flex: 1,
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   headerActions: {
     flexDirection: 'row',
@@ -272,17 +273,18 @@ const styles = StyleSheet.create({
   },
   categoriesContainer: {
     maxHeight: 48,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   categoriesContent: {
-    paddingHorizontal: 16,
-    gap: 8,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
   categoryChip: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   categoryText: {
     fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
   },
   contentContainer: {
     flex: 1,
@@ -293,12 +295,13 @@ const styles = StyleSheet.create({
   filtersContainer: {
     position: 'absolute',
     top: 120,
-    left: 16,
-    right: 16,
+    left: spacing.md,
+    right: spacing.md,
     zIndex: 1000,
     borderRadius: 12,
-    padding: 16,
+    padding: spacing.md,
     maxHeight: '70%',
+    ...shadows.lg,
   },
 });
 

@@ -6,13 +6,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Linking,
+  TouchableOpacity,
 } from 'react-native';
 import {
   Text,
-  TextInput,
-  Button,
   Checkbox,
-  HelperText,
   ActivityIndicator,
   useTheme,
   Snackbar,
@@ -26,6 +24,8 @@ import { validateJordanianPhone, formatPhoneNumber, getFullPhoneNumber } from '.
 import { useAuth } from '../../contexts/AuthContext';
 import { UserRole } from '../../types';
 import Constants from 'expo-constants';
+import { Button, Input } from '../../components/ui';
+import { spacing, shadows } from '../../theme';
 
 type AuthStackParamList = {
   Welcome: undefined;
@@ -147,21 +147,23 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Button
-              mode="text"
+            <TouchableOpacity
               onPress={() => navigation.goBack()}
-              icon={isRTL() ? 'chevron-right' : 'chevron-left'}
               style={styles.backButton}
             >
-              {''}
-            </Button>
+              <MaterialCommunityIcons
+                name={isRTL() ? 'chevron-right' : 'chevron-left'}
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.content}>
-            <Text variant="headlineMedium" style={styles.title}>
+            <Text style={[styles.title, { color: theme.colors.onSurface }]}>
               {i18n.t('phoneAuth.title')}
             </Text>
-            <Text variant="bodyLarge" style={styles.subtitle}>
+            <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
               {i18n.t('phoneAuth.subtitle')}
             </Text>
 
@@ -175,28 +177,25 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
                     validateJordanianPhone(value) || i18n.t('phoneAuth.phoneInvalid'),
                 }}
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
-                    <TextInput
-                      label={i18n.t('phoneAuth.phoneLabel')}
-                      value={value}
-                      onChangeText={(text) => onChange(formatPhoneNumber(text))}
-                      onBlur={onBlur}
-                      placeholder={i18n.t('phoneAuth.phonePlaceholder')}
-                      keyboardType="phone-pad"
-                      maxLength={11}
-                      error={!!errors.phoneNumber}
-                      mode="outlined"
-                      left={
-                        <TextInput.Affix
-                          text="+962"
-                          textStyle={styles.countryCode}
-                        />
-                      }
-                      style={[styles.input, isRTL() && styles.rtlInput]}
-                    />
-                    <HelperText type="error" visible={!!errors.phoneNumber}>
-                      {errors.phoneNumber?.message}
-                    </HelperText>
+                  <View style={styles.phoneInputContainer}>
+                    <View style={styles.countryCodeContainer}>
+                      <Text style={[styles.countryCode, { color: theme.colors.onSurfaceVariant }]}>
+                        +962
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Input
+                        label={i18n.t('phoneAuth.phoneLabel')}
+                        value={value}
+                        onChangeText={(text) => onChange(formatPhoneNumber(text))}
+                        onBlur={onBlur}
+                        placeholder={i18n.t('phoneAuth.phonePlaceholder')}
+                        keyboardType="phone-pad"
+                        maxLength={11}
+                        error={errors.phoneNumber?.message}
+                        style={[isRTL() && styles.rtlInput]}
+                      />
+                    </View>
                   </View>
                 )}
               />
@@ -225,23 +224,22 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
                         </Text>
                       </Text>
                     </View>
-                    <HelperText type="error" visible={!!errors.acceptTerms}>
-                      {errors.acceptTerms?.message}
-                    </HelperText>
+                    {errors.acceptTerms && (
+                      <Text style={[styles.errorText, { color: theme.colors.error }]}>
+                        {errors.acceptTerms?.message}
+                      </Text>
+                    )}
                   </View>
                 )}
               />
 
               <Button
-                mode="contained"
+                variant="primary"
                 onPress={handleSubmit(onSubmit)}
                 loading={loading}
                 disabled={loading || !acceptTerms}
                 style={styles.submitButton}
-                contentStyle={styles.submitButtonContent}
-                labelStyle={styles.submitButtonText}
-                uppercase={false}
-                touchSoundDisabled={false}
+                fullWidth
               >
                 {loading ? i18n.t('common.loading') : i18n.t('phoneAuth.sendOTP')}
               </Button>
@@ -256,16 +254,13 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
                   </View>
                   
                   <Button
-                    mode="contained"
+                    variant="secondary"
                     onPress={handleDevLogin}
                     loading={devLoading}
                     disabled={devLoading}
-                    style={[styles.devButton, { backgroundColor: '#FF6B6B' }]}
-                    contentStyle={styles.devButtonContent}
-                    labelStyle={styles.devButtonText}
-                    icon="test-tube"
-                    uppercase={false}
-                    touchSoundDisabled={false}
+                    style={styles.devButton}
+                    fullWidth
+                    icon={<MaterialCommunityIcons name="test-tube" size={20} color="#FFFFFF" />}
                   >
                     {devLoading ? 'Loading...' : 'Dev Admin Login'}
                   </Button>
@@ -304,87 +299,94 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 40, // Add bottom padding for better scrolling
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   header: {
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   backButton: {
-    marginLeft: -8,
+    padding: spacing.sm,
+    marginLeft: -spacing.sm,
   },
   content: {
     flex: 1,
-    paddingTop: 24,
+    paddingTop: spacing.lg,
   },
   title: {
+    fontSize: 32,
+    fontFamily: 'CormorantGaramond_600SemiBold',
     textAlign: 'center',
-    marginBottom: 8,
-    fontWeight: '600',
+    marginBottom: spacing.sm,
+    letterSpacing: -0.5,
   },
   subtitle: {
+    fontSize: 16,
+    fontFamily: 'MartelSans_400Regular',
     textAlign: 'center',
-    opacity: 0.7,
-    marginBottom: 32,
+    marginBottom: spacing.xl,
+    lineHeight: 24,
   },
   form: {
-    marginTop: 16,
+    marginTop: spacing.md,
   },
-  input: {
-    backgroundColor: 'transparent',
+  phoneInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.md,
+  },
+  countryCodeContainer: {
+    paddingBottom: spacing.lg,
+  },
+  countryCode: {
+    fontSize: 16,
+    fontFamily: 'MartelSans_600SemiBold',
   },
   rtlInput: {
     textAlign: 'right',
   },
-  countryCode: {
-    fontWeight: '600',
-    fontSize: 16,
-  },
   termsContainer: {
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: -8,
+    marginLeft: -spacing.sm,
   },
   termsText: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: spacing.sm,
     fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
+    lineHeight: 20,
   },
   termsLink: {
     textDecorationLine: 'underline',
+    fontFamily: 'MartelSans_600SemiBold',
+  },
+  errorText: {
+    fontSize: 12,
+    fontFamily: 'MartelSans_400Regular',
+    marginTop: spacing.xs,
+    marginLeft: spacing.xxl,
   },
   submitButton: {
-    marginTop: 8,
-    borderRadius: 28,
-    elevation: 0, // Remove elevation for iOS
-  },
-  submitButtonContent: {
-    paddingHorizontal: 32,
-    paddingVertical: 12, // Increased padding for better text display
-    minHeight: 48, // Ensure minimum height
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    lineHeight: 20, // Add line height to prevent text cutoff
+    marginTop: spacing.sm,
   },
   snackbar: {
   },
   errorSnackbar: {
   },
   devContainer: {
-    marginTop: 32,
-    paddingTop: 24,
+    marginTop: spacing.xl,
+    paddingTop: spacing.lg,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   dividerLine: {
     flex: 1,
@@ -392,30 +394,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   dividerText: {
-    marginHorizontal: 16,
+    marginHorizontal: spacing.md,
     fontSize: 12,
+    fontFamily: 'MartelSans_600SemiBold',
     color: '#FF6B6B',
-    fontWeight: '600',
   },
   devButton: {
-    marginTop: 8,
-    borderRadius: 28,
-    elevation: 0, // Remove elevation for iOS
+    marginTop: spacing.sm,
   },
   devButtonContent: {
-    paddingHorizontal: 32,
-    paddingVertical: 12, // Increased padding
-    minHeight: 48, // Ensure minimum height
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
+    minHeight: 48,
   },
   devButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    lineHeight: 20, // Add line height
-    color: '#FFFFFF', // Ensure white text
+    fontFamily: 'MartelSans_600SemiBold',
+    lineHeight: 20,
+    color: '#FFFFFF',
   },
   devWarning: {
-    marginTop: 12,
+    marginTop: spacing.sm,
     fontSize: 12,
+    fontFamily: 'MartelSans_400Regular',
     color: '#666666',
     textAlign: 'center',
   },

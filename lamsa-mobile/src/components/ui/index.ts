@@ -1,3 +1,9 @@
+// New Design System Components
+export { Button, IconButton } from './Button';
+export { ProviderCard, ServiceCard, EmployeeCard } from './Card';
+export { Badge, Chip } from './Badge';
+export { Input, SearchInput, SelectInput } from './Input';
+
 // Platform-specific UI Components
 export { default as PlatformButton } from './PlatformButton';
 export { default as PlatformSwitch } from './PlatformSwitch';

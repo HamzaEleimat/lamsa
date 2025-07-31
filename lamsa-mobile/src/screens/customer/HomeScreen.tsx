@@ -7,15 +7,12 @@ import {
   TouchableOpacity,
   RefreshControl,
   Dimensions,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import { 
   Text, 
   useTheme, 
-  Searchbar, 
-  Card, 
-  Chip,
-  Avatar,
   ActivityIndicator
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,6 +24,15 @@ import { searchService } from '../../services/searchService';
 import { customerBookingService } from '../../services/customerBookingService';
 import { supabase } from '../../services/supabase';
 import { isRTL } from '../../i18n';
+import { 
+  SearchInput, 
+  ProviderCard, 
+  ServiceCard, 
+  Badge, 
+  Chip,
+  IconButton 
+} from '../../components/ui';
+import { spacing, shadows } from '../../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -110,43 +116,40 @@ const HomeScreen: React.FC = () => {
   };
 
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.headerContent}>
         <View>
-          <Text variant="bodyMedium" style={styles.greeting}>
+          <Text style={[styles.greeting, { color: theme.colors.onSurfaceVariant }]}>
             {getGreeting()}, {user?.name || t('guest')}!
           </Text>
-          <Text variant="headlineMedium" style={styles.headerTitle}>
+          <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>
             {t('findYourBeauty')}
           </Text>
         </View>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate('Notifications')}
-          style={styles.notificationButton}
-        >
-          <MaterialCommunityIcons 
+        <IconButton 
+          icon={<MaterialCommunityIcons 
             name="bell-outline" 
             size={24} 
             color={theme.colors.onSurface} 
-          />
-        </TouchableOpacity>
+          />}
+          onPress={() => navigation.navigate('Notifications')}
+          variant="outline"
+        />
       </View>
 
-      <Searchbar
+      <SearchInput
         placeholder={t('searchServices')}
         onChangeText={setSearchQuery}
         value={searchQuery}
-        onSubmitEditing={handleSearch}
-        style={styles.searchBar}
-        icon={isRTL() ? 'magnify' : 'magnify'}
-        clearIcon={isRTL() ? 'close' : 'close'}
+        onClear={() => setSearchQuery('')}
+        containerStyle={{ marginTop: spacing.md }}
       />
     </View>
   );
 
   const renderCategories = () => (
     <View style={styles.section}>
-      <Text variant="titleLarge" style={styles.sectionTitle}>
+      <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
         {t('categories')}
       </Text>
       <ScrollView 
@@ -160,14 +163,18 @@ const HomeScreen: React.FC = () => {
             style={styles.categoryCard}
             onPress={() => handleCategoryPress(category)}
           >
-            <View style={[styles.categoryIcon, { backgroundColor: category.color + '20' }]}>
+            <View style={[
+              styles.categoryIcon, 
+              { backgroundColor: category.color + '20' },
+              shadows.sm
+            ]}>
               <MaterialCommunityIcons 
                 name={category.icon as any} 
                 size={32} 
                 color={category.color} 
               />
             </View>
-            <Text variant="bodySmall" style={styles.categoryName}>
+            <Text style={[styles.categoryName, { color: theme.colors.onSurfaceVariant }]}>
               {isRTL() ? category.name_ar : category.name_en}
             </Text>
           </TouchableOpacity>
@@ -182,38 +189,42 @@ const HomeScreen: React.FC = () => {
     return (
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text variant="titleLarge" style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
             {t('upcomingBookings')}
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Bookings')}>
-            <Text style={styles.seeAllText}>{t('seeAll')}</Text>
+            <Text style={[styles.seeAllText, { color: theme.colors.secondary }]}>
+              {t('seeAll')}
+            </Text>
           </TouchableOpacity>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {upcomingBookings.map((booking) => (
-            <Card 
+            <TouchableOpacity
               key={booking.id} 
-              style={styles.bookingCard}
+              style={[styles.bookingCard, { backgroundColor: theme.colors.surface }, shadows.md]}
               onPress={() => navigation.navigate('BookingDetails', { bookingId: booking.id })}
             >
-              <Card.Content style={styles.bookingContent}>
-                <Avatar.Image 
-                  size={48} 
+              <View style={styles.bookingContent}>
+                <Image 
+                  style={styles.bookingAvatar}
                   source={{ uri: booking.provider?.profile_image_url || 'https://via.placeholder.com/48' }}
                 />
                 <View style={styles.bookingInfo}>
-                  <Text variant="titleMedium" numberOfLines={1}>
+                  <Text style={[styles.bookingServiceName, { color: theme.colors.onSurface }]} numberOfLines={1}>
                     {isRTL() ? booking.service?.name_ar : booking.service?.name_en}
                   </Text>
-                  <Text variant="bodySmall" style={styles.bookingProvider}>
+                  <Text style={[styles.bookingProvider, { color: theme.colors.onSurfaceVariant }]}>
                     {booking.provider?.name}
                   </Text>
-                  <Text variant="bodySmall" style={styles.bookingTime}>
-                    {formatBookingDate(booking.booking_date)} • {booking.start_time}
-                  </Text>
+                  <View style={styles.bookingTimeContainer}>
+                    <Badge variant="primary" size="small">
+                      {formatBookingDate(booking.booking_date)} • {booking.start_time}
+                    </Badge>
+                  </View>
                 </View>
-              </Card.Content>
-            </Card>
+              </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
@@ -223,11 +234,13 @@ const HomeScreen: React.FC = () => {
   const renderFeaturedProviders = () => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text variant="titleLarge" style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
           {t('featuredProviders')}
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Search', { featured: true })}>
-          <Text style={styles.seeAllText}>{t('seeAll')}</Text>
+          <Text style={[styles.seeAllText, { color: theme.colors.secondary }]}>
+            {t('seeAll')}
+          </Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -235,33 +248,26 @@ const HomeScreen: React.FC = () => {
         showsHorizontalScrollIndicator={false}
         data={featuredProviders}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingRight: spacing.md }}
         renderItem={({ item }) => (
-          <Card 
-            style={styles.providerCard}
-            onPress={() => navigation.navigate('ProviderDetail', { providerId: item.id })}
-          >
-            <Card.Cover 
-              source={{ uri: item.profile_image_url || 'https://via.placeholder.com/200' }} 
-              style={styles.providerImage}
+          <View style={{ marginRight: spacing.md }}>
+            <ProviderCard
+              provider={{
+                id: item.id,
+                name: item.name,
+                image: item.profile_image_url,
+                rating: item.rating || 0,
+                reviewCount: item.review_count || 0,
+                distance: item.distance,
+                isOpen: item.is_open,
+                isVerified: item.is_verified,
+                services: item.services?.map(s => isRTL() ? s.name_ar : s.name_en)
+              }}
+              onPress={() => navigation.navigate('ProviderDetail', { providerId: item.id })}
+              onFavorite={() => console.log('Toggle favorite', item.id)}
+              isFavorite={false}
             />
-            <Card.Content style={styles.providerContent}>
-              <Text variant="titleMedium" numberOfLines={1}>
-                {item.name}
-              </Text>
-              <View style={styles.providerMeta}>
-                <MaterialCommunityIcons name="star" size={16} color={theme.colors.primary} />
-                <Text variant="bodySmall" style={styles.rating}>
-                  {item.rating.toFixed(1)}
-                </Text>
-                <Text variant="bodySmall" style={styles.reviewCount}>
-                  ({item.review_count})
-                </Text>
-              </View>
-              <Text variant="bodySmall" style={styles.startingPrice}>
-                {t('startingFrom')} {item.starting_price} {t('jod')}
-              </Text>
-            </Card.Content>
-          </Card>
+          </View>
         )}
       />
     </View>
@@ -270,43 +276,28 @@ const HomeScreen: React.FC = () => {
   const renderPopularServices = () => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text variant="titleLarge" style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
           {t('popularServices')}
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Search', { sortBy: 'popularity' })}>
-          <Text style={styles.seeAllText}>{t('seeAll')}</Text>
+          <Text style={[styles.seeAllText, { color: theme.colors.secondary }]}>
+            {t('seeAll')}
+          </Text>
         </TouchableOpacity>
       </View>
       {popularServices.map((service) => (
-        <Card 
-          key={service.id} 
-          style={styles.serviceCard}
+        <ServiceCard
+          key={service.id}
+          service={{
+            id: service.id,
+            name: isRTL() ? service.name_ar : service.name_en,
+            provider: service.provider_name,
+            price: service.price,
+            duration: service.duration_minutes,
+            image: service.image_url
+          }}
           onPress={() => navigation.navigate('ServiceDetails', { serviceId: service.id })}
-        >
-          <Card.Content style={styles.serviceContent}>
-            <View style={styles.serviceInfo}>
-              <Text variant="titleMedium" numberOfLines={1}>
-                {isRTL() ? service.name_ar : service.name_en}
-              </Text>
-              <Text variant="bodySmall" style={styles.serviceProvider}>
-                {service.provider_name}
-              </Text>
-              <View style={styles.serviceMeta}>
-                <Chip mode="flat" compact style={styles.priceChip}>
-                  {service.price} {t('jod')}
-                </Chip>
-                <Text variant="bodySmall" style={styles.duration}>
-                  {service.duration_minutes} {t('minutes')}
-                </Text>
-              </View>
-            </View>
-            {service.is_featured && (
-              <Chip mode="flat" style={styles.featuredChip}>
-                {t('featured')}
-              </Chip>
-            )}
-          </Card.Content>
-        </Card>
+        />
       ))}
     </View>
   );
@@ -363,7 +354,6 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -371,67 +361,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    backgroundColor: 'white',
-    padding: 16,
+    padding: spacing.md,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...shadows.md,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
   },
   greeting: {
-    opacity: 0.7,
+    fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
+    marginBottom: spacing.xs,
   },
   headerTitle: {
-    marginTop: 4,
-    fontWeight: 'bold',
-  },
-  notificationButton: {
-    padding: 8,
-  },
-  searchBar: {
-    elevation: 0,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 12,
+    fontSize: 28,
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    letterSpacing: -0.5,
   },
   section: {
-    marginTop: 24,
-    paddingHorizontal: 16,
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontFamily: 'CormorantGaramond_500Medium',
+    letterSpacing: 0,
   },
   seeAllText: {
-    color: '#FF8FAB',
-    fontWeight: '600',
+    fontSize: 14,
+    fontFamily: 'MartelSans_600SemiBold',
+    letterSpacing: 0.25,
   },
   categoriesContainer: {
-    paddingRight: 16,
+    paddingRight: spacing.md,
   },
   categoryCard: {
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: spacing.md,
     width: 80,
   },
   categoryIcon: {
@@ -440,89 +416,46 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   categoryName: {
+    fontSize: 12,
+    fontFamily: 'MartelSans_400Regular',
     textAlign: 'center',
+    letterSpacing: 0.4,
   },
   bookingCard: {
-    marginRight: 16,
+    marginRight: spacing.md,
     width: width * 0.75,
+    borderRadius: 16,
+    padding: spacing.md,
   },
   bookingContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  bookingAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
   bookingInfo: {
     flex: 1,
-    marginLeft: isRTL() ? 0 : 12,
-    marginRight: isRTL() ? 12 : 0,
+    marginLeft: isRTL() ? 0 : spacing.md,
+    marginRight: isRTL() ? spacing.md : 0,
+  },
+  bookingServiceName: {
+    fontSize: 16,
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    marginBottom: spacing.xs,
   },
   bookingProvider: {
-    opacity: 0.7,
-    marginTop: 2,
+    fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
+    marginBottom: spacing.sm,
   },
-  bookingTime: {
-    marginTop: 4,
-    color: '#FF8FAB',
-  },
-  providerCard: {
-    marginRight: 16,
-    width: width * 0.45,
-  },
-  providerImage: {
-    height: 120,
-  },
-  providerContent: {
-    paddingTop: 8,
-  },
-  providerMeta: {
+  bookingTimeContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  rating: {
-    marginLeft: 4,
-    fontWeight: 'bold',
-  },
-  reviewCount: {
-    marginLeft: 4,
-    opacity: 0.7,
-  },
-  startingPrice: {
-    marginTop: 8,
-    color: '#FF8FAB',
-    fontWeight: '600',
-  },
-  serviceCard: {
-    marginBottom: 12,
-  },
-  serviceContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  serviceInfo: {
-    flex: 1,
-  },
-  serviceProvider: {
-    opacity: 0.7,
-    marginTop: 2,
-  },
-  serviceMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    gap: 12,
-  },
-  priceChip: {
-    backgroundColor: '#FFE5EC',
-  },
-  duration: {
-    opacity: 0.7,
-  },
-  featuredChip: {
-    backgroundColor: '#FFC2D1',
   },
   bottomSpacing: {
     height: 100,

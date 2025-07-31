@@ -6,10 +6,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   BackHandler,
+  TouchableOpacity,
 } from 'react-native';
 import {
   Text,
-  Button,
   useTheme,
   Snackbar,
   ActivityIndicator,
@@ -24,6 +24,8 @@ import { UserRole } from '../../types';
 import OTPInput from '../../components/auth/OTPInput/OTPInput';
 import ResendTimer from '../../components/auth/OTPInput/ResendTimer';
 import i18n, { isRTL } from '../../i18n';
+import { Button } from '../../components/ui';
+import { spacing, shadows } from '../../theme';
 
 type AuthStackParamList = {
   Welcome: undefined;
@@ -230,15 +232,17 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Button
-              mode="text"
+            <TouchableOpacity
               onPress={() => navigation.goBack()}
-              icon={isRTL() ? 'chevron-right' : 'chevron-left'}
               style={styles.backButton}
               disabled={isVerifying}
             >
-              {''}
-            </Button>
+              <MaterialCommunityIcons
+                name={isRTL() ? 'chevron-right' : 'chevron-left'}
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.content}>
@@ -250,11 +254,11 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
               />
             </View>
 
-            <Text variant="headlineMedium" style={styles.title}>
+            <Text style={[styles.title, { color: theme.colors.onSurface }]}>
               {i18n.t('otp.title')}
             </Text>
 
-            <Text variant="bodyLarge" style={styles.subtitle}>
+            <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
               {i18n.t('otp.subtitle', { phone: formatPhoneForDisplay(phoneNumber) })}
             </Text>
 
@@ -271,7 +275,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
             {isVerifying && (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={styles.loadingText}>
+                <Text style={[styles.loadingText, { color: theme.colors.onSurfaceVariant }]}>
                   {i18n.t('otp.verifying')}
                 </Text>
               </View>
@@ -289,10 +293,10 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
                 </Text>
                 {error.retryable && (
                   <Button
-                    mode="outlined"
+                    variant="outline"
                     onPress={handleRetry}
                     style={styles.retryButton}
-                    icon="refresh"
+                    icon={<MaterialCommunityIcons name="refresh" size={20} color={theme.colors.primary} />}
                   >
                     {i18n.t('common.retry')}
                   </Button>
@@ -301,13 +305,12 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
             )}
 
             <Button
-              mode="contained"
+              variant="primary"
               onPress={() => verifyOTP(otpValue)}
               loading={isVerifying}
               disabled={isVerifying || otpValue.length !== 6}
               style={styles.verifyButton}
-              contentStyle={styles.verifyButtonContent}
-              labelStyle={styles.verifyButtonText}
+              fullWidth
             >
               {isVerifying ? i18n.t('otp.verifying') : i18n.t('otp.verify')}
             </Button>
@@ -356,86 +359,91 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.lg,
   },
   header: {
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   backButton: {
-    marginLeft: -8,
+    padding: spacing.sm,
+    marginLeft: -spacing.sm,
   },
   content: {
     flex: 1,
-    paddingTop: 24,
+    paddingTop: spacing.lg,
     alignItems: 'center',
   },
   iconContainer: {
-    marginBottom: 24,
-    padding: 16,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
     borderRadius: 32,
     backgroundColor: 'transparent',
   },
   title: {
+    fontSize: 28,
+    fontFamily: 'CormorantGaramond_600SemiBold',
     textAlign: 'center',
-    marginBottom: 8,
-    fontWeight: '600',
+    marginBottom: spacing.sm,
+    letterSpacing: -0.5,
   },
   subtitle: {
+    fontSize: 16,
+    fontFamily: 'MartelSans_400Regular',
     textAlign: 'center',
-    opacity: 0.7,
-    marginBottom: 32,
-    paddingHorizontal: 16,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
+    lineHeight: 24,
   },
   loadingContainer: {
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: spacing.md,
   },
   loadingText: {
-    marginTop: 8,
+    marginTop: spacing.sm,
     fontSize: 14,
-    opacity: 0.7,
+    fontFamily: 'MartelSans_400Regular',
   },
   errorContainer: {
     alignItems: 'center',
     backgroundColor: 'transparent',
     borderRadius: 12,
-    padding: 16,
-    marginVertical: 16,
-    marginHorizontal: 8,
+    padding: spacing.md,
+    marginVertical: spacing.md,
+    marginHorizontal: spacing.sm,
   },
   errorText: {
-    marginTop: 8,
+    marginTop: spacing.sm,
     fontSize: 14,
+    fontFamily: 'MartelSans_500Medium',
     textAlign: 'center',
-    fontWeight: '500',
   },
   retryButton: {
-    marginTop: 12,
+    marginTop: spacing.sm,
   },
   verifyButton: {
-    marginTop: 16,
-    marginBottom: 8,
-    borderRadius: 28,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
     minWidth: 200,
   },
   verifyButtonContent: {
-    paddingHorizontal: 32,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
   },
   verifyButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MartelSans_600SemiBold',
   },
   helpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 24,
-    paddingHorizontal: 16,
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.md,
   },
   helpText: {
-    marginLeft: 8,
+    marginLeft: spacing.sm,
     fontSize: 12,
+    fontFamily: 'MartelSans_400Regular',
     textAlign: 'center',
     flex: 1,
   },

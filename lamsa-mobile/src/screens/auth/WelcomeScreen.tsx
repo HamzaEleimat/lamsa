@@ -10,7 +10,6 @@ import {
 import {
   Surface,
   Text,
-  Button,
   useTheme,
   Portal,
   Modal,
@@ -21,6 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import i18n, { changeLanguage, getCurrentLanguage, isRTL } from '../../i18n';
+import { Button } from '../../components/ui';
+import { spacing, shadows } from '../../theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -70,11 +71,10 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.languageSelector}>
           <Button
-            mode="text"
+            variant="text"
             onPress={() => setShowLanguageModal(true)}
-            icon="web"
-            contentStyle={styles.languageButton}
-            labelStyle={styles.languageButtonText}
+            icon={<MaterialCommunityIcons name="web" size={20} color={theme.colors.primary} />}
+            style={styles.languageButton}
           >
             {getLanguageDisplayName()}
           </Button>
@@ -89,29 +89,27 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             />
           </View>
 
-          <Text variant="headlineLarge" style={styles.title}>
+          <Text style={[styles.title, { color: theme.colors.onSurface }]}>
             {i18n.t('welcome.title')}
           </Text>
 
-          <Text variant="titleLarge" style={styles.tagline}>
+          <Text style={[styles.tagline, { color: theme.colors.onSurfaceVariant }]}>
             {i18n.t('welcome.tagline')}
           </Text>
 
           <Button
-            mode="contained"
+            variant="primary"
             onPress={() => navigation.navigate('PhoneAuth')}
             style={styles.getStartedButton}
-            labelStyle={styles.getStartedButtonText}
-            contentStyle={styles.getStartedButtonContent}
+            size="large"
           >
             {i18n.t('welcome.getStarted')}
           </Button>
 
           <Button
-            mode="text"
+            variant="text"
             onPress={() => navigation.navigate('PhoneAuth')}
             style={styles.providerLink}
-            labelStyle={styles.providerLinkText}
           >
             {i18n.t('welcome.providerLink')}
           </Button>
@@ -154,73 +152,81 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.lg,
   },
   languageSelector: {
     alignItems: 'flex-end',
-    paddingTop: 16,
+    paddingTop: spacing.md,
   },
   languageButton: {
     flexDirection: isRTL() ? 'row-reverse' : 'row',
   },
   languageButtonText: {
     fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 48,
+    paddingBottom: spacing.xxxl,
   },
   logoContainer: {
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   logo: {
     width: 150,
     height: 150,
   },
   title: {
-    marginBottom: 8,
+    fontSize: 40,
+    fontFamily: 'CormorantGaramond_700Bold',
+    marginBottom: spacing.sm,
     textAlign: 'center',
-    fontWeight: 'bold',
+    letterSpacing: -1,
   },
   tagline: {
-    marginBottom: 48,
+    fontSize: 20,
+    fontFamily: 'MartelSans_400Regular',
+    marginBottom: spacing.xxxl,
     textAlign: 'center',
-    opacity: 0.7,
+    lineHeight: 28,
   },
   getStartedButton: {
-    marginBottom: 24,
-    borderRadius: 28,
+    marginBottom: spacing.lg,
+    minWidth: 200,
   },
   getStartedButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MartelSans_600SemiBold',
   },
   getStartedButtonContent: {
-    paddingHorizontal: 48,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.xxxl,
+    paddingVertical: spacing.sm,
   },
   providerLink: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   providerLinkText: {
     fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
   },
   modalContent: {
     backgroundColor: 'transparent',
-    margin: 20,
+    margin: spacing.lg,
     borderRadius: 8,
     padding: 0,
-    maxWidth: width - 40,
+    maxWidth: width - (spacing.lg * 2),
     alignSelf: 'center',
   },
   modalTitle: {
-    padding: 16,
+    padding: spacing.md,
     textAlign: 'center',
+    fontSize: 18,
+    fontFamily: 'CormorantGaramond_600SemiBold',
   },
   divider: {
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   selectedLanguage: {
     backgroundColor: 'transparent',

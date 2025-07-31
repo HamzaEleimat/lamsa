@@ -8,10 +8,12 @@ import {
   ViewStyle,
   Modal,
   Alert,
+  Image,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   isIOS,
   isAndroid,
@@ -83,6 +85,7 @@ export function PlatformToast({
   style,
 }: PlatformToastProps) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const translateY = useRef(animationUtils.createValue(100)).current;
   const opacity = useRef(animationUtils.createValue(0)).current;
   const [isVisible, setIsVisible] = useState(visible);
@@ -177,7 +180,7 @@ export function PlatformToast({
     <Animated.View
       style={[
         styles.toast,
-        position === 'top' ? styles.toastTop : styles.toastBottom,
+        position === 'top' ? { top: insets.top + spacing.md } : { bottom: insets.bottom + spacing.md },
         {
           backgroundColor: getBackgroundColor(),
           transform: [{ translateY }],
@@ -255,6 +258,7 @@ export function PlatformNotification({
   style,
 }: PlatformNotificationProps) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const translateY = useRef(animationUtils.createValue(-150)).current;
   const opacity = useRef(animationUtils.createValue(0)).current;
   const [isVisible, setIsVisible] = useState(visible);
@@ -311,6 +315,7 @@ export function PlatformNotification({
     <Animated.View
       style={[
         styles.notification,
+        { top: insets.top + spacing.sm },
         {
           transform: [{ translateY }],
           opacity,
@@ -397,10 +402,10 @@ const styles = StyleSheet.create({
     ...shadowPresets.small,
   },
   toastTop: {
-    top: layout.safeAreaInsets.top + spacing.md,
+    // top will be set dynamically in the component
   },
   toastBottom: {
-    bottom: layout.safeAreaInsets.bottom + spacing.md,
+    // bottom will be set dynamically in the component
   },
   toastContent: {
     flexDirection: 'row',
@@ -426,7 +431,7 @@ const styles = StyleSheet.create({
   // Notification styles
   notification: {
     position: 'absolute',
-    top: layout.safeAreaInsets.top + spacing.sm,
+    // top will be set dynamically in the component
     left: spacing.sm,
     right: spacing.sm,
   },
