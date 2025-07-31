@@ -1,0 +1,11 @@
+{
+  "CFBundleDisplayName": "Lamsa",
+  "NSCameraUsageDescription": "Lamsa needs access to your camera to take photos of your beauty services and profile.",
+  "NSPhotoLibraryUsageDescription": "Lamsa needs access to your photo library to select photos for your profile and services.",
+  "NSLocationWhenInUseUsageDescription": "Lamsa needs access to your location to find nearby beauty service providers.",
+  "NSLocationAlwaysAndWhenInUseUsageDescription": "Lamsa needs access to your location to find nearby beauty service providers.",
+  "NSUserNotificationsUsageDescription": "Lamsa needs to send you notifications about your bookings and appointments.",
+  "NSContactsUsageDescription": "Lamsa needs access to your contacts to help you share services with friends.",
+  "NSCalendarsUsageDescription": "Lamsa needs access to your calendar to schedule your beauty appointments.",
+  "NSMicrophoneUsageDescription": "Lamsa needs access to your microphone for voice messages and video calls with providers."
+}
