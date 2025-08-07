@@ -255,7 +255,7 @@ module.exports = {
       enabled: process.env.ENABLE_EMAIL_ALERTS === 'true',
       provider: 'sendgrid', // or 'ses', 'mailgun'
       apiKey: process.env.SENDGRID_API_KEY,
-      fromEmail: process.env.ALERT_FROM_EMAIL || 'alerts@beautycort.com',
+      fromEmail: process.env.ALERT_FROM_EMAIL || 'alerts@welamsa.com',
       
       // Distribution lists
       recipients: {

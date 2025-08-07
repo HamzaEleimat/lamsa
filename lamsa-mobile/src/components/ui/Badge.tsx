@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { spacing, customColors } from '../../theme';
+import { spacing, customColors } from '../../theme/index';
 
 type BadgeVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error';
 type BadgeSize = 'small' | 'medium' | 'large';

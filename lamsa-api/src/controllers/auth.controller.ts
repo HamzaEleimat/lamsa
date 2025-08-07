@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../middleware/error.middleware';
 import { ApiResponse, AuthRequest } from '../types';
-import { db, auth } from '../config/supabase-simple';
+import { db, auth, supabase, supabaseAdmin } from '../config/supabase-simple';
 import { mockOTP } from '../config/mock-otp';
 import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
 import { getEnvironmentConfig } from '../utils/environment-validation';
@@ -10,8 +10,8 @@ import { logger } from '../utils/logger';
 import { tokenBlacklist, refreshTokenManager } from '../config/token-storage.config';
 import { accountLockoutService } from '../services/account-lockout.service';
 import { encryptedDb } from '../services/encrypted-db.service';
-import { encryptionService } from '../services/encryption.service';
 import { secureLogger } from '../utils/secure-logger';
+import { passwordUtils } from '../utils/password.utils';
 
 // Interfaces for request bodies
 
@@ -19,11 +19,12 @@ interface ProviderSignupRequest {
   email: string;
   password: string;
   phone: string;
+  phoneVerified?: boolean;
   business_name_ar: string;
   business_name_en: string;
   owner_name: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   address: {
     street: string;
     city: string;
@@ -62,26 +63,37 @@ export class AuthController {
    * Accepts: +962XXXXXXXXX, 962XXXXXXXXX, 07XXXXXXXX, 7XXXXXXXX
    */
   private validateJordanPhoneNumber(phone: string): string {
-    // Remove all non-digit characters
-    let cleaned = phone.replace(/\D/g, '');
+    // Remove all non-digit characters except the leading +
+    let cleaned = phone.replace(/[^\d+]/g, '');
+    
+    // Remove any + that's not at the beginning
+    if (cleaned.indexOf('+') > 0) {
+      cleaned = cleaned.replace(/\+/g, '');
+    }
     
     // Handle different formats
-    if (cleaned.startsWith('962')) {
-      // Already has country code
+    if (cleaned.startsWith('+962')) {
+      // Already has country code with +
+      // cleaned is already correct
+    } else if (cleaned.startsWith('962')) {
+      // Has country code without +
       cleaned = '+' + cleaned;
     } else if (cleaned.startsWith('07')) {
-      // Local format with 0
+      // Local format with 0 (e.g., 0791234567)
       cleaned = '+962' + cleaned.substring(1);
     } else if (cleaned.startsWith('7') && cleaned.length === 9) {
-      // Local format without 0
+      // Local format without 0 (e.g., 791234567)
       cleaned = '+962' + cleaned;
     } else {
+      logger.error('Invalid phone format', { original: phone, cleaned });
       throw new AppError('Invalid phone number format. Please use Jordan format (e.g., 0791234567)', 400);
     }
     
-    // Validate final format: +962XXXXXXXXX (12 digits total with +)
-    const jordanPhoneRegex = /^\+962[7][0-9]{8}$/;
+    // Validate final format: +962[7-9]XXXXXXXX (12 digits total with +)
+    // Now accepts 07X, 08X, and 09X numbers
+    const jordanPhoneRegex = /^\+962[7-9][0-9]{8}$/;
     if (!jordanPhoneRegex.test(cleaned)) {
+      logger.error('Phone failed regex validation', { original: phone, cleaned });
       throw new AppError('Invalid Jordan mobile number. Must be a valid Jordanian mobile number', 400);
     }
     
@@ -92,10 +104,22 @@ export class AuthController {
    * Generate JWT token
    */
   private generateToken(payload: JWTPayload): string {
+    // Add security claims
+    const tokenPayload = {
+      ...payload,
+      iat: Math.floor(Date.now() / 1000), // Issued at
+      iss: 'lamsa-api', // Issuer
+      aud: 'lamsa-app', // Audience
+      jti: `${payload.id}-${Date.now()}` // JWT ID for uniqueness
+    };
+
     return jwt.sign(
-      payload, 
+      tokenPayload, 
       this.getConfig().JWT_SECRET, 
-      { expiresIn: this.getConfig().JWT_EXPIRES_IN } as jwt.SignOptions
+      { 
+        expiresIn: this.getConfig().JWT_EXPIRES_IN,
+        algorithm: 'HS256' // Specify algorithm explicitly
+      } as jwt.SignOptions
     );
   }
 
@@ -326,56 +350,102 @@ export class AuthController {
     try {
       const providerData: ProviderSignupRequest = req.body;
 
+      // Validate password
+      const passwordValidation = passwordUtils.validate(providerData.password);
+      if (!passwordValidation.isValid) {
+        throw new AppError(passwordValidation.error!, 400);
+      }
+
       // Validate phone number
       const validatedPhone = this.validateJordanPhoneNumber(providerData.phone);
 
       // Check if email already exists using encrypted database
-      const { data: existingProvider } = await encryptedDb.findProviderByEmail(providerData.email);
-      if (existingProvider) {
-        throw new AppError('Email already registered', 409);
+      try {
+        const { data: existingProvider } = await encryptedDb.findProviderByEmail(providerData.email);
+        if (existingProvider) {
+          throw new AppError('Email already registered', 409);
+        }
+      } catch (error: any) {
+        if (error.message === 'Email already registered') {
+          throw error;
+        }
+        logger.error('Error checking email:', error);
+        throw new AppError('Could not verify email uniqueness. Please try again later.', 500);
       }
 
       // Check if phone already exists using encrypted database service
-      const { data: existingPhone } = await encryptedDb.findProviderByPhone(validatedPhone);
-      if (existingPhone) {
-        throw new AppError('Phone number already registered', 409);
+      try {
+        const { data: existingPhone } = await encryptedDb.findProviderByPhone(validatedPhone);
+        if (existingPhone) {
+          throw new AppError('Phone number already registered', 409);
+        }
+      } catch (error: any) {
+        if (error.message === 'Phone number already registered') {
+          throw error;
+        }
+        logger.error('Error checking phone:', error);
+        throw new AppError('Could not verify phone uniqueness. Please try again later.', 500);
       }
 
-      // Create provider with Supabase Auth
-      const { data: result, error } = await auth.signUpProvider({
-        ...providerData,
+      // Use Supabase Auth to create provider with proper authentication
+      
+      const { data, error } = await auth.signUpProvider({
+        email: providerData.email.toLowerCase().trim(),
+        password: providerData.password,
         phone: validatedPhone,
+        business_name_ar: providerData.business_name_ar,
+        business_name_en: providerData.business_name_en,
+        owner_name: providerData.owner_name,
+        address: providerData.address,
+        license_number: providerData.license_number,
+        phoneVerified: providerData.phoneVerified,
+        latitude: providerData.latitude,
+        longitude: providerData.longitude
       });
 
-      // Remove development bypass - always require real signup
 
-      if (error || !result) {
-        const errorMessage = error && typeof error === 'object' && 'message' in error 
-          ? (error as any).message 
-          : 'Failed to create provider account';
-        throw new AppError(errorMessage, 500);
+      if (error || !data) {
+        logger.error('Failed to create provider', error);
+        console.error('Provider signup error details:', error);
+        // Include error details in development for debugging
+        if (process.env.NODE_ENV === 'development' && error) {
+          const errorMessage = (error as any).message || JSON.stringify(error);
+          throw new AppError(`Failed to create provider account: ${errorMessage}`, 500);
+        }
+        throw new AppError('Failed to create provider account', 500);
       }
+
+      const provider = data.provider;
 
       // Generate JWT token
       const token = this.generateToken({
-        id: result.provider.id,
+        id: provider.id,
         type: 'provider',
-        email: result.provider.email,
+        email: provider.email,
+      });
+
+      // Generate refresh token
+      const refreshTokenData = await this.generateRefreshToken({
+        id: provider.id,
+        type: 'provider',
+        email: provider.email,
       });
 
       const response: ApiResponse = {
         success: true,
         data: {
           provider: {
-            id: result.provider.id,
-            business_name_ar: result.provider.business_name_ar,
-            business_name_en: result.provider.business_name_en,
-            owner_name: result.provider.owner_name,
-            phone: result.provider.phone,
-            email: result.provider.email,
-            verified: result.provider.verified,
+            id: provider.id,
+            business_name_ar: provider.business_name_ar,
+            business_name_en: provider.business_name_en,
+            owner_name: provider.owner_name,
+            phone: provider.phone,
+            email: provider.email,
+            verified: provider.status === 'active',
+            license_number: provider.license_number,
           },
           token,
+          refreshToken: refreshTokenData.refreshToken,
           type: 'provider',
         },
         message: 'Provider account created successfully. Pending verification.',
@@ -394,11 +464,26 @@ export class AuthController {
    * Provider login with email and password
    */
   async providerLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    
     try {
       const { email, password }: ProviderLoginRequest = req.body;
 
+      // Input validation
+      if (!email || !password) {
+        throw new AppError('Email and password are required', 400);
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new AppError('Invalid email format', 400);
+      }
+
+      // Sanitize email input
+      const sanitizedEmail = email.toLowerCase().trim();
+
       // Check if account is locked
-      const lockoutStatus = await accountLockoutService.isLocked(email, 'provider');
+      const lockoutStatus = await accountLockoutService.isLocked(sanitizedEmail, 'provider');
       if (lockoutStatus.isLocked) {
         const minutesRemaining = Math.ceil((lockoutStatus.lockoutUntil!.getTime() - Date.now()) / 60000);
         throw new AppError(
@@ -407,45 +492,80 @@ export class AuthController {
         );
       }
 
-      // Sign in with Supabase Auth
-      const { data: result, error } = await auth.signInProvider(email, password);
+      // Use Supabase Auth for provider login
+      
+      const { data: authResult, error: authError } = await auth.signInProvider(sanitizedEmail, password);
+      
+        hasData: !!authResult,
+        hasError: !!authError,
+        error: authError,
+        provider: authResult?.provider ? { id: authResult.provider.id, email: authResult.provider.email } : null
+      });
 
-      // Remove development bypass - always require real authentication
-
-      if (error || !result) {
+      if (authError || !authResult) {
         // Record failed attempt
-        const lockoutResult = await accountLockoutService.recordFailedAttempt(email, 'provider');
+        const lockoutResult = await accountLockoutService.recordFailedAttempt(sanitizedEmail, 'provider');
+        
+        // Log security event
+        secureLogger.warn('Failed provider login attempt', {
+          email: sanitizedEmail,
+          remainingAttempts: lockoutResult.remainingAttempts,
+          isLocked: lockoutResult.isLocked,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          error: (authError as any)?.message || 'Unknown error'
+        });
+
         if (lockoutResult.isLocked) {
           throw new AppError(
             'Too many failed login attempts. Account temporarily locked.',
             429
           );
         }
+        
+        // Handle specific Supabase Auth errors
+        const errorMessage = (authError as any)?.message || 'Authentication failed';
+        if (errorMessage.includes('Invalid login credentials')) {
+          throw new AppError(
+            `Invalid email or password. ${lockoutResult.remainingAttempts} attempts remaining.`,
+            401
+          );
+        }
+        
         throw new AppError(
           `Invalid email or password. ${lockoutResult.remainingAttempts} attempts remaining.`,
           401
         );
       }
 
-      // Reset lockout attempts on successful login
-      await accountLockoutService.resetAttempts(email, 'provider');
+      const provider = authResult.provider;
 
-      // Check if provider is verified
-      if (!result.provider.verified) {
+      // Reset lockout attempts on successful login
+      await accountLockoutService.resetAttempts(sanitizedEmail, 'provider');
+
+      // Check if provider is active
+      const isActive = (provider as any).status === 'active';
+      if (!isActive) {
         throw new AppError('Provider account not verified. Please contact support.', 403);
       }
 
       // Check if MFA is enabled
       const { mfaService } = await import('../services/mfa.service');
-      const isMFAEnabled = await mfaService.isMFAEnabled(result.provider.id);
+      const isMFAEnabled = await mfaService.isMFAEnabled((provider as any).id);
       
       if (isMFAEnabled) {
+        // Log MFA requirement
+        secureLogger.info('MFA required for provider login', {
+          providerId: (provider as any).id,
+          ipAddress: req.ip
+        });
+
         // Return partial success requiring MFA verification
         const response: ApiResponse = {
           success: true,
           data: {
             requiresMFA: true,
-            providerId: result.provider.id,
+            providerId: (provider as any).id,
             message: 'Please enter your 2FA code',
             message_ar: 'يرجى إدخال رمز المصادقة الثنائية',
           }
@@ -455,27 +575,41 @@ export class AuthController {
         return;
       }
 
-      // Generate JWT token (only if MFA is not enabled)
-      const token = this.generateToken({
-        id: result.provider.id,
+      // Generate JWT token with comprehensive claims
+      const tokenPayload: JWTPayload = {
+        id: (provider as any).id,
         type: 'provider',
-        email: result.provider.email,
+        email: (provider as any).email
+      };
+
+      const token = this.generateToken(tokenPayload);
+
+      // Generate refresh token for session management
+      const refreshTokenData = await this.generateRefreshToken(tokenPayload);
+
+      // Log successful login
+      secureLogger.info('Provider login successful', {
+        providerId: (provider as any).id,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
       });
 
       const response: ApiResponse = {
         success: true,
         data: {
           provider: {
-            id: result.provider.id,
-            business_name_ar: result.provider.business_name_ar,
-            business_name_en: result.provider.business_name_en,
-            owner_name: result.provider.owner_name,
-            phone: result.provider.phone,
-            email: result.provider.email,
-            rating: result.provider.rating,
-            total_reviews: result.provider.total_reviews,
+            id: (provider as any).id,
+            business_name_ar: (provider as any).business_name_ar,
+            business_name_en: (provider as any).business_name_en,
+            owner_name: (provider as any).owner_name,
+            phone: (provider as any).phone,
+            email: (provider as any).email,
+            rating: (provider as any).rating,
+            total_reviews: (provider as any).total_reviews,
           },
           token,
+          refreshToken: refreshTokenData.refreshToken,
+          tokenExpiresIn: this.getConfig().JWT_EXPIRES_IN,
           type: 'provider',
         },
         message: 'Login successful',
@@ -874,12 +1008,7 @@ export class AuthController {
       // 2. Send email with reset link
       // 3. Store token with expiration
 
-      const response: ApiResponse = {
-        success: true,
-        message: 'Password reset instructions sent to your email',
-      };
-
-      res.json(response);
+      throw new AppError('Password reset is not yet implemented.', 501);
     } catch (error) {
       next(error);
     }
@@ -898,21 +1027,211 @@ export class AuthController {
       // 3. Update password in Supabase Auth
       // 4. Invalidate reset token
 
-      if (!token || token.length < 32) {
-        throw new AppError('Invalid or expired reset token', 400);
+      throw new AppError('Password reset is not yet implemented.', 501);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Customer signup with email and password
+   */
+  async customerSignup(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { name, email, password, phone } = req.body;
+
+      logger.debug('Customer signup attempt', { email, phone, name });
+
+      // Validate and sanitize phone number
+      let validatedPhone: string;
+      try {
+        validatedPhone = this.validateJordanPhoneNumber(phone);
+      } catch (phoneError) {
+        logger.error('Phone validation failed', { phone, error: phoneError });
+        throw phoneError;
       }
 
-      if (!newPassword || newPassword.length < 6) {
-        throw new AppError('Password must be at least 6 characters long', 400);
+      // Normalize email
+      const normalizedEmail = email.toLowerCase().trim();
+
+      // Check if customer already exists with this email
+      let existingEmail;
+      try {
+        const result = await db.users.findByEmail(normalizedEmail);
+        existingEmail = result?.data;
+      } catch (dbError) {
+        logger.error('Database error checking existing email', { email: normalizedEmail, error: dbError });
+        throw new AppError('Database error while checking email', 500);
       }
+      
+      if (existingEmail) {
+        throw new AppError('An account with this email already exists', 409);
+      }
+
+      // Check if customer already exists with this phone
+      let existingPhone;
+      try {
+        const result = await db.users.findByPhone(validatedPhone);
+        existingPhone = result?.data;
+      } catch (dbError) {
+        logger.error('Database error checking existing phone', { phone: validatedPhone, error: dbError });
+        throw new AppError('Database error while checking phone', 500);
+      }
+      
+      if (existingPhone) {
+        throw new AppError('An account with this phone number already exists', 409);
+      }
+
+      // Step 1: Create auth user with Supabase Auth
+      logger.debug('Creating auth user with Supabase Auth', { email: normalizedEmail });
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password: password,
+      });
+
+      if (authError) {
+        logger.error('Failed to create auth user', authError);
+        // Check for specific error codes
+        if (authError.message?.includes('already registered')) {
+          throw new AppError('An account with this email already exists', 409);
+        }
+        throw new AppError(authError?.message || 'Failed to create account', 400);
+      }
+
+      if (!authData.user) {
+        throw new AppError('Failed to create account - no user returned', 400);
+      }
+
+      // Step 2: Create user profile in users table
+      // Use supabaseAdmin to bypass RLS policies
+      if (!supabaseAdmin) {
+        logger.error('supabaseAdmin is null - service role key not configured');
+        throw new AppError('Service role key not configured. Cannot create user profile.', 500);
+      }
+
+      logger.debug('Creating user profile', {
+        authUserId: authData.user.id,
+        email: normalizedEmail,
+        phone: validatedPhone,
+        name: name.trim()
+      });
+
+      // Try to create the user profile
+      let newUser;
+      let createError;
+      
+      try {
+        const result = await supabaseAdmin
+          .from('users')
+          .insert({
+            id: authData.user.id, // Link to Supabase Auth user
+            name: name.trim(),
+            email: normalizedEmail,
+            phone: validatedPhone,
+          })
+          .select()
+          .single();
+          
+        newUser = result.data;
+        createError = result.error;
+      } catch (dbError) {
+        logger.error('Exception during user profile creation', {
+          error: dbError,
+          message: dbError instanceof Error ? dbError.message : 'Unknown error',
+          stack: dbError instanceof Error ? dbError.stack : undefined
+        });
+        createError = dbError;
+      }
+
+      if (createError || !newUser) {
+        // Log the actual database error for debugging
+        logger.error('Failed to create customer profile:', {
+          error: createError,
+          errorMessage: (createError as any)?.message,
+          errorCode: (createError as any)?.code,
+          errorDetails: (createError as any)?.details,
+          userId: authData.user?.id,
+          email: normalizedEmail,
+          phone: validatedPhone
+        });
+
+        // Rollback auth user if profile creation fails
+        if (authData.user?.id && supabaseAdmin) {
+          try {
+            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            logger.info('Rolled back Supabase Auth user after profile creation failure');
+          } catch (rollbackError) {
+            // This is a critical state that requires manual cleanup.
+            logger.fatal('CRITICAL: Failed to rollback auth user after profile creation failure.', { 
+              userId: authData.user.id,
+              error: rollbackError 
+            });
+            // Consider sending an alert to an admin/monitoring service here.
+          }
+        }
+        
+        // Provide more specific error message
+        const errorMessage = (createError as any)?.message || 'Failed to create user profile';
+        throw new AppError(errorMessage, 500);
+      }
+
+      // Generate JWT token
+      const token = this.generateToken({
+        id: newUser.id,
+        type: 'customer',
+        phone: newUser.phone,
+        email: newUser.email,
+      });
+
+      // Generate refresh token using the token manager
+      const { refreshToken } = await refreshTokenManager.generateRefreshToken({
+        id: newUser.id,
+        type: 'customer',
+        phone: newUser.phone,
+        email: newUser.email,
+      });
+
+      // Log security event
+      secureLogger.info('Customer signup successful', {
+        userId: newUser.id,
+        email: normalizedEmail,
+        phone: validatedPhone,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      });
 
       const response: ApiResponse = {
         success: true,
-        message: 'Password reset successful. Please login with your new password.',
+        message: 'Signup successful',
+        data: {
+          user: {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            phone: newUser.phone,
+            role: 'customer', // Changed from user_type to role to match Postman expectation
+          },
+          token,
+          refreshToken,
+          type: 'customer',
+        },
       };
 
-      res.json(response);
+      res.status(201).json(response);
     } catch (error) {
+      // Log the full error for debugging
+      logger.error('Customer signup failed', { 
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorStack: error instanceof Error ? error.stack : undefined,
+        requestBody: {
+          email: req.body.email,
+          phone: req.body.phone,
+          name: req.body.name
+          // Don't log password
+        }
+      });
       next(error);
     }
   }

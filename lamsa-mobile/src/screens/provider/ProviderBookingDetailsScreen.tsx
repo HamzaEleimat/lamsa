@@ -29,7 +29,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { bookingService } from '../../services/bookingService';
 import LoadingOverlay from '../../components/shared/LoadingOverlay';
 import { ProviderStackParamList } from '../../navigation/ProviderStackNavigator';
-import { customColors } from '../../theme';
+import { customColors } from '../../theme/index';
 
 type ProviderBookingDetailsScreenNavigationProp = NativeStackNavigationProp<
   ProviderStackParamList,

@@ -77,6 +77,10 @@ class ProductionMonitoringMiddleware {
         const Tracing = require('@sentry/tracing');
         
         Sentry.init(monitoringConfig.sentry);
+        
+        // Assign Sentry to global object for access throughout the application
+        (global as any).Sentry = Sentry;
+        
         console.log('✅ Sentry error tracking initialized');
       } catch (error) {
         secureLogger.warn('Sentry initialization failed:', { error: getErrorMessage(error) });
@@ -343,8 +347,9 @@ class ProductionMonitoringMiddleware {
    */
   private sendErrorToMonitoring(error: Error, req: MonitoringRequest): void {
     // Send to Sentry
-    if (global.Sentry) {
-      global.Sentry.withScope(scope => {
+    const sentry = global.Sentry;
+    if (sentry) {
+      sentry.withScope(scope => {
         scope.setTag('route', req.route?.path || req.path);
         scope.setTag('method', req.method);
         scope.setUser({ id: req.userId });
@@ -353,7 +358,7 @@ class ProductionMonitoringMiddleware {
           userAgent: req.headers['user-agent'],
           ip: req.ip
         });
-        global.Sentry.captureException(error);
+        sentry.captureException(error);
       });
     }
 
@@ -484,7 +489,7 @@ class ProductionMonitoringMiddleware {
    * Generate unique request ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

@@ -9,7 +9,7 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text';
 type ButtonSize = 'small' | 'medium' | 'large';

@@ -1,0 +1,260 @@
+// Jenkins Pipeline for Lamsa API Testing
+pipeline {
+    agent {
+        docker {
+            image 'node:18-alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['local', 'development', 'staging', 'production'],
+            description: 'Environment to test against'
+        )
+        choice(
+            name: 'COLLECTION',
+            choices: ['all', 'auth', 'bookings', 'providers', 'journeys', 'testing'],
+            description: 'Collection to run'
+        )
+        booleanParam(
+            name: 'VERBOSE',
+            defaultValue: false,
+            description: 'Enable verbose output'
+        )
+        booleanParam(
+            name: 'BAIL_ON_FAILURE',
+            defaultValue: true,
+            description: 'Stop on first failure'
+        )
+    }
+    
+    environment {
+        POSTMAN_DIR = 'lamsa-api/postman'
+        RESULTS_DIR = 'test-results'
+    }
+    
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+    }
+    
+    stages {
+        stage('Setup') {
+            steps {
+                echo "Setting up Lamsa API tests"
+                echo "Environment: ${params.ENVIRONMENT}"
+                echo "Collection: ${params.COLLECTION}"
+                
+                dir("${POSTMAN_DIR}") {
+                    sh 'npm ci'
+                }
+            }
+        }
+        
+        stage('Validate') {
+            steps {
+                dir("${POSTMAN_DIR}") {
+                    // List available collections
+                    sh 'node scripts/newman-runner.js --list'
+                    
+                    // Validate environment file exists
+                    sh "test -f environments/${params.ENVIRONMENT}.postman_environment.json"
+                }
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                dir("${POSTMAN_DIR}") {
+                    script {
+                        def command = "node scripts/newman-runner.js"
+                        command += " --environment ${params.ENVIRONMENT}"
+                        command += " --collection ${params.COLLECTION}"
+                        command += " --output ./${RESULTS_DIR}"
+                        
+                        if (params.VERBOSE) {
+                            command += " --verbose"
+                        }
+                        
+                        if (params.BAIL_ON_FAILURE) {
+                            command += " --bail"
+                        }
+                        
+                        sh command
+                    }
+                }
+            }
+        }
+        
+        stage('Analyze Results') {
+            steps {
+                dir("${POSTMAN_DIR}") {
+                    script {
+                        // Parse test results
+                        def summary = sh(
+                            script: '''
+                                node -e "
+                                    const fs = require('fs');
+                                    const summaryFile = fs.readdirSync('./${RESULTS_DIR}')
+                                        .find(f => f.startsWith('summary-'));
+                                    if (summaryFile) {
+                                        const summary = JSON.parse(
+                                            fs.readFileSync('./${RESULTS_DIR}/' + summaryFile)
+                                        );
+                                        console.log(JSON.stringify({
+                                            successRate: summary.overallStats.successRate,
+                                            totalRequests: summary.overallStats.requests,
+                                            failures: summary.overallStats.failures,
+                                            avgResponseTime: summary.performance.responseTime?.average || 0
+                                        }));
+                                    }
+                                "
+                            ''',
+                            returnStdout: true
+                        ).trim()
+                        
+                        if (summary) {
+                            def results = readJSON text: summary
+                            
+                            // Set build description
+                            currentBuild.description = """
+                                Environment: ${params.ENVIRONMENT}
+                                Collection: ${params.COLLECTION}
+                                Success Rate: ${results.successRate}%
+                                Avg Response: ${results.avgResponseTime}ms
+                            """.stripIndent()
+                            
+                            // Add badges
+                            if (results.successRate == "100") {
+                                addBadge(icon: "success.gif", text: "All Tests Passed!")
+                            } else if (results.successRate.toFloat() >= 95) {
+                                addBadge(icon: "warning.gif", text: "Some Tests Failed")
+                            } else {
+                                addBadge(icon: "error.gif", text: "Many Tests Failed")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Performance Check') {
+            when {
+                expression { params.ENVIRONMENT in ['staging', 'production'] }
+            }
+            steps {
+                dir("${POSTMAN_DIR}") {
+                    script {
+                        def perfCheck = sh(
+                            script: '''
+                                node -e "
+                                    const fs = require('fs');
+                                    const summaryFile = fs.readdirSync('./${RESULTS_DIR}')
+                                        .find(f => f.startsWith('summary-'));
+                                    if (summaryFile) {
+                                        const summary = JSON.parse(
+                                            fs.readFileSync('./${RESULTS_DIR}/' + summaryFile)
+                                        );
+                                        if (summary.performance.responseTime) {
+                                            const avg = summary.performance.responseTime.average;
+                                            const p95 = summary.performance.responseTime.p95;
+                                            
+                                            if (avg > 2000) {
+                                                console.error('Performance degradation: Average response time > 2000ms');
+                                                process.exit(1);
+                                            }
+                                            if (p95 > 5000) {
+                                                console.error('Performance degradation: P95 response time > 5000ms');
+                                                process.exit(1);
+                                            }
+                                            console.log('Performance check passed');
+                                        }
+                                    }
+                                "
+                            ''',
+                            returnStatus: true
+                        )
+                        
+                        if (perfCheck != 0) {
+                            unstable('Performance degradation detected')
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            dir("${POSTMAN_DIR}") {
+                // Archive test results
+                archiveArtifacts artifacts: "${RESULTS_DIR}/**/*", allowEmptyArchive: true
+                
+                // Publish HTML reports
+                publishHTML([
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: "${RESULTS_DIR}",
+                    reportFiles: '*-report-*.html',
+                    reportName: 'Newman Test Report',
+                    reportTitles: 'API Test Results'
+                ])
+                
+                // Publish JUnit results
+                junit allowEmptyResults: true, testResults: "${RESULTS_DIR}/*-junit-*.xml"
+            }
+        }
+        
+        success {
+            echo 'All API tests passed successfully!'
+            
+            // Send success notification
+            slackSend(
+                color: 'good',
+                message: """
+                    ✅ API Tests Passed
+                    Environment: ${params.ENVIRONMENT}
+                    Collection: ${params.COLLECTION}
+                    Build: ${env.BUILD_NUMBER}
+                    ${env.BUILD_URL}
+                """.stripIndent()
+            )
+        }
+        
+        failure {
+            echo 'API tests failed!'
+            
+            // Send failure notification
+            slackSend(
+                color: 'danger',
+                message: """
+                    ❌ API Tests Failed
+                    Environment: ${params.ENVIRONMENT}
+                    Collection: ${params.COLLECTION}
+                    Build: ${env.BUILD_NUMBER}
+                    ${env.BUILD_URL}
+                """.stripIndent()
+            )
+        }
+        
+        unstable {
+            echo 'API tests completed with warnings'
+            
+            // Send warning notification
+            slackSend(
+                color: 'warning',
+                message: """
+                    ⚠️ API Tests Unstable
+                    Environment: ${params.ENVIRONMENT}
+                    Collection: ${params.COLLECTION}
+                    Build: ${env.BUILD_NUMBER}
+                    ${env.BUILD_URL}
+                """.stripIndent()
+            )
+        }
+    }
+}

@@ -60,9 +60,9 @@ Error responses:
 \`\`\`
       `,
       contact: {
-        name: 'BeautyCort API Support',
-        email: 'api@beautycort.com',
-        url: 'https://docs.beautycort.com'
+        name: 'WeLamsa API Support',
+        email: 'api@welamsa.com',
+        url: 'https://docs.welamsa.com'
       },
       license: {
         name: 'MIT',
@@ -75,11 +75,11 @@ Error responses:
         description: 'Development server'
       },
       {
-        url: 'https://api.beautycort.com/api',
+        url: 'https://api.welamsa.com/api',
         description: 'Production server'
       },
       {
-        url: 'https://staging-api.beautycort.com/api',
+        url: 'https://staging-api.welamsa.com/api',
         description: 'Staging server'
       }
     ],

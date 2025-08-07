@@ -8,6 +8,13 @@ export interface AuthCredentials {
   otp?: string;
 }
 
+export interface SignupCredentials {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+}
+
 export interface AuthResult {
   user: User;
   session: any;
@@ -570,6 +577,87 @@ export class AuthService {
       createdAt: dbUser.created_at,
       updatedAt: dbUser.updated_at,
     };
+  }
+
+  /**
+   * Customer signup with email and password
+   */
+  async customerSignup(credentials: SignupCredentials): Promise<APIResponse<AuthResult>> {
+    try {
+      const { API_URL } = require('../../config');
+      
+      const response = await fetch(`${API_URL}/auth/customer/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        return {
+          success: false,
+          data: null,
+          error: {
+            code: 'SIGNUP_FAILED',
+            message: data.message || 'Signup failed',
+            category: 'AUTH' as any,
+            userMessage: {
+              en: data.message || 'Failed to create account',
+              ar: data.message || 'فشل في إنشاء الحساب',
+            },
+          },
+        };
+      }
+
+      // Store tokens
+      const tokenInfo: TokenInfo = {
+        accessToken: data.data.token,
+        refreshToken: data.data.refreshToken,
+        expiresAt: Date.now() + 3600000, // 1 hour
+        type: 'Bearer',
+      };
+      await tokenManager.setTokens(tokenInfo);
+
+      // Map the response to our User type
+      const user: User = {
+        id: data.data.user.id,
+        phone: data.data.user.phone,
+        name: data.data.user.name,
+        email: data.data.user.email,
+        role: UserRole.CUSTOMER,
+        createdAt: data.data.user.created_at || new Date().toISOString(),
+        updatedAt: data.data.user.updated_at || new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        data: {
+          user,
+          session: {
+            access_token: data.data.token,
+            refresh_token: data.data.refreshToken,
+          },
+        },
+        error: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: {
+          code: 'SIGNUP_ERROR',
+          message: error instanceof Error ? error.message : 'Unknown error',
+          category: 'UNKNOWN' as any,
+          userMessage: {
+            en: 'An error occurred during signup',
+            ar: 'حدث خطأ أثناء إنشاء الحساب',
+          },
+        },
+      };
+    }
   }
 }
 

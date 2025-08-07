@@ -1,0 +1,679 @@
+{
+  "info": {
+    "_postman_id": "lamsa-api-collection-user-journeys",
+    "name": "Lamsa API - User Journeys",
+    "description": "Complete end-to-end user journey workflows demonstrating real-world usage scenarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "lamsa-dev-team"
+  },
+  "item": [
+    {
+      "name": "Complete User Journeys",
+      "item": [
+        {
+          "name": "Customer Journey - Find & Book Service",
+          "item": [
+            {
+              "name": "1. Search Providers Near Me",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Provider search successful\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "// Store first provider for next steps",
+                      "const providers = pm.response.json().data;",
+                      "if (providers && providers.length > 0) {",
+                      "    pm.environment.set(\"journey_provider_id\", providers[0].id);",
+                      "    pm.environment.set(\"journey_provider_name\", providers[0].businessName);",
+                      "    console.log(\"Selected provider:\", providers[0].businessName);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/providers/search?latitude=31.9454&longitude=35.9284&radius=5&category=hair&limit=10",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "providers",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "latitude",
+                      "value": "31.9454"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "35.9284"
+                    },
+                    {
+                      "key": "radius",
+                      "value": "5"
+                    },
+                    {
+                      "key": "category",
+                      "value": "hair"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Step 1: Customer searches for hair salons near their location in Amman."
+              },
+              "response": []
+            },
+            {
+              "name": "2. View Provider Details",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Provider details retrieved\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "// Store service for booking",
+                      "const provider = pm.response.json().data;",
+                      "if (provider && provider.services && provider.services.length > 0) {",
+                      "    pm.environment.set(\"journey_service_id\", provider.services[0].id);",
+                      "    pm.environment.set(\"journey_service_name\", provider.services[0].name);",
+                      "    pm.environment.set(\"journey_service_price\", provider.services[0].price);",
+                      "    pm.environment.set(\"journey_service_duration\", provider.services[0].duration);",
+                      "    console.log(\"Selected service:\", provider.services[0].name);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/providers/{{journey_provider_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "providers",
+                    "{{journey_provider_id}}"
+                  ]
+                },
+                "description": "Step 2: Customer views detailed provider information including services, ratings, and photos."
+              },
+              "response": []
+            },
+            {
+              "name": "3. Check Availability",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Availability check successful\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "// Store available time slot",
+                      "const availability = pm.response.json().data;",
+                      "if (availability && availability.availableSlots && availability.availableSlots.length > 0) {",
+                      "    const firstSlot = availability.availableSlots[0];",
+                      "    pm.environment.set(\"journey_booking_time\", firstSlot.startTime);",
+                      "    console.log(\"Selected time slot:\", firstSlot.startTime);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/providers/{{journey_provider_id}}/availability?date={{booking_date}}&serviceId={{journey_service_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "providers",
+                    "{{journey_provider_id}}",
+                    "availability"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{booking_date}}"
+                    },
+                    {
+                      "key": "serviceId",
+                      "value": "{{journey_service_id}}"
+                    }
+                  ]
+                },
+                "description": "Step 3: Customer checks provider availability for tomorrow."
+              },
+              "response": []
+            },
+            {
+              "name": "4. Create Booking",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Booking created successfully\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "// Store booking ID for follow-up actions",
+                      "const booking = pm.response.json().data;",
+                      "if (booking && booking.id) {",
+                      "    pm.environment.set(\"journey_booking_id\", booking.id);",
+                      "    console.log(\"Booking created with ID:\", booking.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"providerId\": \"{{journey_provider_id}}\",\n  \"serviceId\": \"{{journey_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"{{journey_booking_time}}\",\n  \"notes\": \"خدمة ممتازة، أتطلع للزيارة\",\n  \"paymentMethod\": \"cash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Step 4: Customer creates a booking for the selected service and time."
+              },
+              "response": []
+            },
+            {
+              "name": "5. View Booking Confirmation",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Booking confirmation retrieved\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "pm.test(\"Booking details are complete\", function () {",
+                      "    const booking = pm.response.json().data;",
+                      "    pm.expect(booking).to.have.property('id');",
+                      "    pm.expect(booking).to.have.property('status');",
+                      "    pm.expect(booking).to.have.property('providerName');",
+                      "    pm.expect(booking).to.have.property('serviceName');",
+                      "    pm.expect(booking).to.have.property('bookingDate');",
+                      "    pm.expect(booking).to.have.property('startTime');",
+                      "    pm.expect(booking).to.have.property('totalAmount');",
+                      "    pm.expect(booking.status).to.equal('confirmed');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/bookings/{{journey_booking_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{journey_booking_id}}"
+                  ]
+                },
+                "description": "Step 5: Customer views booking confirmation with all details."
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete customer journey from searching providers to booking confirmation."
+        },
+        {
+          "name": "Provider Journey - Manage Bookings",
+          "item": [
+            {
+              "name": "1. View Incoming Bookings",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Provider bookings retrieved\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "pm.test(\"Bookings are properly filtered\", function () {",
+                      "    const bookings = pm.response.json().data;",
+                      "    pm.expect(bookings).to.be.an('array');",
+                      "    ",
+                      "    // All bookings should be for this provider",
+                      "    bookings.forEach(booking => {",
+                      "        pm.expect(booking.providerId).to.equal(pm.environment.get('test_provider_id'));",
+                      "    });",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{provider_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/bookings?providerId={{test_provider_id}}&status=confirmed&date={{booking_date}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ],
+                  "query": [
+                    {
+                      "key": "providerId",
+                      "value": "{{test_provider_id}}"
+                    },
+                    {
+                      "key": "status",
+                      "value": "confirmed"
+                    },
+                    {
+                      "key": "date",
+                      "value": "{{booking_date}}"
+                    }
+                  ]
+                },
+                "description": "Step 1: Provider views their confirmed bookings for today."
+              },
+              "response": []
+            },
+            {
+              "name": "2. Update Booking Status",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Booking status updated successfully\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "pm.test(\"Status change is reflected\", function () {",
+                      "    const booking = pm.response.json().data;",
+                      "    pm.expect(booking.status).to.equal('in_progress');",
+                      "    pm.expect(booking).to.have.property('statusChangedAt');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{provider_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in_progress\",\n  \"notes\": \"العميل وصل في الوقت المحدد\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings/{{journey_booking_id}}/status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{journey_booking_id}}",
+                    "status"
+                  ]
+                },
+                "description": "Step 2: Provider marks booking as in progress when customer arrives."
+              },
+              "response": []
+            },
+            {
+              "name": "3. Complete Service",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Service completed successfully\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.response.to.have.jsonBody(\"success\", true);",
+                      "});",
+                      "",
+                      "pm.test(\"Booking marked as completed\", function () {",
+                      "    const booking = pm.response.json().data;",
+                      "    pm.expect(booking.status).to.equal('completed');",
+                      "    pm.expect(booking).to.have.property('completedAt');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{provider_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"completed\",\n  \"notes\": \"تم تقديم الخدمة بنجاح\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings/{{journey_booking_id}}/status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{journey_booking_id}}",
+                    "status"
+                  ]
+                },
+                "description": "Step 3: Provider marks service as completed."
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete provider journey managing bookings from confirmation to completion."
+        }
+      ],
+      "description": "Complete user journey workflows demonstrating end-to-end scenarios for customers and providers."
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_version",
+      "value": "1.0",
+      "type": "string"
+    },
+    {
+      "key": "default_limit",
+      "value": "20",
+      "type": "string"
+    },
+    {
+      "key": "default_timeout",
+      "value": "30000",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_start",
+      "value": "08:00",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_end",
+      "value": "22:00",
+      "type": "string"
+    },
+    {
+      "key": "supported_languages",
+      "value": "[\"ar\", \"en\"]",
+      "type": "string"
+    },
+    {
+      "key": "supported_payment_methods",
+      "value": "[\"cash\", \"card\", \"online\"]",
+      "type": "string"
+    },
+    {
+      "key": "booking_statuses",
+      "value": "[\"pending\", \"confirmed\", \"completed\", \"cancelled\", \"no_show\"]",
+      "type": "string"
+    },
+    {
+      "key": "jordan_phone_prefixes",
+      "value": "[\"77\", \"78\", \"79\"]",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{customer_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script for all requests",
+          "",
+          "// Set common headers",
+          "pm.request.headers.add({",
+          "    key: \"Content-Type\",",
+          "    value: \"application/json\"",
+          "});",
+          "",
+          "// Add timestamp for tracking",
+          "pm.environment.set(\"last_request_time\", new Date().toISOString());",
+          "",
+          "// Generate request ID for tracking",
+          "pm.environment.set(\"request_id\", \"req_\" + Date.now() + \"_\" + Math.random().toString(36).substr(2, 9));",
+          "",
+          "// Log request details",
+          "console.log(\"Making request to:\", pm.request.url);",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Ensure required environment variables are set",
+          "const requiredVars = ['base_url'];",
+          "const missingVars = requiredVars.filter(varName => !pm.environment.get(varName));",
+          "",
+          "if (missingVars.length > 0) {",
+          "    console.warn(\"Missing required environment variables:\", missingVars);",
+          "}",
+          "",
+          "// Set default values if not present",
+          "if (!pm.environment.get(\"base_url\")) {",
+          "    pm.environment.set(\"base_url\", \"http://localhost:3000\");",
+          "    console.log(\"Set default base_url to localhost\");",
+          "}",
+          "",
+          "// Generate future date if not set",
+          "if (!pm.environment.get(\"future_date\")) {",
+          "    const futureDate = new Date();",
+          "    futureDate.setDate(futureDate.getDate() + 3);",
+          "    pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "",
+          "// Basic response validation",
+          "pm.test(\"Response status is valid\", function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404, 409, 422, 429, 500]);",
+          "});",
+          "",
+          "// Response time validation",
+          "pm.test(\"Response time is acceptable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// JSON response validation",
+          "if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+          "    pm.test(\"Response is valid JSON\", function () {",
+          "        pm.response.to.be.json;",
+          "    });",
+          "    ",
+          "    pm.test(\"Response has success field\", function () {",
+          "        pm.response.to.have.jsonBody(\"success\");",
+          "    });",
+          "}",
+          "",
+          "// Rate limiting headers validation",
+          "pm.test(\"Rate limit headers present\", function () {",
+          "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+          "        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+          "        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+          "    }",
+          "});",
+          "",
+          "// Security headers validation",
+          "pm.test(\"Security headers present\", function () {",
+          "    // Check for common security headers",
+          "    const securityHeaders = ['X-Content-Type-Options', 'X-Frame-Options', 'X-XSS-Protection'];",
+          "    securityHeaders.forEach(header => {",
+          "        if (pm.response.headers.has(header)) {",
+          "            pm.expect(pm.response.headers.get(header)).to.be.a('string');",
+          "        }",
+          "    });",
+          "});",
+          "",
+          "// Log response details",
+          "console.log(\"Response Status:\", pm.response.status);",
+          "console.log(\"Response Time:\", pm.response.responseTime + \"ms\");",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Store response data for debugging",
+          "if (pm.response.json && pm.response.json().success === false) {",
+          "    console.log(\"Error Response:\", pm.response.json());",
+          "}",
+          "",
+          "// Jordan-specific validations",
+          "if (pm.response.json && pm.response.json().data) {",
+          "    const data = pm.response.json().data;",
+          "    ",
+          "    // Phone number validation",
+          "    if (data.phone || data.userPhone) {",
+          "        const phone = data.phone || data.userPhone;",
+          "        pm.test(\"Phone number is in Jordanian format\", function () {",
+          "            pm.expect(phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Currency validation",
+          "    if (data.amount || data.price) {",
+          "        const amount = data.amount || data.price;",
+          "        pm.test(\"Amount is in valid JOD format\", function () {",
+          "            pm.expect(amount).to.be.a('number');",
+          "            pm.expect(amount).to.be.at.least(0);",
+          "            pm.expect(amount).to.be.at.most(1000);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Arabic content validation",
+          "    if (data.providerName || data.serviceName) {",
+          "        const arabicText = data.providerName || data.serviceName;",
+          "        if (arabicText && typeof arabicText === 'string') {",
+          "            pm.test(\"Arabic content is present\", function () {",
+          "                pm.expect(arabicText).to.match(/[\\u0600-\\u06FF]/);",
+          "            });",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

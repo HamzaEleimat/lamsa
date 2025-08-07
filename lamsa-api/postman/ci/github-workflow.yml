@@ -1,0 +1,162 @@
+# GitHub Actions workflow for Lamsa API testing
+name: API Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - local
+          - development
+          - staging
+          - production
+      collection:
+        description: 'Collection to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - auth
+          - bookings
+          - providers
+          - journeys
+          - testing
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'lamsa-api/package-lock.json'
+    
+    - name: Install dependencies
+      run: |
+        cd lamsa-api/postman
+        npm install
+    
+    - name: Run API tests
+      env:
+        ENVIRONMENT: ${{ github.event.inputs.environment || 'staging' }}
+        COLLECTION: ${{ github.event.inputs.collection || 'all' }}
+      run: |
+        cd lamsa-api/postman
+        node scripts/newman-runner.js \
+          --environment $ENVIRONMENT \
+          --collection $COLLECTION \
+          --output ./test-results \
+          --bail
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.node-version }}
+        path: lamsa-api/postman/test-results/
+        retention-days: 30
+    
+    - name: Parse test results
+      if: always()
+      run: |
+        cd lamsa-api/postman
+        if [ -f "./test-results/summary-*.json" ]; then
+          node -e "
+            const fs = require('fs');
+            const summaryFile = fs.readdirSync('./test-results')
+              .find(f => f.startsWith('summary-'));
+            const summary = JSON.parse(fs.readFileSync('./test-results/' + summaryFile));
+            console.log('Test Summary:');
+            console.log('Success Rate: ' + summary.overallStats.successRate + '%');
+            console.log('Total Requests: ' + summary.overallStats.requests);
+            console.log('Failures: ' + summary.overallStats.failures);
+          "
+        fi
+    
+    - name: Comment PR with results
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request' && always()
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          const resultsDir = 'lamsa-api/postman/test-results';
+          
+          try {
+            const summaryFile = fs.readdirSync(resultsDir)
+              .find(f => f.startsWith('summary-'));
+            
+            if (summaryFile) {
+              const summary = JSON.parse(
+                fs.readFileSync(path.join(resultsDir, summaryFile))
+              );
+              
+              const comment = `## 🧪 API Test Results
+              
+              **Environment:** ${summary.testRun.environment}
+              **Collection:** ${summary.testRun.collection}
+              **Duration:** ${summary.testRun.duration}ms
+              
+              ### 📊 Statistics
+              - **Success Rate:** ${summary.overallStats.successRate}%
+              - **Total Requests:** ${summary.overallStats.requests}
+              - **Failures:** ${summary.overallStats.failures}
+              - **Errors:** ${summary.overallStats.errors}
+              
+              ### ⚡ Performance
+              ${summary.performance.responseTime ? `
+              - **Average Response Time:** ${summary.performance.responseTime.average}ms
+              - **95th Percentile:** ${summary.performance.responseTime.p95}ms
+              ` : 'No performance data available'}
+              
+              ${summary.recommendations.length > 0 ? `
+              ### 💡 Recommendations
+              ${summary.recommendations.map(r => `- **[${r.priority.toUpperCase()}]** ${r.message}`).join('\n')}
+              ` : ''}
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.error('Failed to post comment:', error);
+          }
+
+  slack-notification:
+    needs: api-tests
+    runs-on: ubuntu-latest
+    if: failure() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'API tests failed on main branch!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        channel: '#api-alerts'

@@ -6,11 +6,13 @@ import PhoneAuthScreen from '../screens/auth/PhoneAuthScreen';
 import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen';
 import UserTypeSelectionScreen from '../screens/auth/UserTypeSelectionScreen';
 import CustomerOnboardingScreen from '../screens/auth/onboarding/CustomerOnboardingScreen';
+import CustomerSignupScreen from '../screens/auth/CustomerSignupScreen';
 import ProviderOnboardingNavigator from './ProviderOnboardingNavigator';
 
 export type AuthStackParamList = {
   Welcome: undefined;
   PhoneAuth: undefined;
+  CustomerSignup: undefined;
   OTPVerification: { phoneNumber: string };
   UserTypeSelection: { phoneNumber: string };
   CustomerOnboarding: { userData: { phone: string; userType: 'customer' } };
@@ -28,6 +30,7 @@ const AuthNavigator = () => {
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="PhoneAuth" component={PhoneAuthScreen} />
+      <Stack.Screen name="CustomerSignup" component={CustomerSignupScreen} />
       <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
       <Stack.Screen name="UserTypeSelection" component={UserTypeSelectionScreen} />
       <Stack.Screen name="CustomerOnboarding" component={CustomerOnboardingScreen} />

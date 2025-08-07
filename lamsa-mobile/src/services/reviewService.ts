@@ -6,7 +6,6 @@ export interface Review {
   booking_id: string;
   user_id: string;
   provider_id: string;
-  service_id?: string;
   employee_id?: string;
   rating: number;
   comment?: string;
@@ -17,11 +16,6 @@ export interface Review {
     id: string;
     name: string;
     image_url?: string;
-  };
-  service?: {
-    id: string;
-    name_en: string;
-    name_ar: string;
   };
   employee?: {
     id: string;
@@ -66,7 +60,6 @@ export class ReviewService {
         .select(`
           *,
           user:users!reviews_user_id_fkey(id, name, image_url),
-          service:services(id, name_en, name_ar),
           employee:employees(id, name)
         `)
         .eq('provider_id', validatedProviderId)
@@ -169,50 +162,6 @@ export class ReviewService {
     }
   }
 
-  /**
-   * Get reviews for a specific service
-   */
-  async getServiceReviews(
-    serviceId: string,
-    options?: {
-      limit?: number;
-      offset?: number;
-    }
-  ): Promise<Review[]> {
-    try {
-      const validatedServiceId = validateUUID(serviceId, 'serviceId');
-
-      let query = supabase
-        .from('reviews')
-        .select(`
-          *,
-          user:users!reviews_user_id_fkey(id, name, image_url),
-          employee:employees(id, name)
-        `)
-        .eq('service_id', validatedServiceId)
-        .order('created_at', { ascending: false });
-
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-
-      if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching service reviews:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error in getServiceReviews:', error);
-      return [];
-    }
-  }
 
   /**
    * Create a new review
@@ -221,7 +170,6 @@ export class ReviewService {
     booking_id: string;
     user_id: string;
     provider_id: string;
-    service_id?: string;
     employee_id?: string;
     rating: number;
     comment?: string;
@@ -233,7 +181,6 @@ export class ReviewService {
         booking_id: validateUUID(reviewData.booking_id, 'booking_id'),
         user_id: validateUUID(reviewData.user_id, 'user_id'),
         provider_id: validateUUID(reviewData.provider_id, 'provider_id'),
-        service_id: reviewData.service_id ? validateUUID(reviewData.service_id, 'service_id') : null,
         employee_id: reviewData.employee_id ? validateUUID(reviewData.employee_id, 'employee_id') : null,
       };
 

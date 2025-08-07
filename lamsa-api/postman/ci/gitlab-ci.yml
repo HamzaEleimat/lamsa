@@ -1,0 +1,176 @@
+# GitLab CI configuration for Lamsa API testing
+stages:
+  - test
+  - report
+
+variables:
+  NODE_VERSION: "18"
+  POSTMAN_DIR: "lamsa-api/postman"
+
+# Cache node_modules
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - ${POSTMAN_DIR}/node_modules/
+
+# Template for test jobs
+.test_template: &test_template
+  stage: test
+  image: node:${NODE_VERSION}
+  before_script:
+    - cd ${POSTMAN_DIR}
+    - npm ci --cache .npm --prefer-offline
+  artifacts:
+    when: always
+    paths:
+      - ${POSTMAN_DIR}/test-results/
+    reports:
+      junit: ${POSTMAN_DIR}/test-results/*-junit-*.xml
+    expire_in: 30 days
+
+# Test all collections in development
+test:development:all:
+  <<: *test_template
+  script:
+    - node scripts/newman-runner.js --environment development --collection all --output ./test-results
+  only:
+    - merge_requests
+    - develop
+
+# Test all collections in staging
+test:staging:all:
+  <<: *test_template
+  script:
+    - node scripts/newman-runner.js --environment staging --collection all --output ./test-results
+  only:
+    - main
+
+# Test auth collection only (fast feedback)
+test:auth:quick:
+  <<: *test_template
+  script:
+    - node scripts/newman-runner.js --environment development --collection auth --output ./test-results --bail
+  only:
+    - merge_requests
+  except:
+    variables:
+      - $CI_MERGE_REQUEST_LABELS =~ /skip-tests/
+
+# Test specific collection based on changes
+test:smart:
+  <<: *test_template
+  script:
+    - |
+      # Determine which collection to test based on changed files
+      COLLECTION="all"
+      
+      if git diff --name-only $CI_MERGE_REQUEST_DIFF_BASE_SHA...$CI_COMMIT_SHA | grep -q "auth\|login\|signup"; then
+        COLLECTION="auth"
+      elif git diff --name-only $CI_MERGE_REQUEST_DIFF_BASE_SHA...$CI_COMMIT_SHA | grep -q "booking\|appointment"; then
+        COLLECTION="bookings"
+      elif git diff --name-only $CI_MERGE_REQUEST_DIFF_BASE_SHA...$CI_COMMIT_SHA | grep -q "provider\|service"; then
+        COLLECTION="providers"
+      fi
+      
+      echo "Testing collection: $COLLECTION"
+      node scripts/newman-runner.js --environment development --collection $COLLECTION --output ./test-results
+  only:
+    - merge_requests
+  when: manual
+
+# Nightly full test suite
+test:nightly:
+  <<: *test_template
+  script:
+    - node scripts/newman-runner.js --environment staging --collection all --output ./test-results --verbose
+  only:
+    - schedules
+
+# Performance test
+test:performance:
+  <<: *test_template
+  script:
+    - |
+      # Run performance-focused tests
+      node scripts/newman-runner.js \
+        --environment staging \
+        --collection all \
+        --output ./test-results \
+        --delay 100
+      
+      # Analyze performance results
+      node -e "
+        const fs = require('fs');
+        const summaryFile = fs.readdirSync('./test-results')
+          .find(f => f.startsWith('summary-'));
+        const summary = JSON.parse(fs.readFileSync('./test-results/' + summaryFile));
+        
+        if (summary.performance.responseTime) {
+          const avg = summary.performance.responseTime.average;
+          const p95 = summary.performance.responseTime.p95;
+          
+          console.log('Performance Metrics:');
+          console.log('Average Response Time:', avg, 'ms');
+          console.log('95th Percentile:', p95, 'ms');
+          
+          // Fail if performance degrades
+          if (avg > 2000) {
+            console.error('Average response time exceeds 2000ms threshold!');
+            process.exit(1);
+          }
+          if (p95 > 5000) {
+            console.error('95th percentile exceeds 5000ms threshold!');
+            process.exit(1);
+          }
+        }
+      "
+  only:
+    - main
+    - develop
+  when: manual
+
+# Generate test report
+generate_report:
+  stage: report
+  image: node:${NODE_VERSION}
+  dependencies:
+    - test:development:all
+    - test:staging:all
+  script:
+    - cd ${POSTMAN_DIR}
+    - |
+      # Combine all test results
+      node -e "
+        const fs = require('fs');
+        const path = require('path');
+        
+        const results = [];
+        const files = fs.readdirSync('./test-results');
+        
+        files.filter(f => f.startsWith('summary-')).forEach(file => {
+          const content = JSON.parse(fs.readFileSync(path.join('./test-results', file)));
+          results.push(content);
+        });
+        
+        const report = {
+          generatedAt: new Date().toISOString(),
+          totalRuns: results.length,
+          environments: [...new Set(results.map(r => r.testRun.environment))],
+          overallSuccess: results.every(r => r.overallStats.failures === 0),
+          results: results
+        };
+        
+        fs.writeFileSync('./test-results/combined-report.json', JSON.stringify(report, null, 2));
+        
+        console.log('Test Report Summary:');
+        console.log('Total Test Runs:', report.totalRuns);
+        console.log('Environments Tested:', report.environments.join(', '));
+        console.log('Overall Success:', report.overallSuccess ? '✅' : '❌');
+      "
+  artifacts:
+    paths:
+      - ${POSTMAN_DIR}/test-results/combined-report.json
+    expire_in: 90 days
+  only:
+    - main
+    - develop

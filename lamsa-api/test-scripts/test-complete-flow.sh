@@ -29,7 +29,7 @@ echo "   - Customer Token: ${CUSTOMER_TOKEN:0:20}..."
 
 # Step 2: Provider Signup
 echo -e "\n2. Testing Provider Signup..."
-PROVIDER_EMAIL="provider_$(date +%s)@beautycort.com"
+PROVIDER_EMAIL="provider_$(date +%s)@welamsa.com"
 PROVIDER_PHONE="+962791234567"
 
 PROVIDER_SIGNUP=$(curl -X POST $API_URL/auth/provider/signup \

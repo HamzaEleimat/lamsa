@@ -12,7 +12,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'beautycort.com', 'beautycort-web.vercel.app']
+      allowedOrigins: ['localhost:3000', 'welamsa.com', 'welamsa-web.vercel.app']
     },
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },

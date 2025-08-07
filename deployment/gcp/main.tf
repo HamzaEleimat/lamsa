@@ -391,7 +391,7 @@ resource "google_compute_managed_ssl_certificate" "ssl_cert" {
   name = "${var.environment}-${var.app_name}-ssl-cert"
   
   managed {
-    domains = ["api.beautycort.com", "dashboard.beautycort.com"]
+    domains = ["api.welamsa.com", "dashboard.welamsa.com"]
   }
 }
 

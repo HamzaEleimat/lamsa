@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
 import { 
   PhoneAuthResult, 
@@ -23,6 +24,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_ANON_KEY');
 }
 
+if (!supabaseServiceKey) {
+  console.warn('SUPABASE_SERVICE_KEY not configured - some admin operations will not be available');
+}
+
 // Create Supabase clients
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -42,8 +47,21 @@ export const supabaseAdmin = supabaseServiceKey
     })
   : null;
 
+// Log configuration status on startup
+console.log('Supabase Configuration:', {
+  url: supabaseUrl,
+  hasServiceKey: !!supabaseServiceKey,
+  hasAdminClient: !!supabaseAdmin,
+  isCloudInstance: supabaseUrl.includes('supabase.co')
+});
+
 // Initialize OTP attempt tracker for security
 const otpAttemptTracker = new OtpAttemptTracker();
+
+// Helper function to create SHA-256 hash
+function createHash(value: string): string {
+  return crypto.createHash('sha256').update(value.toLowerCase().trim()).digest('hex');
+}
 
 // Export auth helpers
 export const auth = {
@@ -61,39 +79,192 @@ export const auth = {
   
   async signUpProvider(providerData: any) {
     try {
+      console.log('=== Provider Signup Debug ===');
+      console.log('Input data:', JSON.stringify(providerData, null, 2));
+      
+      // For development/testing, use admin client to create user with confirmed email
+      if (supabaseAdmin && (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')) {
+        console.log('Using admin client for provider signup (dev/test mode)');
+        
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email: providerData.email,
+          password: providerData.password,
+          email_confirm: true, // Auto-confirm email in development
+          user_metadata: {
+            type: 'provider'
+          }
+        });
+        
+        console.log('Admin auth creation result:', { authData, authError });
+        
+        if (authError || !authData.user) {
+          console.error('Admin auth creation failed:', authError);
+          return { data: null, error: authError };
+        }
+        
+        // Continue with the same flow but use authData.user
+        const transformedAddress = {
+          street_ar: providerData.address.street,
+          street_en: providerData.address.street,
+          area_ar: providerData.address.district,
+          area_en: providerData.address.district,
+          city_ar: providerData.address.city,
+          city_en: providerData.address.city,
+          building_no: ''
+        };
+
+        const insertData: any = {
+          id: authData.user.id,
+          email: providerData.email,
+          phone: providerData.phone,
+          email_hash: createHash(providerData.email),
+          phone_hash: createHash(providerData.phone),
+          business_name_ar: providerData.business_name_ar,
+          business_name_en: providerData.business_name_en,
+          owner_name: providerData.owner_name,
+          address: transformedAddress,
+          license_number: providerData.license_number,
+          password_hash: null,
+        };
+
+        if (providerData.latitude !== undefined && providerData.longitude !== undefined) {
+          insertData.latitude = providerData.latitude;
+          insertData.longitude = providerData.longitude;
+        }
+
+        console.log('Inserting provider data:', JSON.stringify(insertData, null, 2));
+        
+        const { data: provider, error: providerError } = await supabaseAdmin
+          .from('providers')
+          .insert(insertData)
+          .select()
+          .single();
+        
+        console.log('Provider insert result:', { provider, providerError });
+        
+        if (providerError) {
+          console.error('Provider creation failed:', {
+            error: providerError,
+            message: providerError.message,
+            details: providerError.details,
+            hint: providerError.hint,
+            code: providerError.code,
+            insertData: insertData
+          });
+          
+          // Rollback auth user if provider creation fails
+          try {
+            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            console.log('Auth user rolled back successfully');
+          } catch (rollbackError) {
+            console.error('Failed to rollback auth user:', rollbackError);
+          }
+          
+          return { data: null, error: providerError };
+        }
+        
+        return { data: { user: authData.user, provider }, error: null };
+      }
+      
+      // Production mode or no admin client - use regular signup
+      console.log('Using regular client for provider signup');
+      
       // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: providerData.email,
         password: providerData.password,
       });
       
+      console.log('Auth signup result:', { authData, authError });
+      
       if (authError || !authData.user) {
+        console.error('Auth signup failed:', authError);
         return { data: null, error: authError };
       }
       
+      // Transform address to match database schema
+      const transformedAddress = {
+        street_ar: providerData.address.street, // Use English for Arabic temporarily
+        street_en: providerData.address.street,
+        area_ar: providerData.address.district,
+        area_en: providerData.address.district,
+        city_ar: providerData.address.city,
+        city_en: providerData.address.city,
+        building_no: '' // Optional field
+      };
+
       // Create provider profile
-      const { data: provider, error: providerError } = await supabase
+      const insertData: any = {
+        id: authData.user.id,
+        email: providerData.email,
+        phone: providerData.phone,
+        email_hash: createHash(providerData.email), // Add hash for encrypted lookups
+        phone_hash: createHash(providerData.phone), // Add hash for encrypted lookups
+        business_name_ar: providerData.business_name_ar,
+        business_name_en: providerData.business_name_en,
+        owner_name: providerData.owner_name,
+        address: transformedAddress,
+        license_number: providerData.license_number,
+        password_hash: null, // Null since we use Supabase Auth
+      };
+
+      // Only include location fields if both are provided
+      if (providerData.latitude !== undefined && providerData.longitude !== undefined) {
+        insertData.latitude = providerData.latitude;
+        insertData.longitude = providerData.longitude;
+        // Don't set location directly - let database trigger handle it
+      }
+
+      console.log('Inserting provider data:', JSON.stringify(insertData, null, 2));
+      
+      // Use supabaseAdmin for provider creation to bypass RLS
+      if (!supabaseAdmin) {
+        console.error('supabaseAdmin not configured - falling back to regular client');
+        const { data: provider, error: providerError } = await supabase
+          .from('providers')
+          .insert(insertData)
+          .select()
+          .single();
+        
+        console.log('Provider insert result:', { provider, providerError });
+        
+        if (providerError) {
+          throw providerError;
+        }
+        
+        return { data: { user: authData.user, provider }, error: null };
+      }
+      
+      const { data: provider, error: providerError } = await supabaseAdmin
         .from('providers')
-        .insert({
-          id: authData.user.id,
-          email: providerData.email,
-          phone: providerData.phone,
-          business_name_ar: providerData.business_name_ar,
-          business_name_en: providerData.business_name_en,
-          owner_name: providerData.owner_name,
-          latitude: providerData.latitude,
-          longitude: providerData.longitude,
-          address: providerData.address,
-          license_number: providerData.license_number,
-        })
+        .insert(insertData)
         .select()
         .single();
       
+      console.log('Provider insert result:', { provider, providerError });
+      
       if (providerError) {
+        console.error('Provider creation failed:', {
+          error: providerError,
+          message: providerError.message,
+          details: providerError.details,
+          hint: providerError.hint,
+          code: providerError.code,
+          insertData: insertData // Log the data we tried to insert for debugging
+        });
+        
         // Rollback auth user if provider creation fails
         if (supabaseAdmin) {
-          await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+          try {
+            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            console.log('Auth user rolled back successfully');
+          } catch (rollbackError) {
+            console.error('Failed to rollback auth user:', rollbackError);
+          }
+        } else {
+          console.warn('Cannot rollback auth user - supabaseAdmin not configured');
         }
+        
         return { data: null, error: providerError };
       }
       
@@ -105,27 +276,45 @@ export const auth = {
   
   async signInProvider(email: string, password: string) {
     try {
+      console.log('[signInProvider] Called with email:', email);
+      
       // Sign in with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
+      console.log('[signInProvider] Auth result:', {
+        hasUser: !!authData?.user,
+        hasSession: !!authData?.session,
+        error: authError?.message || null
+      });
+      
       if (authError || !authData.user) {
+        console.log('[signInProvider] Returning error:', authError);
         return { data: null, error: authError };
       }
       
       // Get provider profile
+      console.log('[signInProvider] Fetching provider with ID:', authData.user.id);
+      
       const { data: provider, error: providerError } = await supabase
         .from('providers')
         .select('*')
         .eq('id', authData.user.id)
         .single();
       
+      console.log('[signInProvider] Provider query result:', {
+        hasProvider: !!provider,
+        error: providerError?.message || null
+      });
+      
       if (providerError || !provider) {
+        console.log('[signInProvider] Provider error, returning:', providerError);
         return { data: null, error: providerError || new Error('Provider profile not found') };
       }
       
+      console.log('[signInProvider] Success! Returning provider:', provider.email);
       return { data: { user: authData.user, provider }, error: null };
     } catch (error) {
       return { data: null, error };
@@ -386,6 +575,16 @@ export const db = {
           .from('users')
           .select('*')
           .eq('phone', phone)
+          .single()
+      );
+    },
+    
+    async findByEmail(email: string) {
+      return handleSupabaseOperation(
+        supabase
+          .from('users')
+          .select('*')
+          .eq('email', email)
           .single()
       );
     },

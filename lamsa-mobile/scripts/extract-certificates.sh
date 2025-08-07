@@ -12,14 +12,14 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-DOMAINS=("api.beautycort.com" "beautycort.com")
+DOMAINS=("api.welamsa.com" "welamsa.com")
 OUTPUT_DIR="./certificates"
 ANDROID_CERT_DIR="../android/app/src/main/assets/certs"
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
-echo -e "${GREEN}BeautyCort Certificate Extraction Tool${NC}"
+echo -e "${GREEN}WeLamsa Certificate Extraction Tool${NC}"
 echo "======================================"
 echo ""
 

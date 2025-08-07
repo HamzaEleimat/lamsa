@@ -61,7 +61,7 @@ class RollbackManager {
       rollbackStrategy: (process.env.ROLLBACK_STRATEGY as any) || 'blue-green',
       maxRollbackTime: parseInt(process.env.MAX_ROLLBACK_TIME || '15'),
       autoRollbackEnabled: process.env.AUTO_ROLLBACK_ENABLED === 'true',
-      healthCheckUrl: process.env.HEALTH_CHECK_URL || 'https://api.beautycort.com/api/health',
+      healthCheckUrl: process.env.HEALTH_CHECK_URL || 'https://api.welamsa.com/api/health',
       databaseRollbackEnabled: process.env.DATABASE_ROLLBACK_ENABLED === 'true'
     };
 

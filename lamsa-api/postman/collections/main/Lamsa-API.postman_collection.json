@@ -1,0 +1,2703 @@
+{
+	"info": {
+		"_postman_id": "lamsa-api-collection",
+		"name": "Lamsa API",
+		"description": "Comprehensive Postman collection for the Lamsa beauty booking platform API. This collection includes complete user journeys, error handling examples, and test scenarios for the Jordan market.\n\n## Features\n- Complete booking workflow demonstrations\n- Jordan-specific validations (phone numbers, currency, Arabic/English)\n- Authentication flows for customers, providers, and admins\n- Rate limiting and error handling examples\n- Performance and load testing scenarios\n- Real-world user journey simulations\n\n## Setup\n1. Import the collection and environment files\n2. Configure environment variables for your target server\n3. Run the 'Auth & Setup' folder first to generate tokens\n4. Execute individual requests or complete workflows\n\n## Environment Variables Required\n- `base_url`: API base URL (e.g., http://localhost:3000/api)\n- `customer_token`: JWT token for customer authentication\n- `provider_token`: JWT token for provider authentication\n- `admin_token`: JWT token for admin authentication\n\n## Documentation\nFor detailed API documentation, see: /docs/API.md\nFor error handling reference, see: /docs/ERROR-REFERENCE.md\nFor mobile integration guide, see: /docs/MOBILE-INTEGRATION.md",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "lamsa-dev-team"
+	},
+	"item": [
+		{
+			"name": "Auth & Setup",
+			"item": [
+				{
+					"name": "Generate JWT Token (Customer)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Generate customer JWT token for testing",
+									"const generateJWT = (payload) => {",
+									"    const header = btoa(JSON.stringify({\"alg\": \"HS256\", \"typ\": \"JWT\"}));",
+									"    const encodedPayload = btoa(JSON.stringify(payload));",
+									"    const signature = \"mock_signature_\" + Date.now();",
+									"    return `${header}.${encodedPayload}.${signature}`;",
+									"};",
+									"",
+									"// Generate customer token",
+									"const customerToken = generateJWT({",
+									"    id: \"customer-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
+									"    type: \"customer\",",
+									"    phone: \"+962791234567\",",
+									"    email: \"customer@test.com\",",
+									"    language: \"ar\",",
+									"    iat: Math.floor(Date.now() / 1000),",
+									"    exp: Math.floor(Date.now() / 1000) + 3600",
+									"});",
+									"",
+									"pm.environment.set(\"customer_token\", customerToken);",
+									"pm.environment.set(\"customer_user_id\", \"customer-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+									"",
+									"console.log(\"Customer token generated:\", customerToken);",
+									"",
+									"pm.test(\"Customer token generated successfully\", function () {",
+									"    pm.expect(customerToken).to.be.a('string');",
+									"    pm.expect(customerToken.split('.')).to.have.lengthOf(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Generates a JWT token for customer authentication and stores it in environment variables. This is a utility request that uses the health check endpoint to generate test tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate JWT Token (Provider)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Generate provider JWT token for testing",
+									"const generateJWT = (payload) => {",
+									"    const header = btoa(JSON.stringify({\"alg\": \"HS256\", \"typ\": \"JWT\"}));",
+									"    const encodedPayload = btoa(JSON.stringify(payload));",
+									"    const signature = \"mock_signature_\" + Date.now();",
+									"    return `${header}.${encodedPayload}.${signature}`;",
+									"};",
+									"",
+									"// Generate provider token",
+									"const providerToken = generateJWT({",
+									"    id: \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
+									"    type: \"provider\",",
+									"    phone: \"+962781111111\",",
+									"    email: \"provider@test.com\",",
+									"    businessName: \"صالون الجمال\",",
+									"    verified: true,",
+									"    iat: Math.floor(Date.now() / 1000),",
+									"    exp: Math.floor(Date.now() / 1000) + 3600",
+									"});",
+									"",
+									"pm.environment.set(\"provider_token\", providerToken);",
+									"pm.environment.set(\"provider_user_id\", \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+									"pm.environment.set(\"test_provider_id\", \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+									"",
+									"console.log(\"Provider token generated:\", providerToken);",
+									"",
+									"pm.test(\"Provider token generated successfully\", function () {",
+									"    pm.expect(providerToken).to.be.a('string');",
+									"    pm.expect(providerToken.split('.')).to.have.lengthOf(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Generates a JWT token for provider authentication and stores it in environment variables. This includes verified provider status and business information."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate JWT Token (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Generate admin JWT token for testing",
+									"const generateJWT = (payload) => {",
+									"    const header = btoa(JSON.stringify({\"alg\": \"HS256\", \"typ\": \"JWT\"}));",
+									"    const encodedPayload = btoa(JSON.stringify(payload));",
+									"    const signature = \"mock_signature_\" + Date.now();",
+									"    return `${header}.${encodedPayload}.${signature}`;",
+									"};",
+									"",
+									"// Generate admin token",
+									"const adminToken = generateJWT({",
+									"    id: \"admin-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
+									"    type: \"admin\",",
+									"    phone: \"+962771111111\",",
+									"    email: \"admin@lamsa.com\",",
+									"    role: \"super_admin\",",
+									"    permissions: [\"all\"],",
+									"    iat: Math.floor(Date.now() / 1000),",
+									"    exp: Math.floor(Date.now() / 1000) + 3600",
+									"});",
+									"",
+									"pm.environment.set(\"admin_token\", adminToken);",
+									"pm.environment.set(\"admin_user_id\", \"admin-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+									"",
+									"console.log(\"Admin token generated:\", adminToken);",
+									"",
+									"pm.test(\"Admin token generated successfully\", function () {",
+									"    pm.expect(adminToken).to.be.a('string');",
+									"    pm.expect(adminToken.split('.')).to.have.lengthOf(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Generates a JWT token for admin authentication with full permissions for testing administrative operations."
+					},
+					"response": []
+				},
+				{
+					"name": "Customer Signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Signup successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"});",
+									"",
+									"pm.test(\"Response contains user data and tokens\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.data).to.have.property(\"user\");",
+									"    pm.expect(responseData.data).to.have.property(\"token\");",
+									"    pm.expect(responseData.data).to.have.property(\"refreshToken\");",
+									"    pm.expect(responseData.data.type).to.equal(\"customer\");",
+									"});",
+									"",
+									"pm.test(\"User data is correct\", function () {",
+									"    const user = pm.response.json().data.user;",
+									"    pm.expect(user).to.have.property(\"id\");",
+									"    pm.expect(user).to.have.property(\"email\");",
+									"    pm.expect(user).to.have.property(\"name\");",
+									"    pm.expect(user).to.have.property(\"phone\");",
+									"    pm.expect(user.role).to.equal(\"customer\");",
+									"});",
+									"",
+									"// Store tokens for subsequent requests",
+									"if (pm.response.code === 201) {",
+									"    const responseData = pm.response.json().data;",
+									"    pm.environment.set(\"customer_token\", responseData.token);",
+									"    pm.environment.set(\"customer_refresh_token\", responseData.refreshToken);",
+									"    pm.environment.set(\"customer_user_id\", responseData.user.id);",
+									"    console.log(\"Customer registered:\", responseData.user.email);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate random test data",
+									"const timestamp = Date.now();",
+									"pm.environment.set(\"test_customer_email\", `customer${timestamp}@example.com`);",
+									"pm.environment.set(\"test_customer_phone\", `079${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Customer\",\n    \"email\": \"{{test_customer_email}}\",\n    \"password\": \"Test123!\",\n    \"phone\": \"{{test_customer_phone}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/customer/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"customer",
+								"signup"
+							]
+						},
+						"description": "Register a new customer account with email and password. Returns JWT tokens and user profile."
+					},
+					"response": [
+						{
+							"name": "Success - Customer Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"Test123!\",\n    \"phone\": \"0791234567\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/customer/signup",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"customer",
+										"signup"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"user\": {\n            \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n            \"name\": \"John Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"phone\": \"0791234567\",\n            \"role\": \"customer\",\n            \"created_at\": \"2024-01-01T00:00:00.000Z\"\n        },\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"type\": \"customer\"\n    }\n}"
+						},
+						{
+							"name": "Error - Email Already Exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"existing@example.com\",\n    \"password\": \"Test123!\",\n    \"phone\": \"0791234567\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/customer/signup",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"customer",
+										"signup"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": false,\n    \"error\": \"DUPLICATE_EMAIL\",\n    \"message\": \"Email already exists\"\n}"
+						},
+						{
+							"name": "Error - Invalid Phone Number",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Test123!\",\n    \"phone\": \"0761234567\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/customer/signup",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"customer",
+										"signup"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": false,\n    \"error\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid Jordanian phone number. Must start with 077, 078, or 079\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"API is healthy\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.status\", \"healthy\");",
+									"});",
+									"",
+									"pm.test(\"Response time is acceptable\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Database connection is healthy\", function () {",
+									"    pm.response.to.have.jsonBody(\"data.database.status\", \"connected\");",
+									"});",
+									"",
+									"// Store system information",
+									"const responseData = pm.response.json().data;",
+									"pm.environment.set(\"api_version\", responseData.version);",
+									"pm.environment.set(\"system_status\", responseData.status);",
+									"",
+									"console.log(\"System Status:\", responseData.status);",
+									"console.log(\"API Version:\", responseData.version);",
+									"console.log(\"Database Response Time:\", responseData.database.responseTime);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Checks the health status of the API and database connection. This should be run first to ensure the system is operational."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Test Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Generate test data for the collection",
+									"const today = new Date();",
+									"const futureDate = new Date(today);",
+									"futureDate.setDate(today.getDate() + 3);",
+									"",
+									"// Set future dates",
+									"pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+									"pm.environment.set(\"booking_date\", futureDate.toISOString().split('T')[0]);",
+									"",
+									"// Generate next week date",
+									"const nextWeek = new Date(today);",
+									"nextWeek.setDate(today.getDate() + 7);",
+									"pm.environment.set(\"next_week_date\", nextWeek.toISOString().split('T')[0]);",
+									"",
+									"// Generate random Jordanian phone numbers",
+									"const jordanPrefixes = ['77', '78', '79'];",
+									"const randomPrefix = jordanPrefixes[Math.floor(Math.random() * jordanPrefixes.length)];",
+									"const randomNumber = Math.floor(Math.random() * 10000000).toString().padStart(7, '0');",
+									"pm.environment.set(\"random_jordan_phone\", `+962${randomPrefix}${randomNumber}`);",
+									"",
+									"// Generate test IDs",
+									"pm.environment.set(\"test_service_id\", \"service-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+									"pm.environment.set(\"test_booking_id\", \"booking-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+									"",
+									"// Set business hours",
+									"pm.environment.set(\"business_hours_start\", \"08:00\");",
+									"pm.environment.set(\"business_hours_end\", \"22:00\");",
+									"pm.environment.set(\"booking_time\", \"14:30\");",
+									"",
+									"// Generate Arabic test data",
+									"const arabicNames = ['أحمد محمد', 'فاطمة علي', 'محمد أحمد', 'زينب حسن'];",
+									"const arabicBusinessNames = ['صالون الجمال', 'مركز التجميل', 'صالون الأناقة'];",
+									"const arabicServices = ['قص الشعر', 'صبغة الشعر', 'مانيكير', 'تنظيف الوجه'];",
+									"",
+									"pm.environment.set(\"arabic_customer_name\", arabicNames[Math.floor(Math.random() * arabicNames.length)]);",
+									"pm.environment.set(\"arabic_business_name\", arabicBusinessNames[Math.floor(Math.random() * arabicBusinessNames.length)]);",
+									"pm.environment.set(\"arabic_service_name\", arabicServices[Math.floor(Math.random() * arabicServices.length)]);",
+									"",
+									"console.log(\"Test data generated successfully\");",
+									"console.log(\"Future date:\", futureDate.toISOString().split('T')[0]);",
+									"console.log(\"Test phone:\", `+962${randomPrefix}${randomNumber}`);",
+									"",
+									"pm.test(\"Test data generated\", function () {",
+									"    pm.expect(pm.environment.get(\"future_date\")).to.be.a('string');",
+									"    pm.expect(pm.environment.get(\"random_jordan_phone\")).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Generates test data including future dates, Jordanian phone numbers, and Arabic names for use in booking tests."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication and setup requests for generating JWT tokens and test data. Run this folder first to prepare the environment for testing.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// Collection-level pre-request script",
+							"// Set common headers",
+							"pm.request.headers.add({",
+							"    key: \"Content-Type\",",
+							"    value: \"application/json\"",
+							"});",
+							"",
+							"// Set default timeout",
+							"pm.request.timeout = 30000;",
+							"",
+							"// Generate timestamp for logging",
+							"pm.environment.set(\"request_timestamp\", new Date().toISOString());"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Booking Management",
+			"item": [
+				{
+					"name": "Create Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Booking created successfully\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.id\");",
+									"    ",
+									"    // Store booking ID for subsequent tests",
+									"    const bookingId = pm.response.json().data.id;",
+									"    pm.environment.set(\"created_booking_id\", bookingId);",
+									"    ",
+									"    console.log(\"Created booking ID:\", bookingId);",
+									"});",
+									"",
+									"pm.test(\"Booking data structure is valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    // Required fields validation",
+									"    const requiredFields = ['id', 'userId', 'providerId', 'serviceId', 'bookingDate', 'startTime', 'endTime', 'status', 'amount', 'platformFee', 'providerFee'];",
+									"    requiredFields.forEach(field => {",
+									"        pm.expect(data).to.have.property(field);",
+									"    });",
+									"    ",
+									"    // Business rules validation",
+									"    pm.expect(data.status).to.equal('pending');",
+									"    pm.expect(data.amount).to.be.a('number').and.to.be.greaterThan(0);",
+									"    pm.expect(data.platformFee).to.be.a('number').and.to.be.greaterThan(0);",
+									"    pm.expect(data.providerFee).to.be.a('number').and.to.be.greaterThan(0);",
+									"    ",
+									"    // Fee calculation validation (Fixed fees: 2 JOD for ≤25 JOD, 5 JOD for >25 JOD)",
+									"    const expectedPlatformFee = data.amount <= 25 ? 2.00 : 5.00;",
+									"    pm.expect(data.platformFee).to.equal(expectedPlatformFee);",
+									"    pm.expect(data.providerFee).to.be.closeTo(data.amount - data.platformFee, 0.01);",
+									"});",
+									"",
+									"pm.test(\"Booking date and time are valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    // Date format validation",
+									"    pm.expect(data.bookingDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+									"    pm.expect(data.startTime).to.match(/^\\d{2}:\\d{2}$/);",
+									"    pm.expect(data.endTime).to.match(/^\\d{2}:\\d{2}$/);",
+									"    ",
+									"    // Future date validation",
+									"    const bookingDate = new Date(data.bookingDate);",
+									"    const today = new Date();",
+									"    today.setHours(0, 0, 0, 0);",
+									"    pm.expect(bookingDate.getTime()).to.be.greaterThan(today.getTime());",
+									"});",
+									"",
+									"pm.test(\"Arabic and English names are present\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    if (data.providerName && typeof data.providerName === 'string') {",
+									"        pm.expect(data.providerName).to.match(/[\\u0600-\\u06FF]/);",
+									"    }",
+									"    ",
+									"    if (data.serviceName && typeof data.serviceName === 'string') {",
+									"        pm.expect(data.serviceName).to.match(/[\\u0600-\\u06FF]/);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Rate limiting headers are present\", function () {",
+									"    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+									"        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+									"        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+									"        ",
+									"        // Store rate limit info",
+									"        pm.environment.set(\"rate_limit_remaining\", pm.response.headers.get(\"X-RateLimit-Remaining\"));",
+									"        pm.environment.set(\"rate_limit_reset\", pm.response.headers.get(\"X-RateLimit-Reset\"));",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"{{booking_time}}\",\n  \"paymentMethod\": \"cash\",\n  \"notes\": \"Test booking from Postman collection\",\n  \"customerPhone\": \"{{random_jordan_phone}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						},
+						"description": "Creates a new booking with the specified details. This endpoint validates Jordan-specific business rules including phone number format, business hours, and payment methods.\n\n**Rate Limit**: 5 requests per 15 minutes\n\n**Authentication**: Required (customer role)\n\n**Request Body**:\n- `providerId`: UUID of the service provider\n- `serviceId`: UUID of the service\n- `date`: Booking date in YYYY-MM-DD format (2 hours to 90 days in future)\n- `time`: Booking time in HH:mm format (within business hours 8:00-22:00)\n- `paymentMethod`: Payment method (cash, card, online)\n- `notes`: Optional customer notes (max 500 characters)\n- `customerPhone`: Optional Jordanian phone number override\n\n**Business Rules**:\n- Date must be 2 hours to 90 days in the future\n- Time must be within business hours (8:00-22:00)\n- Online payment required for amounts > 100 JOD\n- Provider and service must exist and be active\n- Phone numbers must be in Jordanian format (+962XX...)\n\n**Response**:\n- Returns complete booking details including fees\n- Platform fee: Fixed fees (2 JOD for services ≤25 JOD, 5 JOD for services >25 JOD)\n- Provider earnings: Service amount - Platform fee\n- Initial status: 'pending'"
+					},
+					"response": [
+						{
+							"name": "Successful Booking Creation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"providerId\": \"provider-test-12345\",\n  \"serviceId\": \"service-test-12345\",\n  \"date\": \"2024-07-25\",\n  \"time\": \"14:30\",\n  \"paymentMethod\": \"cash\",\n  \"notes\": \"Please call before arriving\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "X-RateLimit-Limit",
+									"value": "5"
+								},
+								{
+									"key": "X-RateLimit-Remaining",
+									"value": "4"
+								},
+								{
+									"key": "X-RateLimit-Reset",
+									"value": "1642694400"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"booking1-1111-1111-1111-111111111111\",\n    \"userId\": \"customer-test-12345\",\n    \"providerId\": \"provider-test-12345\",\n    \"serviceId\": \"service-test-12345\",\n    \"bookingDate\": \"2024-07-25\",\n    \"startTime\": \"14:30\",\n    \"endTime\": \"15:30\",\n    \"status\": \"pending\",\n    \"paymentMethod\": \"cash\",\n    \"amount\": 25.00,\n    \"platformFee\": 2.00,\n    \"providerFee\": 23.00,\n    \"notes\": \"Please call before arriving\",\n    \"createdAt\": \"2024-07-15T10:00:00Z\",\n    \"updatedAt\": \"2024-07-15T10:00:00Z\",\n    \"userName\": \"أحمد محمد\",\n    \"userPhone\": \"+962791234567\",\n    \"providerName\": \"صالون الجمال\",\n    \"serviceName\": \"قص الشعر\",\n    \"serviceDuration\": 60\n  },\n  \"message\": \"Booking created successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User Bookings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User bookings retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.data\");",
+									"});",
+									"",
+									"pm.test(\"Pagination structure is valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    // Pagination fields",
+									"    pm.expect(data).to.have.property('data');",
+									"    pm.expect(data).to.have.property('total');",
+									"    pm.expect(data).to.have.property('page');",
+									"    pm.expect(data).to.have.property('totalPages');",
+									"    pm.expect(data).to.have.property('hasNext');",
+									"    pm.expect(data).to.have.property('hasPrev');",
+									"    ",
+									"    // Data types",
+									"    pm.expect(data.data).to.be.an('array');",
+									"    pm.expect(data.total).to.be.a('number');",
+									"    pm.expect(data.page).to.be.a('number');",
+									"    pm.expect(data.totalPages).to.be.a('number');",
+									"    pm.expect(data.hasNext).to.be.a('boolean');",
+									"    pm.expect(data.hasPrev).to.be.a('boolean');",
+									"});",
+									"",
+									"pm.test(\"Booking items have required fields\", function () {",
+									"    const bookings = pm.response.json().data.data;",
+									"    ",
+									"    if (bookings.length > 0) {",
+									"        const booking = bookings[0];",
+									"        const requiredFields = ['id', 'providerId', 'serviceId', 'bookingDate', 'startTime', 'endTime', 'status', 'amount', 'providerName', 'serviceName', 'createdAt'];",
+									"        ",
+									"        requiredFields.forEach(field => {",
+									"            pm.expect(booking).to.have.property(field);",
+									"        });",
+									"        ",
+									"        // Status validation",
+									"        const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];",
+									"        pm.expect(validStatuses).to.include(booking.status);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Sorting and filtering work correctly\", function () {",
+									"    const bookings = pm.response.json().data.data;",
+									"    ",
+									"    // If sorting by date descending (default), check order",
+									"    if (bookings.length > 1) {",
+									"        const firstDate = new Date(bookings[0].bookingDate);",
+									"        const secondDate = new Date(bookings[1].bookingDate);",
+									"        // Allow equal dates, check that first is not earlier than second",
+									"        pm.expect(firstDate.getTime()).to.be.at.least(secondDate.getTime());",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Arabic content is preserved\", function () {",
+									"    const bookings = pm.response.json().data.data;",
+									"    ",
+									"    if (bookings.length > 0) {",
+									"        const booking = bookings[0];",
+									"        if (booking.providerName && typeof booking.providerName === 'string') {",
+									"            pm.expect(booking.providerName).to.match(/[\\u0600-\\u06FF]/);",
+									"        }",
+									"        if (booking.serviceName && typeof booking.serviceName === 'string') {",
+									"            pm.expect(booking.serviceName).to.match(/[\\u0600-\\u06FF]/);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Cache headers are present\", function () {",
+									"    // Check for cache-related headers",
+									"    if (pm.response.headers.has(\"Cache-Control\")) {",
+									"        pm.expect(pm.response.headers.get(\"Cache-Control\")).to.include(\"max-age\");",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/user?page=1&limit=20&sortBy=date&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"user"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (1-1000, default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (1-100, default: 10)"
+								},
+								{
+									"key": "status",
+									"value": "pending,confirmed",
+									"description": "Filter by status (comma-separated)",
+									"disabled": true
+								},
+								{
+									"key": "dateFrom",
+									"value": "2024-07-01",
+									"description": "Start date filter",
+									"disabled": true
+								},
+								{
+									"key": "dateTo",
+									"value": "2024-07-31",
+									"description": "End date filter",
+									"disabled": true
+								},
+								{
+									"key": "sortBy",
+									"value": "date",
+									"description": "Sort field (date, time, amount, status)"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"description": "Sort order (asc, desc)"
+								}
+							]
+						},
+						"description": "Retrieves paginated list of current user's bookings with filtering and sorting options.\n\n**Authentication**: Required (any role)\n\n**Cache**: 1 minute TTL\n\n**Query Parameters**:\n- `page`: Page number (1-1000, default: 1)\n- `limit`: Items per page (1-100, default: 10)\n- `status`: Filter by status (comma-separated)\n- `dateFrom`: Start date filter (YYYY-MM-DD)\n- `dateTo`: End date filter (YYYY-MM-DD)\n- `sortBy`: Sort field (date, time, amount, status)\n- `sortOrder`: Sort order (asc, desc)\n\n**Response**:\n- Paginated list of bookings with metadata\n- Each booking includes provider and service details\n- Supports filtering by status, date range\n- Default sorting by booking date descending\n\n**Performance**:\n- Cached for 1 minute to improve response times\n- Optimized queries with proper indexing\n- Supports large datasets with efficient pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Booking Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Booking details retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.id\");",
+									"});",
+									"",
+									"pm.test(\"Complete booking details are present\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    // Core booking fields",
+									"    const requiredFields = ['id', 'userId', 'providerId', 'serviceId', 'bookingDate', 'startTime', 'endTime', 'status', 'paymentMethod', 'amount', 'platformFee', 'providerFee', 'notes', 'createdAt', 'updatedAt'];",
+									"    requiredFields.forEach(field => {",
+									"        pm.expect(data).to.have.property(field);",
+									"    });",
+									"    ",
+									"    // Related entity details",
+									"    pm.expect(data).to.have.property('user');",
+									"    pm.expect(data).to.have.property('provider');",
+									"    pm.expect(data).to.have.property('service');",
+									"});",
+									"",
+									"pm.test(\"User details are complete\", function () {",
+									"    const user = pm.response.json().data.user;",
+									"    ",
+									"    pm.expect(user).to.have.property('id');",
+									"    pm.expect(user).to.have.property('name');",
+									"    pm.expect(user).to.have.property('phone');",
+									"    pm.expect(user).to.have.property('language');",
+									"    ",
+									"    // Phone validation",
+									"    pm.expect(user.phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+									"    ",
+									"    // Language validation",
+									"    pm.expect(['ar', 'en']).to.include(user.language);",
+									"});",
+									"",
+									"pm.test(\"Provider details are complete\", function () {",
+									"    const provider = pm.response.json().data.provider;",
+									"    ",
+									"    pm.expect(provider).to.have.property('id');",
+									"    pm.expect(provider).to.have.property('businessNameAr');",
+									"    pm.expect(provider).to.have.property('businessNameEn');",
+									"    pm.expect(provider).to.have.property('phone');",
+									"    pm.expect(provider).to.have.property('address');",
+									"    ",
+									"    // Arabic business name validation",
+									"    if (provider.businessNameAr) {",
+									"        pm.expect(provider.businessNameAr).to.match(/[\\u0600-\\u06FF]/);",
+									"    }",
+									"    ",
+									"    // Address should have Arabic and English versions",
+									"    pm.expect(provider.address).to.have.property('ar');",
+									"    pm.expect(provider.address).to.have.property('en');",
+									"});",
+									"",
+									"pm.test(\"Service details are complete\", function () {",
+									"    const service = pm.response.json().data.service;",
+									"    ",
+									"    pm.expect(service).to.have.property('id');",
+									"    pm.expect(service).to.have.property('nameAr');",
+									"    pm.expect(service).to.have.property('nameEn');",
+									"    pm.expect(service).to.have.property('price');",
+									"    pm.expect(service).to.have.property('duration');",
+									"    ",
+									"    // Arabic service name validation",
+									"    if (service.nameAr) {",
+									"        pm.expect(service.nameAr).to.match(/[\\u0600-\\u06FF]/);",
+									"    }",
+									"    ",
+									"    // Price and duration validation",
+									"    pm.expect(service.price).to.be.a('number').and.to.be.greaterThan(0);",
+									"    pm.expect(service.duration).to.be.a('number').and.to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test(\"Booking times are consistent\", function () {",
+									"    const data = pm.response.json().data;",
+									"    const service = data.service;",
+									"    ",
+									"    // Check that end time is start time + duration",
+									"    const startTime = data.startTime.split(':');",
+									"    const endTime = data.endTime.split(':');",
+									"    const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);",
+									"    const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);",
+									"    ",
+									"    pm.expect(endMinutes - startMinutes).to.equal(service.duration);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{created_booking_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"{{created_booking_id}}"
+							]
+						},
+						"description": "Retrieves detailed information for a specific booking including related user, provider, and service details.\n\n**Authentication**: Required (user involved in booking or admin)\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Response**:\n- Complete booking details with all relationships\n- User information (name, phone, language preference)\n- Provider information (business names in Arabic/English, address, contact)\n- Service information (names in Arabic/English, price, duration)\n- Booking timeline and status history\n\n**Access Control**:\n- Customers can only view their own bookings\n- Providers can view bookings for their services\n- Admins can view all bookings\n\n**Data Localization**:\n- Provider and service names in both Arabic and English\n- Address information localized for Jordan\n- Phone numbers in Jordanian format\n- Amounts in JOD (Jordanian Dinar)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Booking Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Booking status updated successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.id\");",
+									"    pm.response.to.have.jsonBody(\"data.status\");",
+									"});",
+									"",
+									"pm.test(\"Status transition is valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    const newStatus = data.status;",
+									"    ",
+									"    // Valid status values",
+									"    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];",
+									"    pm.expect(validStatuses).to.include(newStatus);",
+									"    ",
+									"    // If confirming, should be 'confirmed'",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.status) {",
+									"            pm.expect(data.status).to.equal(requestBody.status);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Updated timestamp is present\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    pm.expect(data).to.have.property('updatedAt');",
+									"    pm.expect(data.updatedAt).to.be.a('string');",
+									"    ",
+									"    // Timestamp should be recent (within last minute)",
+									"    const updatedAt = new Date(data.updatedAt);",
+									"    const now = new Date();",
+									"    const diffMs = now.getTime() - updatedAt.getTime();",
+									"    pm.expect(diffMs).to.be.below(60000); // Within 1 minute",
+									"});",
+									"",
+									"pm.test(\"Reason is captured if provided\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.reason) {",
+									"            pm.expect(data).to.have.property('reason');",
+									"            pm.expect(data.reason).to.equal(requestBody.reason);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Provider notes are captured if provided\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.providerNotes) {",
+									"            pm.expect(data).to.have.property('providerNotes');",
+									"            pm.expect(data.providerNotes).to.equal(requestBody.providerNotes);",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{provider_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\",\n  \"reason\": \"Customer called to confirm\",\n  \"providerNotes\": \"Customer requested specific time\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{created_booking_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"{{created_booking_id}}",
+								"status"
+							]
+						},
+						"description": "Updates the status of a booking with proper validation of status transitions.\n\n**Authentication**: Required (provider or admin)\n\n**Authorized Roles**: Provider (for their bookings), Admin\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Request Body**:\n- `status`: New status (pending, confirmed, completed, cancelled, no_show)\n- `reason`: Optional reason for status change (max 200 characters)\n- `providerNotes`: Optional provider notes (max 300 characters)\n\n**Valid Status Transitions**:\n- `pending` → `confirmed`, `cancelled`\n- `confirmed` → `completed`, `cancelled`, `no_show`\n- `completed` → (final state)\n- `cancelled` → (final state)\n- `no_show` → (final state)\n\n**Business Rules**:\n- Only providers can update their own bookings\n- Admins can update any booking\n- Status transitions must follow business logic\n- Reasons are logged for audit purposes\n- Automatic notifications sent to customers\n\n**Response**:\n- Updated booking status and timestamp\n- Reason and provider notes if provided\n- Audit trail information"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Booking cancelled successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.id\");",
+									"    pm.response.to.have.jsonBody(\"data.status\", \"cancelled\");",
+									"});",
+									"",
+									"pm.test(\"Cancellation details are captured\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    pm.expect(data).to.have.property('cancelledAt');",
+									"    pm.expect(data.cancelledAt).to.be.a('string');",
+									"    ",
+									"    // Cancellation timestamp should be recent",
+									"    const cancelledAt = new Date(data.cancelledAt);",
+									"    const now = new Date();",
+									"    const diffMs = now.getTime() - cancelledAt.getTime();",
+									"    pm.expect(diffMs).to.be.below(60000); // Within 1 minute",
+									"});",
+									"",
+									"pm.test(\"Cancellation reason is captured\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.reason) {",
+									"            pm.expect(data).to.have.property('reason');",
+									"            pm.expect(data.reason).to.equal(requestBody.reason);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Refund status is tracked\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.refundRequested !== undefined) {",
+									"            pm.expect(data).to.have.property('refundRequested');",
+									"            pm.expect(data.refundRequested).to.be.a('boolean');",
+									"            pm.expect(data.refundRequested).to.equal(requestBody.refundRequested);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Rate limiting is properly handled\", function () {",
+									"    // This endpoint has a 3 requests per hour limit",
+									"    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+									"        const limit = parseInt(pm.response.headers.get(\"X-RateLimit-Limit\"));",
+									"        pm.expect(limit).to.equal(3);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Schedule conflict - cannot make it at this time\",\n  \"refundRequested\": false,\n  \"notifyCustomer\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{created_booking_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"{{created_booking_id}}",
+								"cancel"
+							]
+						},
+						"description": "Cancels an existing booking with proper validation and audit trail.\n\n**Authentication**: Required (any role)\n\n**Rate Limit**: 3 requests per hour\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Request Body**:\n- `reason`: Optional cancellation reason (10-200 characters)\n- `refundRequested`: Optional boolean for refund request\n- `notifyCustomer`: Optional boolean to send notification to customer\n\n**Business Rules**:\n- Customers can cancel their own bookings\n- Providers can cancel bookings for their services\n- Cannot cancel past bookings\n- Cannot cancel already cancelled bookings\n- Cannot cancel completed bookings\n- Cancellation reasons are logged for analysis\n\n**Response**:\n- Updated booking with cancelled status\n- Cancellation timestamp and reason\n- Refund request status\n- Audit trail information\n\n**Notifications**:\n- Automatic SMS/email notifications sent based on settings\n- Provider notifications for customer cancellations\n- Customer notifications for provider cancellations\n\n**Rate Limiting**:\n- Limited to prevent abuse\n- 3 cancellations per hour per user\n- Resets every hour"
+					},
+					"response": []
+				},
+				{
+					"name": "Reschedule Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Booking rescheduled successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data.id\");",
+									"});",
+									"",
+									"pm.test(\"New booking time is updated\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    pm.expect(data).to.have.property('bookingDate');",
+									"    pm.expect(data).to.have.property('startTime');",
+									"    pm.expect(data).to.have.property('endTime');",
+									"    pm.expect(data).to.have.property('updatedAt');",
+									"    ",
+									"    // Verify the new date and time match the request",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.date) {",
+									"            pm.expect(data.bookingDate).to.equal(requestBody.date);",
+									"        }",
+									"        if (requestBody.time) {",
+									"            pm.expect(data.startTime).to.equal(requestBody.time);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Reschedule reason is captured\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    if (pm.request.body && pm.request.body.raw) {",
+									"        const requestBody = JSON.parse(pm.request.body.raw);",
+									"        if (requestBody.reason) {",
+									"            pm.expect(data).to.have.property('reason');",
+									"            pm.expect(data.reason).to.equal(requestBody.reason);",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"New date is in the future\", function () {",
+									"    const data = pm.response.json().data;",
+									"    const bookingDate = new Date(data.bookingDate);",
+									"    const today = new Date();",
+									"    today.setHours(0, 0, 0, 0);",
+									"    ",
+									"    pm.expect(bookingDate.getTime()).to.be.greaterThan(today.getTime());",
+									"});",
+									"",
+									"pm.test(\"New time is within business hours\", function () {",
+									"    const data = pm.response.json().data;",
+									"    const startTime = data.startTime;",
+									"    const endTime = data.endTime;",
+									"    ",
+									"    // Extract hours from time strings",
+									"    const startHour = parseInt(startTime.split(':')[0]);",
+									"    const endHour = parseInt(endTime.split(':')[0]);",
+									"    ",
+									"    // Business hours: 8:00 - 22:00",
+									"    pm.expect(startHour).to.be.at.least(8);",
+									"    pm.expect(endHour).to.be.at.most(22);",
+									"});",
+									"",
+									"pm.test(\"Rate limiting is enforced\", function () {",
+									"    // This endpoint has a 3 requests per 30 minutes limit",
+									"    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+									"        const limit = parseInt(pm.response.headers.get(\"X-RateLimit-Limit\"));",
+									"        pm.expect(limit).to.equal(3);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{provider_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"date\": \"{{next_week_date}}\",\n  \"time\": \"16:00\",\n  \"reason\": \"Provider requested schedule adjustment\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/{{created_booking_id}}/reschedule",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"{{created_booking_id}}",
+								"reschedule"
+							]
+						},
+						"description": "Reschedules a booking to a new date and time with availability validation.\n\n**Authentication**: Required (any role)\n\n**Rate Limit**: 3 requests per 30 minutes\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Request Body**:\n- `date`: New booking date in YYYY-MM-DD format\n- `time`: New booking time in HH:mm format\n- `reason`: Optional reschedule reason (max 200 characters)\n\n**Validation Rules**:\n- New date must be 2 hours to 90 days in the future\n- New time must be within business hours (8:00-22:00)\n- New time slot must be available\n- Cannot reschedule completed or cancelled bookings\n- Original booking must not be in the past\n\n**Business Rules**:\n- Customers can reschedule their own bookings\n- Providers can reschedule bookings for their services\n- Availability is checked before confirming reschedule\n- Automatic notifications sent to all parties\n- Audit trail maintained for all changes\n\n**Response**:\n- Updated booking with new date/time\n- Reschedule reason and timestamp\n- Confirmation of successful time slot reservation\n\n**Conflict Resolution**:\n- If new time slot conflicts, returns 409 with alternatives\n- Suggestions provided for nearby available times\n- Original booking remains unchanged if reschedule fails"
+					},
+					"response": []
+				}
+			],
+			"description": "Core booking management endpoints for creating, retrieving, updating, and managing bookings. These endpoints handle the primary booking lifecycle with proper validation, authentication, and business rule enforcement.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// Booking Management pre-request script",
+							"",
+							"// Ensure we have test data",
+							"if (!pm.environment.get(\"test_provider_id\")) {",
+							"    pm.environment.set(\"test_provider_id\", \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+							"}",
+							"",
+							"if (!pm.environment.get(\"test_service_id\")) {",
+							"    pm.environment.set(\"test_service_id\", \"service-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+							"}",
+							"",
+							"// Ensure we have future dates",
+							"if (!pm.environment.get(\"booking_date\")) {",
+							"    const futureDate = new Date();",
+							"    futureDate.setDate(futureDate.getDate() + 3);",
+							"    pm.environment.set(\"booking_date\", futureDate.toISOString().split('T')[0]);",
+							"}",
+							"",
+							"// Set rate limit tracking",
+							"if (!pm.environment.get(\"rate_limit_tracking\")) {",
+							"    pm.environment.set(\"rate_limit_tracking\", JSON.stringify({",
+							"        booking_creation: { count: 0, reset: Date.now() + 900000 }, // 15 minutes",
+							"        booking_cancellation: { count: 0, reset: Date.now() + 3600000 }, // 1 hour",
+							"        booking_reschedule: { count: 0, reset: Date.now() + 1800000 } // 30 minutes",
+							"    }));",
+							"}"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Provider & Service Management",
+			"item": [
+				{
+					"name": "Get Provider Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Provider profile retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data\");",
+									"});",
+									"",
+									"pm.test(\"Provider profile has required fields\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.have.property('id');",
+									"    pm.expect(data).to.have.property('businessName');",
+									"    pm.expect(data).to.have.property('phone');",
+									"    pm.expect(data).to.have.property('services');",
+									"    pm.expect(data).to.have.property('availability');",
+									"    pm.expect(data).to.have.property('rating');",
+									"    pm.expect(data).to.have.property('verified');",
+									"});",
+									"",
+									"pm.test(\"Provider services are properly formatted\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data.services).to.be.an('array');",
+									"    ",
+									"    if (data.services.length > 0) {",
+									"        const service = data.services[0];",
+									"        pm.expect(service).to.have.property('id');",
+									"        pm.expect(service).to.have.property('name');",
+									"        pm.expect(service).to.have.property('price');",
+									"        pm.expect(service).to.have.property('duration');",
+									"        pm.expect(service).to.have.property('category');",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Provider availability is valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data.availability).to.be.an('object');",
+									"    ",
+									"    // Check for standard business days",
+									"    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];",
+									"    days.forEach(day => {",
+									"        if (data.availability[day]) {",
+									"            pm.expect(data.availability[day]).to.have.property('open');",
+									"            pm.expect(data.availability[day]).to.have.property('close');",
+									"        }",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{provider_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/providers/{{test_provider_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"providers",
+								"{{test_provider_id}}"
+							]
+						},
+						"description": "Retrieves detailed provider profile information including services, availability, and ratings."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Providers by Location",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Provider search completed successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data\");",
+									"});",
+									"",
+									"pm.test(\"Search results have pagination\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('pagination');",
+									"    pm.expect(response.pagination).to.have.property('total');",
+									"    pm.expect(response.pagination).to.have.property('limit');",
+									"    pm.expect(response.pagination).to.have.property('offset');",
+									"});",
+									"",
+									"pm.test(\"Providers are sorted by distance\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.be.an('array');",
+									"    ",
+									"    if (data.length > 1) {",
+									"        for (let i = 0; i < data.length - 1; i++) {",
+									"            if (data[i].distance && data[i + 1].distance) {",
+									"                pm.expect(data[i].distance).to.be.at.most(data[i + 1].distance);",
+									"            }",
+									"        }",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Provider location data is valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    ",
+									"    data.forEach(provider => {",
+									"        if (provider.location) {",
+									"            pm.expect(provider.location).to.have.property('latitude');",
+									"            pm.expect(provider.location).to.have.property('longitude');",
+									"            pm.expect(provider.location.latitude).to.be.within(29, 34); // Jordan latitude range",
+									"            pm.expect(provider.location.longitude).to.be.within(34, 40); // Jordan longitude range",
+									"        }",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/providers/search?latitude=31.9454&longitude=35.9284&radius=10&category=hair&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"providers",
+								"search"
+							],
+							"query": [
+								{
+									"key": "latitude",
+									"value": "31.9454",
+									"description": "Amman latitude"
+								},
+								{
+									"key": "longitude",
+									"value": "35.9284",
+									"description": "Amman longitude"
+								},
+								{
+									"key": "radius",
+									"value": "10",
+									"description": "Search radius in kilometers"
+								},
+								{
+									"key": "category",
+									"value": "hair",
+									"description": "Service category filter"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Number of results to return"
+								}
+							]
+						},
+						"description": "Searches for providers within a specific geographical area with optional service category filtering."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Provider Availability",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Provider availability retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data\");",
+									"});",
+									"",
+									"pm.test(\"Availability data is properly structured\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.have.property('date');",
+									"    pm.expect(data).to.have.property('availableSlots');",
+									"    pm.expect(data).to.have.property('bookedSlots');",
+									"    pm.expect(data).to.have.property('businessHours');",
+									"});",
+									"",
+									"pm.test(\"Available slots are in valid format\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data.availableSlots).to.be.an('array');",
+									"    ",
+									"    data.availableSlots.forEach(slot => {",
+									"        pm.expect(slot).to.have.property('startTime');",
+									"        pm.expect(slot).to.have.property('endTime');",
+									"        pm.expect(slot).to.have.property('available');",
+									"        pm.expect(slot.startTime).to.match(/^\\d{2}:\\d{2}$/);",
+									"        pm.expect(slot.endTime).to.match(/^\\d{2}:\\d{2}$/);",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"Business hours are within valid range\", function () {",
+									"    const data = pm.response.json().data;",
+									"    if (data.businessHours) {",
+									"        const openTime = data.businessHours.open;",
+									"        const closeTime = data.businessHours.close;",
+									"        ",
+									"        pm.expect(openTime).to.match(/^\\d{2}:\\d{2}$/);",
+									"        pm.expect(closeTime).to.match(/^\\d{2}:\\d{2}$/);",
+									"        ",
+									"        const openHour = parseInt(openTime.split(':')[0]);",
+									"        const closeHour = parseInt(closeTime.split(':')[0]);",
+									"        ",
+									"        pm.expect(openHour).to.be.at.least(6);",
+									"        pm.expect(closeHour).to.be.at.most(24);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/providers/{{test_provider_id}}/availability?date={{booking_date}}&serviceId={{test_service_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"providers",
+								"{{test_provider_id}}",
+								"availability"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "{{booking_date}}",
+									"description": "Date to check availability for"
+								},
+								{
+									"key": "serviceId",
+									"value": "{{test_service_id}}",
+									"description": "Service ID to check availability for"
+								}
+							]
+						},
+						"description": "Retrieves provider availability for a specific date and service, showing available time slots."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Service Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Service details retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.jsonBody(\"success\", true);",
+									"    pm.response.to.have.jsonBody(\"data\");",
+									"});",
+									"",
+									"pm.test(\"Service has required fields\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.have.property('id');",
+									"    pm.expect(data).to.have.property('name');",
+									"    pm.expect(data).to.have.property('nameAr');",
+									"    pm.expect(data).to.have.property('price');",
+									"    pm.expect(data).to.have.property('duration');",
+									"    pm.expect(data).to.have.property('category');",
+									"    pm.expect(data).to.have.property('description');",
+									"});",
+									"",
+									"pm.test(\"Service pricing is valid\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data.price).to.be.a('number');",
+									"    pm.expect(data.price).to.be.at.least(5); // Minimum service price in JOD",
+									"    pm.expect(data.price).to.be.at.most(500); // Maximum service price in JOD",
+									"    pm.expect(data.duration).to.be.a('number');",
+									"    pm.expect(data.duration).to.be.at.least(15); // Minimum 15 minutes",
+									"    pm.expect(data.duration).to.be.at.most(480); // Maximum 8 hours",
+									"});",
+									"",
+									"pm.test(\"Service has bilingual names\", function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data.name).to.be.a('string');",
+									"    pm.expect(data.nameAr).to.be.a('string');",
+									"    pm.expect(data.nameAr).to.match(/[\\u0600-\\u06FF]/); // Contains Arabic characters",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/services/{{test_service_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"services",
+								"{{test_service_id}}"
+							]
+						},
+						"description": "Retrieves detailed information about a specific service including pricing, duration, and descriptions."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing providers, services, and availability. These endpoints support the provider marketplace functionality."
+		},
+		{
+			"name": "Complete User Journeys",
+			"item": [
+				{
+					"name": "Customer Journey - Find & Book Service",
+					"item": [
+						{
+							"name": "1. Search Providers Near Me",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Provider search successful\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"// Store first provider for next steps",
+											"const providers = pm.response.json().data;",
+											"if (providers && providers.length > 0) {",
+											"    pm.environment.set(\"journey_provider_id\", providers[0].id);",
+											"    pm.environment.set(\"journey_provider_name\", providers[0].businessName);",
+											"    console.log(\"Selected provider:\", providers[0].businessName);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/providers/search?latitude=31.9454&longitude=35.9284&radius=5&category=hair&limit=10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"providers",
+										"search"
+									],
+									"query": [
+										{
+											"key": "latitude",
+											"value": "31.9454"
+										},
+										{
+											"key": "longitude",
+											"value": "35.9284"
+										},
+										{
+											"key": "radius",
+											"value": "5"
+										},
+										{
+											"key": "category",
+											"value": "hair"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Step 1: Customer searches for hair salons near their location in Amman."
+							},
+							"response": []
+						},
+						{
+							"name": "2. View Provider Details",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Provider details retrieved\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"// Store service for booking",
+											"const provider = pm.response.json().data;",
+											"if (provider && provider.services && provider.services.length > 0) {",
+											"    pm.environment.set(\"journey_service_id\", provider.services[0].id);",
+											"    pm.environment.set(\"journey_service_name\", provider.services[0].name);",
+											"    pm.environment.set(\"journey_service_price\", provider.services[0].price);",
+											"    pm.environment.set(\"journey_service_duration\", provider.services[0].duration);",
+											"    console.log(\"Selected service:\", provider.services[0].name);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/providers/{{journey_provider_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"providers",
+										"{{journey_provider_id}}"
+									]
+								},
+								"description": "Step 2: Customer views detailed provider information including services, ratings, and photos."
+							},
+							"response": []
+						},
+						{
+							"name": "3. Check Availability",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Availability check successful\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"// Store available time slot",
+											"const availability = pm.response.json().data;",
+											"if (availability && availability.availableSlots && availability.availableSlots.length > 0) {",
+											"    const firstSlot = availability.availableSlots[0];",
+											"    pm.environment.set(\"journey_booking_time\", firstSlot.startTime);",
+											"    console.log(\"Selected time slot:\", firstSlot.startTime);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/providers/{{journey_provider_id}}/availability?date={{booking_date}}&serviceId={{journey_service_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"providers",
+										"{{journey_provider_id}}",
+										"availability"
+									],
+									"query": [
+										{
+											"key": "date",
+											"value": "{{booking_date}}"
+										},
+										{
+											"key": "serviceId",
+											"value": "{{journey_service_id}}"
+										}
+									]
+								},
+								"description": "Step 3: Customer checks provider availability for tomorrow."
+							},
+							"response": []
+						},
+						{
+							"name": "4. Create Booking",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Booking created successfully\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"// Store booking ID for follow-up actions",
+											"const booking = pm.response.json().data;",
+											"if (booking && booking.id) {",
+											"    pm.environment.set(\"journey_booking_id\", booking.id);",
+											"    console.log(\"Booking created with ID:\", booking.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"providerId\": \"{{journey_provider_id}}\",\n  \"serviceId\": \"{{journey_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"{{journey_booking_time}}\",\n  \"notes\": \"خدمة ممتازة، أتطلع للزيارة\",\n  \"paymentMethod\": \"cash\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Step 4: Customer creates a booking for the selected service and time."
+							},
+							"response": []
+						},
+						{
+							"name": "5. View Booking Confirmation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Booking confirmation retrieved\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"pm.test(\"Booking details are complete\", function () {",
+											"    const booking = pm.response.json().data;",
+											"    pm.expect(booking).to.have.property('id');",
+											"    pm.expect(booking).to.have.property('status');",
+											"    pm.expect(booking).to.have.property('providerName');",
+											"    pm.expect(booking).to.have.property('serviceName');",
+											"    pm.expect(booking).to.have.property('bookingDate');",
+											"    pm.expect(booking).to.have.property('startTime');",
+											"    pm.expect(booking).to.have.property('totalAmount');",
+											"    pm.expect(booking.status).to.equal('confirmed');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/bookings/{{journey_booking_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings",
+										"{{journey_booking_id}}"
+									]
+								},
+								"description": "Step 5: Customer views booking confirmation with all details."
+							},
+							"response": []
+						}
+					],
+					"description": "Complete customer journey from searching providers to booking confirmation."
+				},
+				{
+					"name": "Provider Journey - Manage Bookings",
+					"item": [
+						{
+							"name": "1. View Incoming Bookings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Provider bookings retrieved\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"pm.test(\"Bookings are properly filtered\", function () {",
+											"    const bookings = pm.response.json().data;",
+											"    pm.expect(bookings).to.be.an('array');",
+											"    ",
+											"    // All bookings should be for this provider",
+											"    bookings.forEach(booking => {",
+											"        pm.expect(booking.providerId).to.equal(pm.environment.get('test_provider_id'));",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{provider_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/bookings?providerId={{test_provider_id}}&status=confirmed&date={{booking_date}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									],
+									"query": [
+										{
+											"key": "providerId",
+											"value": "{{test_provider_id}}"
+										},
+										{
+											"key": "status",
+											"value": "confirmed"
+										},
+										{
+											"key": "date",
+											"value": "{{booking_date}}"
+										}
+									]
+								},
+								"description": "Step 1: Provider views their confirmed bookings for today."
+							},
+							"response": []
+						},
+						{
+							"name": "2. Update Booking Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Booking status updated successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"pm.test(\"Status change is reflected\", function () {",
+											"    const booking = pm.response.json().data;",
+											"    pm.expect(booking.status).to.equal('in_progress');",
+											"    pm.expect(booking).to.have.property('statusChangedAt');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{provider_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"in_progress\",\n  \"notes\": \"العميل وصل في الوقت المحدد\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings/{{journey_booking_id}}/status",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings",
+										"{{journey_booking_id}}",
+										"status"
+									]
+								},
+								"description": "Step 2: Provider marks booking as in progress when customer arrives."
+							},
+							"response": []
+						},
+						{
+							"name": "3. Complete Service",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Service completed successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.response.to.have.jsonBody(\"success\", true);",
+											"});",
+											"",
+											"pm.test(\"Booking marked as completed\", function () {",
+											"    const booking = pm.response.json().data;",
+											"    pm.expect(booking.status).to.equal('completed');",
+											"    pm.expect(booking).to.have.property('completedAt');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{provider_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"completed\",\n  \"notes\": \"تم تقديم الخدمة بنجاح\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings/{{journey_booking_id}}/status",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings",
+										"{{journey_booking_id}}",
+										"status"
+									]
+								},
+								"description": "Step 3: Provider marks service as completed."
+							},
+							"response": []
+						}
+					],
+					"description": "Complete provider journey managing bookings from confirmation to completion."
+				}
+			],
+			"description": "Complete user journey workflows demonstrating end-to-end scenarios for customers and providers."
+		},
+		{
+			"name": "Error Handling & Edge Cases",
+			"item": [
+				{
+					"name": "Authentication Errors",
+					"item": [
+						{
+							"name": "Invalid Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Invalid token rejected\", function () {",
+											"    pm.response.to.have.status(401);",
+											"    pm.response.to.have.jsonBody(\"success\", false);",
+											"    pm.response.to.have.jsonBody(\"error\");",
+											"});",
+											"",
+											"pm.test(\"Error message is descriptive\", function () {",
+											"    const error = pm.response.json().error;",
+											"    pm.expect(error).to.have.property('message');",
+											"    pm.expect(error).to.have.property('code');",
+											"    pm.expect(error.code).to.equal('INVALID_TOKEN');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer invalid_token_here",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Test handling of invalid authentication tokens."
+							},
+							"response": []
+						},
+						{
+							"name": "Missing Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Missing token rejected\", function () {",
+											"    pm.response.to.have.status(401);",
+											"    pm.response.to.have.jsonBody(\"success\", false);",
+											"});",
+											"",
+											"pm.test(\"Error indicates missing authentication\", function () {",
+											"    const error = pm.response.json().error;",
+											"    pm.expect(error.code).to.equal('MISSING_TOKEN');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Test handling of requests without authentication tokens."
+							},
+							"response": []
+						}
+					],
+					"description": "Authentication and authorization error scenarios."
+				},
+				{
+					"name": "Validation Errors",
+					"item": [
+						{
+							"name": "Invalid Phone Number",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Invalid phone number rejected\", function () {",
+											"    pm.response.to.have.status(422);",
+											"    pm.response.to.have.jsonBody(\"success\", false);",
+											"});",
+											"",
+											"pm.test(\"Validation error details provided\", function () {",
+											"    const error = pm.response.json().error;",
+											"    pm.expect(error.code).to.equal('VALIDATION_ERROR');",
+											"    pm.expect(error).to.have.property('details');",
+											"    pm.expect(error.details).to.have.property('phone');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"14:30\",\n  \"phone\": \"123456789\",\n  \"paymentMethod\": \"cash\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Test validation of invalid phone number format."
+							},
+							"response": []
+						},
+						{
+							"name": "Past Date Booking",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Past date booking rejected\", function () {",
+											"    pm.response.to.have.status(422);",
+											"    pm.response.to.have.jsonBody(\"success\", false);",
+											"});",
+											"",
+											"pm.test(\"Date validation error provided\", function () {",
+											"    const error = pm.response.json().error;",
+											"    pm.expect(error.code).to.equal('VALIDATION_ERROR');",
+											"    pm.expect(error.details).to.have.property('date');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"2023-01-01\",\n  \"time\": \"14:30\",\n  \"paymentMethod\": \"cash\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Test validation of past date booking attempts."
+							},
+							"response": []
+						}
+					],
+					"description": "Input validation and business rule error scenarios."
+				},
+				{
+					"name": "Rate Limiting",
+					"item": [
+						{
+							"name": "Booking Creation Rate Limit",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Rate limit enforced after multiple requests\", function () {",
+											"    // This test requires running multiple times to trigger rate limit",
+											"    if (pm.response.code === 429) {",
+											"        pm.response.to.have.status(429);",
+											"        pm.response.to.have.jsonBody(\"success\", false);",
+											"        ",
+											"        const error = pm.response.json().error;",
+											"        pm.expect(error.code).to.equal('RATE_LIMIT_EXCEEDED');",
+											"        pm.expect(error).to.have.property('retryAfter');",
+											"    } else {",
+											"        // First few requests should succeed",
+											"        pm.response.to.have.status(201);",
+											"    }",
+											"});",
+											"",
+											"pm.test(\"Rate limit headers present\", function () {",
+											"    pm.response.to.have.header('X-RateLimit-Limit');",
+											"    pm.response.to.have.header('X-RateLimit-Remaining');",
+											"    pm.response.to.have.header('X-RateLimit-Reset');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"15:00\",\n  \"paymentMethod\": \"cash\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Test rate limiting for booking creation (5 requests per 15 minutes)."
+							},
+							"response": []
+						}
+					],
+					"description": "Rate limiting and abuse prevention testing."
+				},
+				{
+					"name": "Conflict Resolution",
+					"item": [
+						{
+							"name": "Double Booking Attempt",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Double booking prevented\", function () {",
+											"    pm.response.to.have.status(409);",
+											"    pm.response.to.have.jsonBody(\"success\", false);",
+											"});",
+											"",
+											"pm.test(\"Conflict details provided\", function () {",
+											"    const error = pm.response.json().error;",
+											"    pm.expect(error.code).to.equal('TIME_SLOT_CONFLICT');",
+											"    pm.expect(error).to.have.property('conflictingBooking');",
+											"    pm.expect(error).to.have.property('alternativeSlots');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customer_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"{{journey_booking_time}}\",\n  \"paymentMethod\": \"cash\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/bookings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"bookings"
+									]
+								},
+								"description": "Test prevention of double booking the same time slot."
+							},
+							"response": []
+						}
+					],
+					"description": "Conflict resolution and business rule enforcement."
+				}
+			],
+			"description": "Comprehensive error handling and edge case testing scenarios."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script for all requests",
+					"",
+					"// Set common headers",
+					"pm.request.headers.add({",
+					"    key: \"Content-Type\",",
+					"    value: \"application/json\"",
+					"});",
+					"",
+					"// Add timestamp for tracking",
+					"pm.environment.set(\"last_request_time\", new Date().toISOString());",
+					"",
+					"// Generate request ID for tracking",
+					"pm.environment.set(\"request_id\", \"req_\" + Date.now() + \"_\" + Math.random().toString(36).substr(2, 9));",
+					"",
+					"// Log request details",
+					"console.log(\"Making request to:\", pm.request.url);",
+					"console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+					"",
+					"// Ensure required environment variables are set",
+					"const requiredVars = ['base_url'];",
+					"const missingVars = requiredVars.filter(varName => !pm.environment.get(varName));",
+					"",
+					"if (missingVars.length > 0) {",
+					"    console.warn(\"Missing required environment variables:\", missingVars);",
+					"}",
+					"",
+					"// Set default values if not present",
+					"if (!pm.environment.get(\"base_url\")) {",
+					"    pm.environment.set(\"base_url\", \"http://localhost:3000\");",
+					"    console.log(\"Set default base_url to localhost\");",
+					"}",
+					"",
+					"// Generate future date if not set",
+					"if (!pm.environment.get(\"future_date\")) {",
+					"    const futureDate = new Date();",
+					"    futureDate.setDate(futureDate.getDate() + 3);",
+					"    pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script for all requests",
+					"",
+					"// Basic response validation",
+					"pm.test(\"Response status is valid\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404, 409, 422, 429, 500]);",
+					"});",
+					"",
+					"// Response time validation",
+					"pm.test(\"Response time is acceptable\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"// JSON response validation",
+					"if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+					"    pm.test(\"Response is valid JSON\", function () {",
+					"        pm.response.to.be.json;",
+					"    });",
+					"    ",
+					"    pm.test(\"Response has success field\", function () {",
+					"        pm.response.to.have.jsonBody(\"success\");",
+					"    });",
+					"}",
+					"",
+					"// Rate limiting headers validation",
+					"pm.test(\"Rate limit headers present\", function () {",
+					"    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+					"        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+					"        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+					"    }",
+					"});",
+					"",
+					"// Security headers validation",
+					"pm.test(\"Security headers present\", function () {",
+					"    // Check for common security headers",
+					"    const securityHeaders = ['X-Content-Type-Options', 'X-Frame-Options', 'X-XSS-Protection'];",
+					"    securityHeaders.forEach(header => {",
+					"        if (pm.response.headers.has(header)) {",
+					"            pm.expect(pm.response.headers.get(header)).to.be.a('string');",
+					"        }",
+					"    });",
+					"});",
+					"",
+					"// Log response details",
+					"console.log(\"Response Status:\", pm.response.status);",
+					"console.log(\"Response Time:\", pm.response.responseTime + \"ms\");",
+					"console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+					"",
+					"// Store response data for debugging",
+					"if (pm.response.json && pm.response.json().success === false) {",
+					"    console.log(\"Error Response:\", pm.response.json());",
+					"}",
+					"",
+					"// Jordan-specific validations",
+					"if (pm.response.json && pm.response.json().data) {",
+					"    const data = pm.response.json().data;",
+					"    ",
+					"    // Phone number validation",
+					"    if (data.phone || data.userPhone) {",
+					"        const phone = data.phone || data.userPhone;",
+					"        pm.test(\"Phone number is in Jordanian format\", function () {",
+					"            pm.expect(phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+					"        });",
+					"    }",
+					"    ",
+					"    // Currency validation",
+					"    if (data.amount || data.price) {",
+					"        const amount = data.amount || data.price;",
+					"        pm.test(\"Amount is in valid JOD format\", function () {",
+					"            pm.expect(amount).to.be.a('number');",
+					"            pm.expect(amount).to.be.at.least(0);",
+					"            pm.expect(amount).to.be.at.most(1000);",
+					"        });",
+					"    }",
+					"    ",
+					"    // Arabic content validation",
+					"    if (data.providerName || data.serviceName) {",
+					"        const arabicText = data.providerName || data.serviceName;",
+					"        if (arabicText && typeof arabicText === 'string') {",
+					"            pm.test(\"Arabic content is present\", function () {",
+					"                pm.expect(arabicText).to.match(/[\\u0600-\\u06FF]/);",
+					"            });",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{customer_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "api_version",
+			"value": "1.0",
+			"type": "string"
+		},
+		{
+			"key": "default_limit",
+			"value": "20",
+			"type": "string"
+		},
+		{
+			"key": "default_timeout",
+			"value": "30000",
+			"type": "string"
+		},
+		{
+			"key": "business_hours_start",
+			"value": "08:00",
+			"type": "string"
+		},
+		{
+			"key": "business_hours_end",
+			"value": "22:00",
+			"type": "string"
+		},
+		{
+			"key": "supported_languages",
+			"value": "[\"ar\", \"en\"]",
+			"type": "string"
+		},
+		{
+			"key": "supported_payment_methods",
+			"value": "[\"cash\", \"card\", \"online\"]",
+			"type": "string"
+		},
+		{
+			"key": "booking_statuses",
+			"value": "[\"pending\", \"confirmed\", \"completed\", \"cancelled\", \"no_show\"]",
+			"type": "string"
+		},
+		{
+			"key": "jordan_phone_prefixes",
+			"value": "[\"77\", \"78\", \"79\"]",
+			"type": "string"
+		}
+	]
+}

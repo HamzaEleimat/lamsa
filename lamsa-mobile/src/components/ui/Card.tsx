@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 import { Button } from './Button';
 import { Badge } from './Badge';
 import { isRTL } from '../../i18n';

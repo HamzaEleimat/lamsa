@@ -55,5 +55,8 @@
     "nextjs"
   ],
   "author": "Lamsa Development Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
 }

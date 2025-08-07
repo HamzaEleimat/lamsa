@@ -20,6 +20,8 @@ const PROTECTED_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'];
 const EXEMPT_PATHS = [
   '/api/auth/login',
   '/api/auth/provider/login',
+  '/api/auth/provider/signup', // Provider signup is exempt as it's an auth endpoint
+  '/api/auth/customer/signup',
   '/api/auth/otp/request',
   '/api/auth/otp/verify',
   '/api/auth/refresh',

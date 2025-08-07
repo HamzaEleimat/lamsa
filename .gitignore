@@ -5,11 +5,22 @@ node_modules/
 
 # Testing
 coverage/
+lamsa-api/test-results.json
+lamsa-api/test-*.ts
+lamsa-api/test-*.js
+lamsa-api/test-*.json
+lamsa-api/create-*.ts
+lamsa-api/debug-*.ts
+lamsa-api/debug-*.js
+lamsa-api/cleanup-*.ts
+test-*.js
+test-*.json
 
 # Production
 build/
 dist/
 .next/
+*.tsbuildinfo
 
 # Misc
 .DS_Store

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 import { isRTL } from '../../i18n';
 
 interface InputProps extends TextInputProps {

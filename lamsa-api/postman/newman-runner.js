@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Newman CLI Runner for BeautyCort API
+ * Newman CLI Runner for Lamsa API
  * 
- * This script provides automated testing capabilities for the BeautyCort API
+ * This script provides automated testing capabilities for the Lamsa API
  * using Newman (Postman CLI runner) with advanced features:
  * - Environment-specific test execution
  * - Parallel test execution
@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
 
-class BeautyCortTestRunner {
+class LamsaTestRunner {
     constructor(options = {}) {
         this.options = {
             environment: options.environment || 'development',
@@ -31,7 +31,7 @@ class BeautyCortTestRunner {
             ...options
         };
 
-        this.collectionPath = path.join(__dirname, 'BeautyCort-API.postman_collection.json');
+        this.collectionPath = path.join(__dirname, 'Lamsa-API.postman_collection.json');
         this.environmentPath = path.join(__dirname, 'environments', `${this.options.environment}.postman_environment.json`);
         this.results = [];
         this.startTime = null;
@@ -82,7 +82,7 @@ class BeautyCortTestRunner {
             this.validateFiles();
             this.ensureOutputDir();
 
-            console.log(`🚀 Starting BeautyCort API Tests`);
+            console.log(`🚀 Starting Lamsa API Tests`);
             console.log(`📍 Environment: ${this.options.environment}`);
             console.log(`📊 Reporters: ${this.options.reporters.join(', ')}`);
             console.log(`⏱️  Timeout: ${this.options.timeout}ms`);
@@ -430,7 +430,7 @@ class BeautyCortTestRunner {
     generateReadableReport(summaryData) {
         const lines = [];
         lines.push('='.repeat(80));
-        lines.push('BeautyCort API Test Report');
+        lines.push('Lamsa API Test Report');
         lines.push('='.repeat(80));
         lines.push('');
         
@@ -495,7 +495,7 @@ class BeautyCortTestRunner {
      */
     displaySummary(summaryData) {
         console.log('\n' + '='.repeat(60));
-        console.log('🎯 BeautyCort API Test Summary');
+        console.log('🎯 Lamsa API Test Summary');
         console.log('='.repeat(60));
 
         const stats = summaryData.overallStats;
@@ -557,7 +557,7 @@ if (require.main === module) {
             options.delayRequest = parseInt(args[++i]);
         } else if (arg === '--help' || arg === '-h') {
             console.log(`
-BeautyCort API Test Runner
+Lamsa API Test Runner
 
 Usage: node newman-runner.js [options]
 
@@ -579,11 +579,11 @@ Examples:
         }
     }
 
-    const runner = new BeautyCortTestRunner(options);
+    const runner = new LamsaTestRunner(options);
     runner.runTests().catch(error => {
         console.error('Test runner failed:', error);
         process.exit(1);
     });
 }
 
-module.exports = BeautyCortTestRunner;
+module.exports = LamsaTestRunner;

@@ -413,6 +413,7 @@ export const auth = {
     latitude: number;
     longitude: number;
     address: any;
+    license_number?: string;
   }): Promise<SupabaseResponse<{ provider: Provider; auth: any }>> {
     if (!supabaseAdmin) {
       return { 
@@ -421,11 +422,14 @@ export const auth = {
       };
     }
 
-    // First create auth user
+    // First create auth user with auto-confirmed email in development
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: providerData.email,
       password: providerData.password,
-      email_confirm: true,
+      email_confirm: true, // Always confirm in admin mode
+      user_metadata: {
+        type: 'provider'
+      }
     });
 
     if (authError) {

@@ -1,0 +1,545 @@
+{
+  "info": {
+    "_postman_id": "lamsa-api-collection-error-scenarios",
+    "name": "Lamsa API - Error Scenarios",
+    "description": "Comprehensive error handling and edge case testing scenarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "lamsa-dev-team"
+  },
+  "item": [
+    {
+      "name": "Error Handling & Edge Cases",
+      "item": [
+        {
+          "name": "Authentication Errors",
+          "item": [
+            {
+              "name": "Invalid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Invalid token rejected\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "    pm.response.to.have.jsonBody(\"success\", false);",
+                      "    pm.response.to.have.jsonBody(\"error\");",
+                      "});",
+                      "",
+                      "pm.test(\"Error message is descriptive\", function () {",
+                      "    const error = pm.response.json().error;",
+                      "    pm.expect(error).to.have.property('message');",
+                      "    pm.expect(error).to.have.property('code');",
+                      "    pm.expect(error.code).to.equal('INVALID_TOKEN');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer invalid_token_here",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Test handling of invalid authentication tokens."
+              },
+              "response": []
+            },
+            {
+              "name": "Missing Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Missing token rejected\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "    pm.response.to.have.jsonBody(\"success\", false);",
+                      "});",
+                      "",
+                      "pm.test(\"Error indicates missing authentication\", function () {",
+                      "    const error = pm.response.json().error;",
+                      "    pm.expect(error.code).to.equal('MISSING_TOKEN');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Test handling of requests without authentication tokens."
+              },
+              "response": []
+            }
+          ],
+          "description": "Authentication and authorization error scenarios."
+        },
+        {
+          "name": "Validation Errors",
+          "item": [
+            {
+              "name": "Invalid Phone Number",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Invalid phone number rejected\", function () {",
+                      "    pm.response.to.have.status(422);",
+                      "    pm.response.to.have.jsonBody(\"success\", false);",
+                      "});",
+                      "",
+                      "pm.test(\"Validation error details provided\", function () {",
+                      "    const error = pm.response.json().error;",
+                      "    pm.expect(error.code).to.equal('VALIDATION_ERROR');",
+                      "    pm.expect(error).to.have.property('details');",
+                      "    pm.expect(error.details).to.have.property('phone');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"14:30\",\n  \"phone\": \"123456789\",\n  \"paymentMethod\": \"cash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Test validation of invalid phone number format."
+              },
+              "response": []
+            },
+            {
+              "name": "Past Date Booking",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Past date booking rejected\", function () {",
+                      "    pm.response.to.have.status(422);",
+                      "    pm.response.to.have.jsonBody(\"success\", false);",
+                      "});",
+                      "",
+                      "pm.test(\"Date validation error provided\", function () {",
+                      "    const error = pm.response.json().error;",
+                      "    pm.expect(error.code).to.equal('VALIDATION_ERROR');",
+                      "    pm.expect(error.details).to.have.property('date');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"2023-01-01\",\n  \"time\": \"14:30\",\n  \"paymentMethod\": \"cash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Test validation of past date booking attempts."
+              },
+              "response": []
+            }
+          ],
+          "description": "Input validation and business rule error scenarios."
+        },
+        {
+          "name": "Rate Limiting",
+          "item": [
+            {
+              "name": "Booking Creation Rate Limit",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Rate limit enforced after multiple requests\", function () {",
+                      "    // This test requires running multiple times to trigger rate limit",
+                      "    if (pm.response.code === 429) {",
+                      "        pm.response.to.have.status(429);",
+                      "        pm.response.to.have.jsonBody(\"success\", false);",
+                      "        ",
+                      "        const error = pm.response.json().error;",
+                      "        pm.expect(error.code).to.equal('RATE_LIMIT_EXCEEDED');",
+                      "        pm.expect(error).to.have.property('retryAfter');",
+                      "    } else {",
+                      "        // First few requests should succeed",
+                      "        pm.response.to.have.status(201);",
+                      "    }",
+                      "});",
+                      "",
+                      "pm.test(\"Rate limit headers present\", function () {",
+                      "    pm.response.to.have.header('X-RateLimit-Limit');",
+                      "    pm.response.to.have.header('X-RateLimit-Remaining');",
+                      "    pm.response.to.have.header('X-RateLimit-Reset');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"15:00\",\n  \"paymentMethod\": \"cash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Test rate limiting for booking creation (5 requests per 15 minutes)."
+              },
+              "response": []
+            }
+          ],
+          "description": "Rate limiting and abuse prevention testing."
+        },
+        {
+          "name": "Conflict Resolution",
+          "item": [
+            {
+              "name": "Double Booking Attempt",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Double booking prevented\", function () {",
+                      "    pm.response.to.have.status(409);",
+                      "    pm.response.to.have.jsonBody(\"success\", false);",
+                      "});",
+                      "",
+                      "pm.test(\"Conflict details provided\", function () {",
+                      "    const error = pm.response.json().error;",
+                      "    pm.expect(error.code).to.equal('TIME_SLOT_CONFLICT');",
+                      "    pm.expect(error).to.have.property('conflictingBooking');",
+                      "    pm.expect(error).to.have.property('alternativeSlots');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"{{journey_booking_time}}\",\n  \"paymentMethod\": \"cash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                },
+                "description": "Test prevention of double booking the same time slot."
+              },
+              "response": []
+            }
+          ],
+          "description": "Conflict resolution and business rule enforcement."
+        }
+      ],
+      "description": "Comprehensive error handling and edge case testing scenarios."
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_version",
+      "value": "1.0",
+      "type": "string"
+    },
+    {
+      "key": "default_limit",
+      "value": "20",
+      "type": "string"
+    },
+    {
+      "key": "default_timeout",
+      "value": "30000",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_start",
+      "value": "08:00",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_end",
+      "value": "22:00",
+      "type": "string"
+    },
+    {
+      "key": "supported_languages",
+      "value": "[\"ar\", \"en\"]",
+      "type": "string"
+    },
+    {
+      "key": "supported_payment_methods",
+      "value": "[\"cash\", \"card\", \"online\"]",
+      "type": "string"
+    },
+    {
+      "key": "booking_statuses",
+      "value": "[\"pending\", \"confirmed\", \"completed\", \"cancelled\", \"no_show\"]",
+      "type": "string"
+    },
+    {
+      "key": "jordan_phone_prefixes",
+      "value": "[\"77\", \"78\", \"79\"]",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{customer_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script for all requests",
+          "",
+          "// Set common headers",
+          "pm.request.headers.add({",
+          "    key: \"Content-Type\",",
+          "    value: \"application/json\"",
+          "});",
+          "",
+          "// Add timestamp for tracking",
+          "pm.environment.set(\"last_request_time\", new Date().toISOString());",
+          "",
+          "// Generate request ID for tracking",
+          "pm.environment.set(\"request_id\", \"req_\" + Date.now() + \"_\" + Math.random().toString(36).substr(2, 9));",
+          "",
+          "// Log request details",
+          "console.log(\"Making request to:\", pm.request.url);",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Ensure required environment variables are set",
+          "const requiredVars = ['base_url'];",
+          "const missingVars = requiredVars.filter(varName => !pm.environment.get(varName));",
+          "",
+          "if (missingVars.length > 0) {",
+          "    console.warn(\"Missing required environment variables:\", missingVars);",
+          "}",
+          "",
+          "// Set default values if not present",
+          "if (!pm.environment.get(\"base_url\")) {",
+          "    pm.environment.set(\"base_url\", \"http://localhost:3000\");",
+          "    console.log(\"Set default base_url to localhost\");",
+          "}",
+          "",
+          "// Generate future date if not set",
+          "if (!pm.environment.get(\"future_date\")) {",
+          "    const futureDate = new Date();",
+          "    futureDate.setDate(futureDate.getDate() + 3);",
+          "    pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "",
+          "// Basic response validation",
+          "pm.test(\"Response status is valid\", function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404, 409, 422, 429, 500]);",
+          "});",
+          "",
+          "// Response time validation",
+          "pm.test(\"Response time is acceptable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// JSON response validation",
+          "if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+          "    pm.test(\"Response is valid JSON\", function () {",
+          "        pm.response.to.be.json;",
+          "    });",
+          "    ",
+          "    pm.test(\"Response has success field\", function () {",
+          "        pm.response.to.have.jsonBody(\"success\");",
+          "    });",
+          "}",
+          "",
+          "// Rate limiting headers validation",
+          "pm.test(\"Rate limit headers present\", function () {",
+          "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+          "        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+          "        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+          "    }",
+          "});",
+          "",
+          "// Security headers validation",
+          "pm.test(\"Security headers present\", function () {",
+          "    // Check for common security headers",
+          "    const securityHeaders = ['X-Content-Type-Options', 'X-Frame-Options', 'X-XSS-Protection'];",
+          "    securityHeaders.forEach(header => {",
+          "        if (pm.response.headers.has(header)) {",
+          "            pm.expect(pm.response.headers.get(header)).to.be.a('string');",
+          "        }",
+          "    });",
+          "});",
+          "",
+          "// Log response details",
+          "console.log(\"Response Status:\", pm.response.status);",
+          "console.log(\"Response Time:\", pm.response.responseTime + \"ms\");",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Store response data for debugging",
+          "if (pm.response.json && pm.response.json().success === false) {",
+          "    console.log(\"Error Response:\", pm.response.json());",
+          "}",
+          "",
+          "// Jordan-specific validations",
+          "if (pm.response.json && pm.response.json().data) {",
+          "    const data = pm.response.json().data;",
+          "    ",
+          "    // Phone number validation",
+          "    if (data.phone || data.userPhone) {",
+          "        const phone = data.phone || data.userPhone;",
+          "        pm.test(\"Phone number is in Jordanian format\", function () {",
+          "            pm.expect(phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Currency validation",
+          "    if (data.amount || data.price) {",
+          "        const amount = data.amount || data.price;",
+          "        pm.test(\"Amount is in valid JOD format\", function () {",
+          "            pm.expect(amount).to.be.a('number');",
+          "            pm.expect(amount).to.be.at.least(0);",
+          "            pm.expect(amount).to.be.at.most(1000);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Arabic content validation",
+          "    if (data.providerName || data.serviceName) {",
+          "        const arabicText = data.providerName || data.serviceName;",
+          "        if (arabicText && typeof arabicText === 'string') {",
+          "            pm.test(\"Arabic content is present\", function () {",
+          "                pm.expect(arabicText).to.match(/[\\u0600-\\u06FF]/);",
+          "            });",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

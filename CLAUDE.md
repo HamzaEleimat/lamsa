@@ -150,6 +150,15 @@ This fee structure is implemented in:
 - No CI/CD pipeline configured
 - No API documentation (Swagger/OpenAPI)
 
+## Technical Decisions
+
+### Error Handling Strategy (MVP)
+The API currently uses a basic error handling middleware (`error.middleware.ts`) for simplicity and stability. Enhanced error handlers with bilingual support and detailed formatting are available but not active:
+- `enhanced-error.middleware.ts` - Advanced error formatting and categorization
+- `enhanced-bilingual-error.middleware.ts` - Full Arabic/English error messages
+
+**Rationale**: Keeping error handling simple for MVP reduces complexity and testing burden. The enhanced versions can be gradually adopted post-launch based on actual user needs.
+
 ## Important Notes
 
 - The mobile app uses Expo managed workflow for easier deployment

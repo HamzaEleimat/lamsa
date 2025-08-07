@@ -1,0 +1,1004 @@
+{
+  "info": {
+    "_postman_id": "lamsa-api-collection-booking-management",
+    "name": "Lamsa API - Booking Management",
+    "description": "Core booking management endpoints for creating, retrieving, updating, and managing bookings.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "lamsa-dev-team"
+  },
+  "item": [
+    {
+      "name": "Booking Management",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Booking created successfully\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.id\");",
+                  "    ",
+                  "    // Store booking ID for subsequent tests",
+                  "    const bookingId = pm.response.json().data.id;",
+                  "    pm.environment.set(\"created_booking_id\", bookingId);",
+                  "    ",
+                  "    console.log(\"Created booking ID:\", bookingId);",
+                  "});",
+                  "",
+                  "pm.test(\"Booking data structure is valid\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    // Required fields validation",
+                  "    const requiredFields = ['id', 'userId', 'providerId', 'serviceId', 'bookingDate', 'startTime', 'endTime', 'status', 'amount', 'platformFee', 'providerFee'];",
+                  "    requiredFields.forEach(field => {",
+                  "        pm.expect(data).to.have.property(field);",
+                  "    });",
+                  "    ",
+                  "    // Business rules validation",
+                  "    pm.expect(data.status).to.equal('pending');",
+                  "    pm.expect(data.amount).to.be.a('number').and.to.be.greaterThan(0);",
+                  "    pm.expect(data.platformFee).to.be.a('number').and.to.be.greaterThan(0);",
+                  "    pm.expect(data.providerFee).to.be.a('number').and.to.be.greaterThan(0);",
+                  "    ",
+                  "    // Fee calculation validation (Fixed fees: 2 JOD for ≤25 JOD, 5 JOD for >25 JOD)",
+                  "    const expectedPlatformFee = data.amount <= 25 ? 2.00 : 5.00;",
+                  "    pm.expect(data.platformFee).to.equal(expectedPlatformFee);",
+                  "    pm.expect(data.providerFee).to.be.closeTo(data.amount - data.platformFee, 0.01);",
+                  "});",
+                  "",
+                  "pm.test(\"Booking date and time are valid\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    // Date format validation",
+                  "    pm.expect(data.bookingDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "    pm.expect(data.startTime).to.match(/^\\d{2}:\\d{2}$/);",
+                  "    pm.expect(data.endTime).to.match(/^\\d{2}:\\d{2}$/);",
+                  "    ",
+                  "    // Future date validation",
+                  "    const bookingDate = new Date(data.bookingDate);",
+                  "    const today = new Date();",
+                  "    today.setHours(0, 0, 0, 0);",
+                  "    pm.expect(bookingDate.getTime()).to.be.greaterThan(today.getTime());",
+                  "});",
+                  "",
+                  "pm.test(\"Arabic and English names are present\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    if (data.providerName && typeof data.providerName === 'string') {",
+                  "        pm.expect(data.providerName).to.match(/[\\u0600-\\u06FF]/);",
+                  "    }",
+                  "    ",
+                  "    if (data.serviceName && typeof data.serviceName === 'string') {",
+                  "        pm.expect(data.serviceName).to.match(/[\\u0600-\\u06FF]/);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Rate limiting headers are present\", function () {",
+                  "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+                  "        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+                  "        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+                  "        ",
+                  "        // Store rate limit info",
+                  "        pm.environment.set(\"rate_limit_remaining\", pm.response.headers.get(\"X-RateLimit-Remaining\"));",
+                  "        pm.environment.set(\"rate_limit_reset\", pm.response.headers.get(\"X-RateLimit-Reset\"));",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"providerId\": \"{{test_provider_id}}\",\n  \"serviceId\": \"{{test_service_id}}\",\n  \"date\": \"{{booking_date}}\",\n  \"time\": \"{{booking_time}}\",\n  \"paymentMethod\": \"cash\",\n  \"notes\": \"Test booking from Postman collection\",\n  \"customerPhone\": \"{{random_jordan_phone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            },
+            "description": "Creates a new booking with the specified details. This endpoint validates Jordan-specific business rules including phone number format, business hours, and payment methods.\n\n**Rate Limit**: 5 requests per 15 minutes\n\n**Authentication**: Required (customer role)\n\n**Request Body**:\n- `providerId`: UUID of the service provider\n- `serviceId`: UUID of the service\n- `date`: Booking date in YYYY-MM-DD format (2 hours to 90 days in future)\n- `time`: Booking time in HH:mm format (within business hours 8:00-22:00)\n- `paymentMethod`: Payment method (cash, card, online)\n- `notes`: Optional customer notes (max 500 characters)\n- `customerPhone`: Optional Jordanian phone number override\n\n**Business Rules**:\n- Date must be 2 hours to 90 days in the future\n- Time must be within business hours (8:00-22:00)\n- Online payment required for amounts > 100 JOD\n- Provider and service must exist and be active\n- Phone numbers must be in Jordanian format (+962XX...)\n\n**Response**:\n- Returns complete booking details including fees\n- Platform fee: Fixed fees (2 JOD for services ≤25 JOD, 5 JOD for services >25 JOD)\n- Provider earnings: Service amount - Platform fee\n- Initial status: 'pending'"
+          },
+          "response": [
+            {
+              "name": "Successful Booking Creation",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customer_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"providerId\": \"provider-test-12345\",\n  \"serviceId\": \"service-test-12345\",\n  \"date\": \"2024-07-25\",\n  \"time\": \"14:30\",\n  \"paymentMethod\": \"cash\",\n  \"notes\": \"Please call before arriving\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "bookings"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Limit",
+                  "value": "5"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "4"
+                },
+                {
+                  "key": "X-RateLimit-Reset",
+                  "value": "1642694400"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"booking1-1111-1111-1111-111111111111\",\n    \"userId\": \"customer-test-12345\",\n    \"providerId\": \"provider-test-12345\",\n    \"serviceId\": \"service-test-12345\",\n    \"bookingDate\": \"2024-07-25\",\n    \"startTime\": \"14:30\",\n    \"endTime\": \"15:30\",\n    \"status\": \"pending\",\n    \"paymentMethod\": \"cash\",\n    \"amount\": 25.00,\n    \"platformFee\": 2.00,\n    \"providerFee\": 23.00,\n    \"notes\": \"Please call before arriving\",\n    \"createdAt\": \"2024-07-15T10:00:00Z\",\n    \"updatedAt\": \"2024-07-15T10:00:00Z\",\n    \"userName\": \"أحمد محمد\",\n    \"userPhone\": \"+962791234567\",\n    \"providerName\": \"صالون الجمال\",\n    \"serviceName\": \"قص الشعر\",\n    \"serviceDuration\": 60\n  },\n  \"message\": \"Booking created successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get User Bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"User bookings retrieved successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.data\");",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination structure is valid\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    // Pagination fields",
+                  "    pm.expect(data).to.have.property('data');",
+                  "    pm.expect(data).to.have.property('total');",
+                  "    pm.expect(data).to.have.property('page');",
+                  "    pm.expect(data).to.have.property('totalPages');",
+                  "    pm.expect(data).to.have.property('hasNext');",
+                  "    pm.expect(data).to.have.property('hasPrev');",
+                  "    ",
+                  "    // Data types",
+                  "    pm.expect(data.data).to.be.an('array');",
+                  "    pm.expect(data.total).to.be.a('number');",
+                  "    pm.expect(data.page).to.be.a('number');",
+                  "    pm.expect(data.totalPages).to.be.a('number');",
+                  "    pm.expect(data.hasNext).to.be.a('boolean');",
+                  "    pm.expect(data.hasPrev).to.be.a('boolean');",
+                  "});",
+                  "",
+                  "pm.test(\"Booking items have required fields\", function () {",
+                  "    const bookings = pm.response.json().data.data;",
+                  "    ",
+                  "    if (bookings.length > 0) {",
+                  "        const booking = bookings[0];",
+                  "        const requiredFields = ['id', 'providerId', 'serviceId', 'bookingDate', 'startTime', 'endTime', 'status', 'amount', 'providerName', 'serviceName', 'createdAt'];",
+                  "        ",
+                  "        requiredFields.forEach(field => {",
+                  "            pm.expect(booking).to.have.property(field);",
+                  "        });",
+                  "        ",
+                  "        // Status validation",
+                  "        const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];",
+                  "        pm.expect(validStatuses).to.include(booking.status);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Sorting and filtering work correctly\", function () {",
+                  "    const bookings = pm.response.json().data.data;",
+                  "    ",
+                  "    // If sorting by date descending (default), check order",
+                  "    if (bookings.length > 1) {",
+                  "        const firstDate = new Date(bookings[0].bookingDate);",
+                  "        const secondDate = new Date(bookings[1].bookingDate);",
+                  "        // Allow equal dates, check that first is not earlier than second",
+                  "        pm.expect(firstDate.getTime()).to.be.at.least(secondDate.getTime());",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Arabic content is preserved\", function () {",
+                  "    const bookings = pm.response.json().data.data;",
+                  "    ",
+                  "    if (bookings.length > 0) {",
+                  "        const booking = bookings[0];",
+                  "        if (booking.providerName && typeof booking.providerName === 'string') {",
+                  "            pm.expect(booking.providerName).to.match(/[\\u0600-\\u06FF]/);",
+                  "        }",
+                  "        if (booking.serviceName && typeof booking.serviceName === 'string') {",
+                  "            pm.expect(booking.serviceName).to.match(/[\\u0600-\\u06FF]/);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Cache headers are present\", function () {",
+                  "    // Check for cache-related headers",
+                  "    if (pm.response.headers.has(\"Cache-Control\")) {",
+                  "        pm.expect(pm.response.headers.get(\"Cache-Control\")).to.include(\"max-age\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/user?page=1&limit=20&sortBy=date&sortOrder=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "user"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (1-1000, default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Items per page (1-100, default: 10)"
+                },
+                {
+                  "key": "status",
+                  "value": "pending,confirmed",
+                  "description": "Filter by status (comma-separated)",
+                  "disabled": true
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2024-07-01",
+                  "description": "Start date filter",
+                  "disabled": true
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2024-07-31",
+                  "description": "End date filter",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "date",
+                  "description": "Sort field (date, time, amount, status)"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort order (asc, desc)"
+                }
+              ]
+            },
+            "description": "Retrieves paginated list of current user's bookings with filtering and sorting options.\n\n**Authentication**: Required (any role)\n\n**Cache**: 1 minute TTL\n\n**Query Parameters**:\n- `page`: Page number (1-1000, default: 1)\n- `limit`: Items per page (1-100, default: 10)\n- `status`: Filter by status (comma-separated)\n- `dateFrom`: Start date filter (YYYY-MM-DD)\n- `dateTo`: End date filter (YYYY-MM-DD)\n- `sortBy`: Sort field (date, time, amount, status)\n- `sortOrder`: Sort order (asc, desc)\n\n**Response**:\n- Paginated list of bookings with metadata\n- Each booking includes provider and service details\n- Supports filtering by status, date range\n- Default sorting by booking date descending\n\n**Performance**:\n- Cached for 1 minute to improve response times\n- Optimized queries with proper indexing\n- Supports large datasets with efficient pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Booking Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Booking details retrieved successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Complete booking details are present\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    // Core booking fields",
+                  "    const requiredFields = ['id', 'userId', 'providerId', 'serviceId', 'bookingDate', 'startTime', 'endTime', 'status', 'paymentMethod', 'amount', 'platformFee', 'providerFee', 'notes', 'createdAt', 'updatedAt'];",
+                  "    requiredFields.forEach(field => {",
+                  "        pm.expect(data).to.have.property(field);",
+                  "    });",
+                  "    ",
+                  "    // Related entity details",
+                  "    pm.expect(data).to.have.property('user');",
+                  "    pm.expect(data).to.have.property('provider');",
+                  "    pm.expect(data).to.have.property('service');",
+                  "});",
+                  "",
+                  "pm.test(\"User details are complete\", function () {",
+                  "    const user = pm.response.json().data.user;",
+                  "    ",
+                  "    pm.expect(user).to.have.property('id');",
+                  "    pm.expect(user).to.have.property('name');",
+                  "    pm.expect(user).to.have.property('phone');",
+                  "    pm.expect(user).to.have.property('language');",
+                  "    ",
+                  "    // Phone validation",
+                  "    pm.expect(user.phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+                  "    ",
+                  "    // Language validation",
+                  "    pm.expect(['ar', 'en']).to.include(user.language);",
+                  "});",
+                  "",
+                  "pm.test(\"Provider details are complete\", function () {",
+                  "    const provider = pm.response.json().data.provider;",
+                  "    ",
+                  "    pm.expect(provider).to.have.property('id');",
+                  "    pm.expect(provider).to.have.property('businessNameAr');",
+                  "    pm.expect(provider).to.have.property('businessNameEn');",
+                  "    pm.expect(provider).to.have.property('phone');",
+                  "    pm.expect(provider).to.have.property('address');",
+                  "    ",
+                  "    // Arabic business name validation",
+                  "    if (provider.businessNameAr) {",
+                  "        pm.expect(provider.businessNameAr).to.match(/[\\u0600-\\u06FF]/);",
+                  "    }",
+                  "    ",
+                  "    // Address should have Arabic and English versions",
+                  "    pm.expect(provider.address).to.have.property('ar');",
+                  "    pm.expect(provider.address).to.have.property('en');",
+                  "});",
+                  "",
+                  "pm.test(\"Service details are complete\", function () {",
+                  "    const service = pm.response.json().data.service;",
+                  "    ",
+                  "    pm.expect(service).to.have.property('id');",
+                  "    pm.expect(service).to.have.property('nameAr');",
+                  "    pm.expect(service).to.have.property('nameEn');",
+                  "    pm.expect(service).to.have.property('price');",
+                  "    pm.expect(service).to.have.property('duration');",
+                  "    ",
+                  "    // Arabic service name validation",
+                  "    if (service.nameAr) {",
+                  "        pm.expect(service.nameAr).to.match(/[\\u0600-\\u06FF]/);",
+                  "    }",
+                  "    ",
+                  "    // Price and duration validation",
+                  "    pm.expect(service.price).to.be.a('number').and.to.be.greaterThan(0);",
+                  "    pm.expect(service.duration).to.be.a('number').and.to.be.greaterThan(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Booking times are consistent\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    const service = data.service;",
+                  "    ",
+                  "    // Check that end time is start time + duration",
+                  "    const startTime = data.startTime.split(':');",
+                  "    const endTime = data.endTime.split(':');",
+                  "    const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);",
+                  "    const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);",
+                  "    ",
+                  "    pm.expect(endMinutes - startMinutes).to.equal(service.duration);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{created_booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{created_booking_id}}"
+              ]
+            },
+            "description": "Retrieves detailed information for a specific booking including related user, provider, and service details.\n\n**Authentication**: Required (user involved in booking or admin)\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Response**:\n- Complete booking details with all relationships\n- User information (name, phone, language preference)\n- Provider information (business names in Arabic/English, address, contact)\n- Service information (names in Arabic/English, price, duration)\n- Booking timeline and status history\n\n**Access Control**:\n- Customers can only view their own bookings\n- Providers can view bookings for their services\n- Admins can view all bookings\n\n**Data Localization**:\n- Provider and service names in both Arabic and English\n- Address information localized for Jordan\n- Phone numbers in Jordanian format\n- Amounts in JOD (Jordanian Dinar)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Booking Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Booking status updated successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.id\");",
+                  "    pm.response.to.have.jsonBody(\"data.status\");",
+                  "});",
+                  "",
+                  "pm.test(\"Status transition is valid\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    const newStatus = data.status;",
+                  "    ",
+                  "    // Valid status values",
+                  "    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];",
+                  "    pm.expect(validStatuses).to.include(newStatus);",
+                  "    ",
+                  "    // If confirming, should be 'confirmed'",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.status) {",
+                  "            pm.expect(data.status).to.equal(requestBody.status);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Updated timestamp is present\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    pm.expect(data).to.have.property('updatedAt');",
+                  "    pm.expect(data.updatedAt).to.be.a('string');",
+                  "    ",
+                  "    // Timestamp should be recent (within last minute)",
+                  "    const updatedAt = new Date(data.updatedAt);",
+                  "    const now = new Date();",
+                  "    const diffMs = now.getTime() - updatedAt.getTime();",
+                  "    pm.expect(diffMs).to.be.below(60000); // Within 1 minute",
+                  "});",
+                  "",
+                  "pm.test(\"Reason is captured if provided\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.reason) {",
+                  "            pm.expect(data).to.have.property('reason');",
+                  "            pm.expect(data.reason).to.equal(requestBody.reason);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Provider notes are captured if provided\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.providerNotes) {",
+                  "            pm.expect(data).to.have.property('providerNotes');",
+                  "            pm.expect(data.providerNotes).to.equal(requestBody.providerNotes);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{provider_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\",\n  \"reason\": \"Customer called to confirm\",\n  \"providerNotes\": \"Customer requested specific time\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{created_booking_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{created_booking_id}}",
+                "status"
+              ]
+            },
+            "description": "Updates the status of a booking with proper validation of status transitions.\n\n**Authentication**: Required (provider or admin)\n\n**Authorized Roles**: Provider (for their bookings), Admin\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Request Body**:\n- `status`: New status (pending, confirmed, completed, cancelled, no_show)\n- `reason`: Optional reason for status change (max 200 characters)\n- `providerNotes`: Optional provider notes (max 300 characters)\n\n**Valid Status Transitions**:\n- `pending` → `confirmed`, `cancelled`\n- `confirmed` → `completed`, `cancelled`, `no_show`\n- `completed` → (final state)\n- `cancelled` → (final state)\n- `no_show` → (final state)\n\n**Business Rules**:\n- Only providers can update their own bookings\n- Admins can update any booking\n- Status transitions must follow business logic\n- Reasons are logged for audit purposes\n- Automatic notifications sent to customers\n\n**Response**:\n- Updated booking status and timestamp\n- Reason and provider notes if provided\n- Audit trail information"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Booking cancelled successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.id\");",
+                  "    pm.response.to.have.jsonBody(\"data.status\", \"cancelled\");",
+                  "});",
+                  "",
+                  "pm.test(\"Cancellation details are captured\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    pm.expect(data).to.have.property('cancelledAt');",
+                  "    pm.expect(data.cancelledAt).to.be.a('string');",
+                  "    ",
+                  "    // Cancellation timestamp should be recent",
+                  "    const cancelledAt = new Date(data.cancelledAt);",
+                  "    const now = new Date();",
+                  "    const diffMs = now.getTime() - cancelledAt.getTime();",
+                  "    pm.expect(diffMs).to.be.below(60000); // Within 1 minute",
+                  "});",
+                  "",
+                  "pm.test(\"Cancellation reason is captured\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.reason) {",
+                  "            pm.expect(data).to.have.property('reason');",
+                  "            pm.expect(data.reason).to.equal(requestBody.reason);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Refund status is tracked\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.refundRequested !== undefined) {",
+                  "            pm.expect(data).to.have.property('refundRequested');",
+                  "            pm.expect(data.refundRequested).to.be.a('boolean');",
+                  "            pm.expect(data.refundRequested).to.equal(requestBody.refundRequested);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Rate limiting is properly handled\", function () {",
+                  "    // This endpoint has a 3 requests per hour limit",
+                  "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+                  "        const limit = parseInt(pm.response.headers.get(\"X-RateLimit-Limit\"));",
+                  "        pm.expect(limit).to.equal(3);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Schedule conflict - cannot make it at this time\",\n  \"refundRequested\": false,\n  \"notifyCustomer\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{created_booking_id}}/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{created_booking_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels an existing booking with proper validation and audit trail.\n\n**Authentication**: Required (any role)\n\n**Rate Limit**: 3 requests per hour\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Request Body**:\n- `reason`: Optional cancellation reason (10-200 characters)\n- `refundRequested`: Optional boolean for refund request\n- `notifyCustomer`: Optional boolean to send notification to customer\n\n**Business Rules**:\n- Customers can cancel their own bookings\n- Providers can cancel bookings for their services\n- Cannot cancel past bookings\n- Cannot cancel already cancelled bookings\n- Cannot cancel completed bookings\n- Cancellation reasons are logged for analysis\n\n**Response**:\n- Updated booking with cancelled status\n- Cancellation timestamp and reason\n- Refund request status\n- Audit trail information\n\n**Notifications**:\n- Automatic SMS/email notifications sent based on settings\n- Provider notifications for customer cancellations\n- Customer notifications for provider cancellations\n\n**Rate Limiting**:\n- Limited to prevent abuse\n- 3 cancellations per hour per user\n- Resets every hour"
+          },
+          "response": []
+        },
+        {
+          "name": "Reschedule Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Booking rescheduled successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.id\");",
+                  "});",
+                  "",
+                  "pm.test(\"New booking time is updated\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    pm.expect(data).to.have.property('bookingDate');",
+                  "    pm.expect(data).to.have.property('startTime');",
+                  "    pm.expect(data).to.have.property('endTime');",
+                  "    pm.expect(data).to.have.property('updatedAt');",
+                  "    ",
+                  "    // Verify the new date and time match the request",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.date) {",
+                  "            pm.expect(data.bookingDate).to.equal(requestBody.date);",
+                  "        }",
+                  "        if (requestBody.time) {",
+                  "            pm.expect(data.startTime).to.equal(requestBody.time);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Reschedule reason is captured\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    ",
+                  "    if (pm.request.body && pm.request.body.raw) {",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        if (requestBody.reason) {",
+                  "            pm.expect(data).to.have.property('reason');",
+                  "            pm.expect(data.reason).to.equal(requestBody.reason);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"New date is in the future\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    const bookingDate = new Date(data.bookingDate);",
+                  "    const today = new Date();",
+                  "    today.setHours(0, 0, 0, 0);",
+                  "    ",
+                  "    pm.expect(bookingDate.getTime()).to.be.greaterThan(today.getTime());",
+                  "});",
+                  "",
+                  "pm.test(\"New time is within business hours\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    const startTime = data.startTime;",
+                  "    const endTime = data.endTime;",
+                  "    ",
+                  "    // Extract hours from time strings",
+                  "    const startHour = parseInt(startTime.split(':')[0]);",
+                  "    const endHour = parseInt(endTime.split(':')[0]);",
+                  "    ",
+                  "    // Business hours: 8:00 - 22:00",
+                  "    pm.expect(startHour).to.be.at.least(8);",
+                  "    pm.expect(endHour).to.be.at.most(22);",
+                  "});",
+                  "",
+                  "pm.test(\"Rate limiting is enforced\", function () {",
+                  "    // This endpoint has a 3 requests per 30 minutes limit",
+                  "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+                  "        const limit = parseInt(pm.response.headers.get(\"X-RateLimit-Limit\"));",
+                  "        pm.expect(limit).to.equal(3);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{provider_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{next_week_date}}\",\n  \"time\": \"16:00\",\n  \"reason\": \"Provider requested schedule adjustment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{created_booking_id}}/reschedule",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{created_booking_id}}",
+                "reschedule"
+              ]
+            },
+            "description": "Reschedules a booking to a new date and time with availability validation.\n\n**Authentication**: Required (any role)\n\n**Rate Limit**: 3 requests per 30 minutes\n\n**URL Parameters**:\n- `id`: Booking identifier (UUID)\n\n**Request Body**:\n- `date`: New booking date in YYYY-MM-DD format\n- `time`: New booking time in HH:mm format\n- `reason`: Optional reschedule reason (max 200 characters)\n\n**Validation Rules**:\n- New date must be 2 hours to 90 days in the future\n- New time must be within business hours (8:00-22:00)\n- New time slot must be available\n- Cannot reschedule completed or cancelled bookings\n- Original booking must not be in the past\n\n**Business Rules**:\n- Customers can reschedule their own bookings\n- Providers can reschedule bookings for their services\n- Availability is checked before confirming reschedule\n- Automatic notifications sent to all parties\n- Audit trail maintained for all changes\n\n**Response**:\n- Updated booking with new date/time\n- Reschedule reason and timestamp\n- Confirmation of successful time slot reservation\n\n**Conflict Resolution**:\n- If new time slot conflicts, returns 409 with alternatives\n- Suggestions provided for nearby available times\n- Original booking remains unchanged if reschedule fails"
+          },
+          "response": []
+        }
+      ],
+      "description": "Core booking management endpoints for creating, retrieving, updating, and managing bookings. These endpoints handle the primary booking lifecycle with proper validation, authentication, and business rule enforcement.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Booking Management pre-request script",
+              "",
+              "// Ensure we have test data",
+              "if (!pm.environment.get(\"test_provider_id\")) {",
+              "    pm.environment.set(\"test_provider_id\", \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+              "}",
+              "",
+              "if (!pm.environment.get(\"test_service_id\")) {",
+              "    pm.environment.set(\"test_service_id\", \"service-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+              "}",
+              "",
+              "// Ensure we have future dates",
+              "if (!pm.environment.get(\"booking_date\")) {",
+              "    const futureDate = new Date();",
+              "    futureDate.setDate(futureDate.getDate() + 3);",
+              "    pm.environment.set(\"booking_date\", futureDate.toISOString().split('T')[0]);",
+              "}",
+              "",
+              "// Set rate limit tracking",
+              "if (!pm.environment.get(\"rate_limit_tracking\")) {",
+              "    pm.environment.set(\"rate_limit_tracking\", JSON.stringify({",
+              "        booking_creation: { count: 0, reset: Date.now() + 900000 }, // 15 minutes",
+              "        booking_cancellation: { count: 0, reset: Date.now() + 3600000 }, // 1 hour",
+              "        booking_reschedule: { count: 0, reset: Date.now() + 1800000 } // 30 minutes",
+              "    }));",
+              "}"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_version",
+      "value": "1.0",
+      "type": "string"
+    },
+    {
+      "key": "default_limit",
+      "value": "20",
+      "type": "string"
+    },
+    {
+      "key": "default_timeout",
+      "value": "30000",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_start",
+      "value": "08:00",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_end",
+      "value": "22:00",
+      "type": "string"
+    },
+    {
+      "key": "supported_languages",
+      "value": "[\"ar\", \"en\"]",
+      "type": "string"
+    },
+    {
+      "key": "supported_payment_methods",
+      "value": "[\"cash\", \"card\", \"online\"]",
+      "type": "string"
+    },
+    {
+      "key": "booking_statuses",
+      "value": "[\"pending\", \"confirmed\", \"completed\", \"cancelled\", \"no_show\"]",
+      "type": "string"
+    },
+    {
+      "key": "jordan_phone_prefixes",
+      "value": "[\"77\", \"78\", \"79\"]",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{customer_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script for all requests",
+          "",
+          "// Set common headers",
+          "pm.request.headers.add({",
+          "    key: \"Content-Type\",",
+          "    value: \"application/json\"",
+          "});",
+          "",
+          "// Add timestamp for tracking",
+          "pm.environment.set(\"last_request_time\", new Date().toISOString());",
+          "",
+          "// Generate request ID for tracking",
+          "pm.environment.set(\"request_id\", \"req_\" + Date.now() + \"_\" + Math.random().toString(36).substr(2, 9));",
+          "",
+          "// Log request details",
+          "console.log(\"Making request to:\", pm.request.url);",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Ensure required environment variables are set",
+          "const requiredVars = ['base_url'];",
+          "const missingVars = requiredVars.filter(varName => !pm.environment.get(varName));",
+          "",
+          "if (missingVars.length > 0) {",
+          "    console.warn(\"Missing required environment variables:\", missingVars);",
+          "}",
+          "",
+          "// Set default values if not present",
+          "if (!pm.environment.get(\"base_url\")) {",
+          "    pm.environment.set(\"base_url\", \"http://localhost:3000\");",
+          "    console.log(\"Set default base_url to localhost\");",
+          "}",
+          "",
+          "// Generate future date if not set",
+          "if (!pm.environment.get(\"future_date\")) {",
+          "    const futureDate = new Date();",
+          "    futureDate.setDate(futureDate.getDate() + 3);",
+          "    pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "",
+          "// Basic response validation",
+          "pm.test(\"Response status is valid\", function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404, 409, 422, 429, 500]);",
+          "});",
+          "",
+          "// Response time validation",
+          "pm.test(\"Response time is acceptable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// JSON response validation",
+          "if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+          "    pm.test(\"Response is valid JSON\", function () {",
+          "        pm.response.to.be.json;",
+          "    });",
+          "    ",
+          "    pm.test(\"Response has success field\", function () {",
+          "        pm.response.to.have.jsonBody(\"success\");",
+          "    });",
+          "}",
+          "",
+          "// Rate limiting headers validation",
+          "pm.test(\"Rate limit headers present\", function () {",
+          "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+          "        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+          "        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+          "    }",
+          "});",
+          "",
+          "// Security headers validation",
+          "pm.test(\"Security headers present\", function () {",
+          "    // Check for common security headers",
+          "    const securityHeaders = ['X-Content-Type-Options', 'X-Frame-Options', 'X-XSS-Protection'];",
+          "    securityHeaders.forEach(header => {",
+          "        if (pm.response.headers.has(header)) {",
+          "            pm.expect(pm.response.headers.get(header)).to.be.a('string');",
+          "        }",
+          "    });",
+          "});",
+          "",
+          "// Log response details",
+          "console.log(\"Response Status:\", pm.response.status);",
+          "console.log(\"Response Time:\", pm.response.responseTime + \"ms\");",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Store response data for debugging",
+          "if (pm.response.json && pm.response.json().success === false) {",
+          "    console.log(\"Error Response:\", pm.response.json());",
+          "}",
+          "",
+          "// Jordan-specific validations",
+          "if (pm.response.json && pm.response.json().data) {",
+          "    const data = pm.response.json().data;",
+          "    ",
+          "    // Phone number validation",
+          "    if (data.phone || data.userPhone) {",
+          "        const phone = data.phone || data.userPhone;",
+          "        pm.test(\"Phone number is in Jordanian format\", function () {",
+          "            pm.expect(phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Currency validation",
+          "    if (data.amount || data.price) {",
+          "        const amount = data.amount || data.price;",
+          "        pm.test(\"Amount is in valid JOD format\", function () {",
+          "            pm.expect(amount).to.be.a('number');",
+          "            pm.expect(amount).to.be.at.least(0);",
+          "            pm.expect(amount).to.be.at.most(1000);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Arabic content validation",
+          "    if (data.providerName || data.serviceName) {",
+          "        const arabicText = data.providerName || data.serviceName;",
+          "        if (arabicText && typeof arabicText === 'string') {",
+          "            pm.test(\"Arabic content is present\", function () {",
+          "                pm.expect(arabicText).to.match(/[\\u0600-\\u06FF]/);",
+          "            });",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

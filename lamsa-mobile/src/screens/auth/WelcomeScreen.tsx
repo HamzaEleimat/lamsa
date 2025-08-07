@@ -21,7 +21,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import i18n, { changeLanguage, getCurrentLanguage, isRTL } from '../../i18n';
 import { Button } from '../../components/ui';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 
 const { width, height } = Dimensions.get('window');
 

@@ -25,7 +25,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { UserRole } from '../../types';
 import Constants from 'expo-constants';
 import { Button, Input } from '../../components/ui';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 
 type AuthStackParamList = {
   Welcome: undefined;
@@ -244,6 +244,18 @@ const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
                 {loading ? i18n.t('common.loading') : i18n.t('phoneAuth.sendOTP')}
               </Button>
 
+              {/* Email Signup Option */}
+              <View style={styles.emailSignupContainer}>
+                <Text style={[styles.emailSignupText, { color: theme.colors.onSurfaceVariant }]}>
+                  {i18n.t('phoneAuth.preferEmail')}
+                </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('CustomerSignup' as any)}>
+                  <Text style={[styles.emailSignupLink, { color: theme.colors.primary }]}>
+                    {i18n.t('phoneAuth.signupWithEmail')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
               {/* Development-only Admin Login Button */}
               {isDevelopment && (
                 <View style={styles.devContainer}>
@@ -374,6 +386,22 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: spacing.sm,
+  },
+  emailSignupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    gap: spacing.xs,
+  },
+  emailSignupText: {
+    fontSize: 14,
+    fontFamily: 'MartelSans_400Regular',
+  },
+  emailSignupLink: {
+    fontSize: 14,
+    fontFamily: 'MartelSans_600SemiBold',
+    textDecorationLine: 'underline',
   },
   snackbar: {
   },

@@ -35,7 +35,7 @@ import { BookingStatus, UserRole } from "../../types";
 import { useTranslation } from "../../hooks/useTranslation";
 import { isRTL } from "../../i18n";
 import { ProviderStackParamList } from "../../navigation/ProviderStackNavigator";
-import { customColors } from "../../theme";
+import { customColors } from "../../theme/index";
 import { getProviderIdForUser } from "../../utils/providerUtils";
 
 type BookingListScreenNavigationProp = NativeStackNavigationProp<

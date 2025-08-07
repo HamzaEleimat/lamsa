@@ -321,7 +321,7 @@ resource "azurerm_application_gateway" "main" {
     name                = "api-health-probe"
     protocol            = "Http"
     path                = "/api/health"
-    host                = "api.beautycort.com"
+    host                = "api.welamsa.com"
     interval            = 30
     timeout             = 5
     unhealthy_threshold = 3
@@ -335,7 +335,7 @@ resource "azurerm_application_gateway" "main" {
     name                = "web-health-probe"
     protocol            = "Http"
     path                = "/api/health"
-    host                = "dashboard.beautycort.com"
+    host                = "dashboard.welamsa.com"
     interval            = 30
     timeout             = 5
     unhealthy_threshold = 3
@@ -350,7 +350,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name             = "http-port"
     protocol                       = "Http"
-    host_name                      = "api.beautycort.com"
+    host_name                      = "api.welamsa.com"
   }
   
   http_listener {
@@ -358,7 +358,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name             = "http-port"
     protocol                       = "Http"
-    host_name                      = "dashboard.beautycort.com"
+    host_name                      = "dashboard.welamsa.com"
   }
   
   request_routing_rule {

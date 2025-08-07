@@ -32,7 +32,7 @@ import {
   Chip,
   IconButton 
 } from '../../components/ui';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 
 const { width } = Dimensions.get('window');
 

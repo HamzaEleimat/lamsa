@@ -5,11 +5,11 @@
 
 API_URL="http://localhost:3000/api/auth"
 TEST_PHONE="0791234567"
-TEST_EMAIL="test@beautycort.com"
+TEST_EMAIL="test@welamsa.com"
 TEST_PASSWORD="Test123!"
 
 echo "==================================="
-echo "Testing BeautyCort Auth Endpoints"
+echo "Testing WeLamsa Auth Endpoints"
 echo "==================================="
 echo ""
 

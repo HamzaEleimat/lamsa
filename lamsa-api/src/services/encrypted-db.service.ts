@@ -6,7 +6,6 @@
  * @copyright Lamsa 2025
  */
 
-import { db, supabaseAdmin } from '../config/supabase-simple';
 import { encryptionService, EncryptionService, PIIFields } from './encryption.service';
 import { logger } from '../utils/logger';
 
@@ -23,6 +22,19 @@ const PII_FIELDS: PIIFields = {
  * Encrypted database service that automatically handles PII encryption/decryption
  */
 export class EncryptedDatabaseService {
+  /**
+   * Get the Supabase admin client dynamically
+   * This ensures we get the latest client after environment changes
+   */
+  private getSupabaseAdmin() {
+    // Dynamically require to ensure we get the latest configuration
+    const { supabaseAdmin } = require('../config/supabase-simple');
+    if (!supabaseAdmin) {
+      logger.error('Supabase admin client not configured - check SUPABASE_SERVICE_KEY');
+      throw new Error('Supabase admin client not configured');
+    }
+    return supabaseAdmin;
+  }
   /**
    * Create a user with encrypted PII
    */
@@ -43,6 +55,7 @@ export class EncryptedDatabaseService {
       }
       
       // Create user with encrypted data
+      const { db } = require('../config/supabase-simple');
       const result = await db.users.create(encryptedData);
       
       // Decrypt PII before returning
@@ -68,9 +81,7 @@ export class EncryptedDatabaseService {
       const phoneHash = encryptionService.hash(phone);
       
       // First, try to find by hash
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('users')
@@ -108,9 +119,7 @@ export class EncryptedDatabaseService {
       const emailHash = encryptionService.hash(email);
       
       // First, try to find by hash
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('providers')
@@ -148,9 +157,7 @@ export class EncryptedDatabaseService {
       const phoneHash = encryptionService.hash(phone);
       
       // First, try to find by hash
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('providers')
@@ -203,9 +210,7 @@ export class EncryptedDatabaseService {
       }
       
       // Update with encrypted data
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('users')
@@ -236,9 +241,7 @@ export class EncryptedDatabaseService {
    */
   async getBookings(filters: any = {}) {
     try {
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       let query = supabaseAdmin.from('bookings').select('*');
       
@@ -254,7 +257,7 @@ export class EncryptedDatabaseService {
       }
       
       // Decrypt PII in each booking
-      const decryptedBookings = data.map(booking => 
+      const decryptedBookings = data.map((booking: any) => 
         encryptionService.decryptObject(booking, PII_FIELDS.bookings)
       );
       
@@ -276,9 +279,7 @@ export class EncryptedDatabaseService {
         PII_FIELDS.reviews
       );
       
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('reviews')
@@ -308,6 +309,7 @@ export class EncryptedDatabaseService {
    */
   async getProviderProfile(providerId: string, requesterId?: string) {
     try {
+      const { db } = require('../config/supabase-simple');
       const { data, error } = await db.providers.findById(providerId);
       
       if (error || !data) {
@@ -366,6 +368,7 @@ export class EncryptedDatabaseService {
    */
   private async isAdmin(userId: string): Promise<boolean> {
     try {
+      const { db } = require('../config/supabase-simple');
       const { data } = await db.providers.findById(userId);
       return (data as any)?.role === 'admin' || (data as any)?.role === 'super_admin';
     } catch {
@@ -397,9 +400,7 @@ export class EncryptedDatabaseService {
       encryptedData.pii_encrypted_at = new Date().toISOString();
       
       // Create provider with encrypted data
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('providers')
@@ -457,9 +458,7 @@ export class EncryptedDatabaseService {
       }
       
       // Update with encrypted data
-      if (!supabaseAdmin) {
-        throw new Error('Supabase admin client not configured');
-      }
+      const supabaseAdmin = this.getSupabaseAdmin();
       
       const { data, error } = await supabaseAdmin
         .from('providers')
@@ -499,9 +498,7 @@ export class EncryptedDatabaseService {
     try {
       while (true) {
         // Get batch of records
-        if (!supabaseAdmin) {
-          throw new Error('Supabase admin client not configured');
-        }
+        const supabaseAdmin = this.getSupabaseAdmin();
         
         let query = supabaseAdmin
           .from(tableName)

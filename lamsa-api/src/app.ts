@@ -15,6 +15,7 @@ dotenv.config();
 // Initialize and validate environment configuration
 import { initializeEnvironment } from './utils/environment-validation';
 import { secureLogger } from './utils/secure-logger';
+import { supabase } from './config/supabase';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -93,12 +94,14 @@ const app: Application = express();
 // CORS configuration for mobile app support
 const corsOptions: cors.CorsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.) only in development
+    // In development, allow all origins including mobile apps
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
+    // In production, still allow requests with no origin (mobile apps)
     if (!origin) {
-      if (process.env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-      return callback(new Error('Origin required'));
+      return callback(null, true);
     }
     
     // Production allowed origins
@@ -106,48 +109,22 @@ const corsOptions: cors.CorsOptions = {
       'https://lamsa.com',
       'https://www.lamsa.com',
       'https://app.lamsa.com',
-      'https://admin.lamsa.com',
-      'https://api.lamsa.com'
+      'https://admin.lamsa.com'
     ];
     
-    // Development allowed origins
-    const developmentOrigins = [
-      'http://localhost:8081', // Expo default
-      'http://localhost:19000', // Expo DevTools
-      'http://localhost:19001', // Expo web
-      'http://localhost:19002', // Expo web
-      'http://localhost:3000', // Web dashboard dev
-      'http://localhost:3001', // Alternative API port
-    ];
-    
-    // Get allowed origins based on environment
-    const allowedOrigins = process.env.NODE_ENV === 'production' 
-      ? productionOrigins 
-      : [...productionOrigins, ...developmentOrigins];
-    
-    // Check if origin is allowed
-    let isAllowed = allowedOrigins.includes(origin);
-    
-    // In development only, allow Expo patterns
-    if (!isAllowed && process.env.NODE_ENV === 'development') {
-      isAllowed = /^https?:\/\/.*\.exp\.direct$/.test(origin) || // Expo published apps
-                  /^https?:\/\/.*\.expo\.dev$/.test(origin) || // Expo development
-                  /^exp:\/\//.test(origin); // Expo client
-    }
-    
-    if (isAllowed) {
+    if (productionOrigins.includes(origin)) {
       callback(null, true);
     } else {
       secureLogger.warn('CORS blocked origin', { origin });
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Allow cookies/auth headers
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
   exposedHeaders: ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
-  maxAge: 86400 // Cache preflight response for 24 hours
+  optionsSuccessStatus: 200,
+  maxAge: 86400
 };
 
 // Enhanced security headers
@@ -217,13 +194,35 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(apiRateLimiter);
 
 // Health check endpoint
-app.get('/api/health', (_req: Request, res: Response) => {
+app.get('/api/health', async (_req: Request, res: Response) => {
+  // Check database connection
+  let databaseStatus = 'disconnected';
+  let databaseResponseTime = 0;
+  
+  try {
+    const startTime = Date.now();
+    // Simple database ping using Supabase
+    const { error } = await supabase.from('users').select('id').limit(1);
+    databaseResponseTime = Date.now() - startTime;
+    databaseStatus = error ? 'error' : 'connected';
+  } catch (error) {
+    databaseStatus = 'error';
+    console.error('Health check database error:', error);
+  }
+
   res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
-    version: '1.0.0',
+    success: true,
+    data: {
+      status: 'healthy',
+      version: '1.0.0',
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      database: {
+        status: databaseStatus,
+        responseTime: databaseResponseTime
+      }
+    }
   });
 });
 
@@ -304,8 +303,16 @@ if (isDevelopment) {
 // CSRF token endpoint (before CSRF protection)
 app.get('/api/csrf-token', getCSRFToken);
 
-// Apply CSRF protection to all routes (after token endpoint)
-app.use(csrfProtection);
+// Apply CSRF protection ONLY to non-API routes
+// Mobile apps use JWT, not cookies, so they don't need CSRF protection
+app.use((req: Request, res: Response, next: NextFunction) => {
+  // Skip CSRF for all API routes except the csrf-token endpoint
+  if (req.path.startsWith('/api/') && req.path !== '/api/csrf-token') {
+    return next();
+  }
+  // Apply CSRF protection to web routes only
+  csrfProtection(req, res, next);
+});
 
 // Configuration endpoints (after CSRF protection - now protected)
 app.use('/api/config', configRoutes);
@@ -314,7 +321,7 @@ app.use('/api/config', configRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/providers', providerRoutes);
-app.use('/api/providers', enhancedProviderRoutes); // Enhanced provider features
+// app.use('/api/providers', enhancedProviderRoutes); // Enhanced provider features
 app.use('/api/services', serviceRoutes);
 app.use('/api/service-management', serviceManagementRoutes); // Enhanced service management
 app.use('/api/availability', availabilityRoutes); // Availability management

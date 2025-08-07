@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
-import { lightTheme, darkTheme } from './src/theme';
+import { lightTheme, darkTheme } from './src/theme/index';
 import AuthStack from './src/navigation/AuthStack';
 import MainStack from './src/navigation/MainStack'; // Your main app navigation
 
@@ -46,7 +46,7 @@ export default function App() {
 1. Import the necessary components:
    import { Provider as PaperProvider } from 'react-native-paper';
    import { AuthProvider } from './src/contexts/AuthContext';
-   import { lightTheme } from './src/theme';
+   import { lightTheme } from './src/theme/index';
    import PhoneAuthScreen from './src/screens/auth/PhoneAuthScreen';
    import OTPVerifyScreen from './src/screens/auth/OTPVerifyScreen';
 

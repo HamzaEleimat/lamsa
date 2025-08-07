@@ -1,6 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
 import { secureLogger } from '../utils/secure-logger';
 
+/**
+ * TODO: Future Enhancement Options
+ * 
+ * This is the basic error middleware currently used throughout the application.
+ * For MVP, we're keeping this simple implementation.
+ * 
+ * Additional error handling capabilities are available in:
+ * - enhanced-error.middleware.ts: Provides detailed validation errors, specialized formatters
+ *   for booking/auth/database errors, and structured error responses
+ * - enhanced-bilingual-error.middleware.ts: Adds full Arabic/English bilingual support
+ *   with comprehensive error categorization
+ * 
+ * Post-MVP considerations:
+ * - Gradually migrate to enhanced error handling on specific routes
+ * - Add bilingual support based on actual user needs
+ * - Consider performance impact before enabling globally
+ */
+
 export class AppError extends Error {
   statusCode: number;
   isOperational: boolean;

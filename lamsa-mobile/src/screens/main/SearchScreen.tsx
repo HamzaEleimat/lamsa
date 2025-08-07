@@ -13,7 +13,7 @@ import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import { debounce } from 'lodash';
 import { Badge } from '../../components/ui';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 
 const SearchScreen: React.FC = () => {
   const theme = useTheme();

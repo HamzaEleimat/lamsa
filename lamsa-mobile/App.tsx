@@ -8,7 +8,7 @@ import { ThemeProvider, ThemeContext } from './src/contexts/ThemeContext';
 import { AppStateProvider } from './src/contexts/AppStateContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { initializeI18n } from './src/i18n';
-import { lightTheme, darkTheme } from './src/theme';
+import { lightTheme, darkTheme } from './src/theme/index';
 import ErrorBoundary from './src/components/base/ErrorBoundary';
 import {
   useFonts as useCormorantGaramond,

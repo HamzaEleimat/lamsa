@@ -351,15 +351,18 @@ class EnvironmentValidator {
   }
 
   private validateSupabaseURL(url: string): void {
-    if (!url.startsWith('https://')) {
-      this.errors.push('SUPABASE_URL must start with https://');
+    // Allow local development URLs
+    const isLocalDev = url.includes('127.0.0.1:54321') || url.includes('localhost:54321');
+    
+    if (!url.startsWith('https://') && !isLocalDev) {
+      this.errors.push('SUPABASE_URL must start with https:// (except for local development)');
     }
 
     if (url.includes('localhost') && this.isProduction) {
       this.errors.push('Cannot use localhost SUPABASE_URL in production');
     }
 
-    if (!url.includes('.supabase.co')) {
+    if (!url.includes('.supabase.co') && !isLocalDev) {
       this.warnings.push('SUPABASE_URL does not match expected Supabase format');
     }
   }

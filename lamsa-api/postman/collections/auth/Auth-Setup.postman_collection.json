@@ -1,0 +1,744 @@
+{
+  "info": {
+    "_postman_id": "lamsa-api-collection-auth-&-setup",
+    "name": "Lamsa API - Auth & Setup",
+    "description": "Authentication and setup requests for generating JWT tokens and test data. Run this collection first to prepare the environment for testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "lamsa-dev-team"
+  },
+  "item": [
+    {
+      "name": "Auth & Setup",
+      "item": [
+        {
+          "name": "Generate JWT Token (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Generate customer JWT token for testing",
+                  "const generateJWT = (payload) => {",
+                  "    const header = btoa(JSON.stringify({\"alg\": \"HS256\", \"typ\": \"JWT\"}));",
+                  "    const encodedPayload = btoa(JSON.stringify(payload));",
+                  "    const signature = \"mock_signature_\" + Date.now();",
+                  "    return `${header}.${encodedPayload}.${signature}`;",
+                  "};",
+                  "",
+                  "// Generate customer token",
+                  "const customerToken = generateJWT({",
+                  "    id: \"customer-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
+                  "    type: \"customer\",",
+                  "    phone: \"+962791234567\",",
+                  "    email: \"customer@test.com\",",
+                  "    language: \"ar\",",
+                  "    iat: Math.floor(Date.now() / 1000),",
+                  "    exp: Math.floor(Date.now() / 1000) + 3600",
+                  "});",
+                  "",
+                  "pm.environment.set(\"customer_token\", customerToken);",
+                  "pm.environment.set(\"customer_user_id\", \"customer-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "",
+                  "console.log(\"Customer token generated:\", customerToken);",
+                  "",
+                  "pm.test(\"Customer token generated successfully\", function () {",
+                  "    pm.expect(customerToken).to.be.a('string');",
+                  "    pm.expect(customerToken.split('.')).to.have.lengthOf(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Generates a JWT token for customer authentication and stores it in environment variables. This is a utility request that uses the health check endpoint to generate test tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate JWT Token (Provider)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Generate provider JWT token for testing",
+                  "const generateJWT = (payload) => {",
+                  "    const header = btoa(JSON.stringify({\"alg\": \"HS256\", \"typ\": \"JWT\"}));",
+                  "    const encodedPayload = btoa(JSON.stringify(payload));",
+                  "    const signature = \"mock_signature_\" + Date.now();",
+                  "    return `${header}.${encodedPayload}.${signature}`;",
+                  "};",
+                  "",
+                  "// Generate provider token",
+                  "const providerToken = generateJWT({",
+                  "    id: \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
+                  "    type: \"provider\",",
+                  "    phone: \"+962781111111\",",
+                  "    email: \"provider@test.com\",",
+                  "    businessName: \"صالون الجمال\",",
+                  "    verified: true,",
+                  "    iat: Math.floor(Date.now() / 1000),",
+                  "    exp: Math.floor(Date.now() / 1000) + 3600",
+                  "});",
+                  "",
+                  "pm.environment.set(\"provider_token\", providerToken);",
+                  "pm.environment.set(\"provider_user_id\", \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "pm.environment.set(\"test_provider_id\", \"provider-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "",
+                  "console.log(\"Provider token generated:\", providerToken);",
+                  "",
+                  "pm.test(\"Provider token generated successfully\", function () {",
+                  "    pm.expect(providerToken).to.be.a('string');",
+                  "    pm.expect(providerToken.split('.')).to.have.lengthOf(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Generates a JWT token for provider authentication and stores it in environment variables. This includes verified provider status and business information."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate JWT Token (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Generate admin JWT token for testing",
+                  "const generateJWT = (payload) => {",
+                  "    const header = btoa(JSON.stringify({\"alg\": \"HS256\", \"typ\": \"JWT\"}));",
+                  "    const encodedPayload = btoa(JSON.stringify(payload));",
+                  "    const signature = \"mock_signature_\" + Date.now();",
+                  "    return `${header}.${encodedPayload}.${signature}`;",
+                  "};",
+                  "",
+                  "// Generate admin token",
+                  "const adminToken = generateJWT({",
+                  "    id: \"admin-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"),",
+                  "    type: \"admin\",",
+                  "    phone: \"+962771111111\",",
+                  "    email: \"admin@lamsa.com\",",
+                  "    role: \"super_admin\",",
+                  "    permissions: [\"all\"],",
+                  "    iat: Math.floor(Date.now() / 1000),",
+                  "    exp: Math.floor(Date.now() / 1000) + 3600",
+                  "});",
+                  "",
+                  "pm.environment.set(\"admin_token\", adminToken);",
+                  "pm.environment.set(\"admin_user_id\", \"admin-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "",
+                  "console.log(\"Admin token generated:\", adminToken);",
+                  "",
+                  "pm.test(\"Admin token generated successfully\", function () {",
+                  "    pm.expect(adminToken).to.be.a('string');",
+                  "    pm.expect(adminToken.split('.')).to.have.lengthOf(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Generates a JWT token for admin authentication with full permissions for testing administrative operations."
+          },
+          "response": []
+        },
+        {
+          "name": "Customer Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Signup successful\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains user data and tokens\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData.data).to.have.property(\"user\");",
+                  "    pm.expect(responseData.data).to.have.property(\"token\");",
+                  "    pm.expect(responseData.data).to.have.property(\"refreshToken\");",
+                  "    pm.expect(responseData.data.type).to.equal(\"customer\");",
+                  "});",
+                  "",
+                  "pm.test(\"User data is correct\", function () {",
+                  "    const user = pm.response.json().data.user;",
+                  "    pm.expect(user).to.have.property(\"id\");",
+                  "    pm.expect(user).to.have.property(\"email\");",
+                  "    pm.expect(user).to.have.property(\"name\");",
+                  "    pm.expect(user).to.have.property(\"phone\");",
+                  "    pm.expect(user.role).to.equal(\"customer\");",
+                  "});",
+                  "",
+                  "// Store tokens for subsequent requests",
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json().data;",
+                  "    pm.environment.set(\"customer_token\", responseData.token);",
+                  "    pm.environment.set(\"customer_refresh_token\", responseData.refreshToken);",
+                  "    pm.environment.set(\"customer_user_id\", responseData.user.id);",
+                  "    console.log(\"Customer registered:\", responseData.user.email);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate random test data",
+                  "const timestamp = Date.now();",
+                  "pm.environment.set(\"test_customer_email\", `customer${timestamp}@example.com`);",
+                  "pm.environment.set(\"test_customer_phone\", `079${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test Customer\",\n    \"email\": \"{{test_customer_email}}\",\n    \"password\": \"Test123!\",\n    \"phone\": \"{{test_customer_phone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/customer/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "customer",
+                "signup"
+              ]
+            },
+            "description": "Register a new customer account with email and password. Returns JWT tokens and user profile."
+          },
+          "response": [
+            {
+              "name": "Success - Customer Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"Test123!\",\n    \"phone\": \"0791234567\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/customer/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "customer",
+                    "signup"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"user\": {\n            \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n            \"name\": \"John Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"phone\": \"0791234567\",\n            \"role\": \"customer\",\n            \"created_at\": \"2024-01-01T00:00:00.000Z\"\n        },\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"type\": \"customer\"\n    }\n}"
+            },
+            {
+              "name": "Error - Email Already Exists",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"existing@example.com\",\n    \"password\": \"Test123!\",\n    \"phone\": \"0791234567\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/customer/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "customer",
+                    "signup"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"error\": \"DUPLICATE_EMAIL\",\n    \"message\": \"Email already exists\"\n}"
+            },
+            {
+              "name": "Error - Invalid Phone Number",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Test123!\",\n    \"phone\": \"0761234567\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/customer/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "customer",
+                    "signup"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"error\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid Jordanian phone number. Must start with 077, 078, or 079\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"API is healthy\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.have.jsonBody(\"success\", true);",
+                  "    pm.response.to.have.jsonBody(\"data.status\", \"healthy\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is acceptable\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test(\"Database connection is healthy\", function () {",
+                  "    pm.response.to.have.jsonBody(\"data.database.status\", \"connected\");",
+                  "});",
+                  "",
+                  "// Store system information",
+                  "const responseData = pm.response.json().data;",
+                  "pm.environment.set(\"api_version\", responseData.version);",
+                  "pm.environment.set(\"system_status\", responseData.status);",
+                  "",
+                  "console.log(\"System Status:\", responseData.status);",
+                  "console.log(\"API Version:\", responseData.version);",
+                  "console.log(\"Database Response Time:\", responseData.database.responseTime);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Checks the health status of the API and database connection. This should be run first to ensure the system is operational."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Test Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Generate test data for the collection",
+                  "const today = new Date();",
+                  "const futureDate = new Date(today);",
+                  "futureDate.setDate(today.getDate() + 3);",
+                  "",
+                  "// Set future dates",
+                  "pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+                  "pm.environment.set(\"booking_date\", futureDate.toISOString().split('T')[0]);",
+                  "",
+                  "// Generate next week date",
+                  "const nextWeek = new Date(today);",
+                  "nextWeek.setDate(today.getDate() + 7);",
+                  "pm.environment.set(\"next_week_date\", nextWeek.toISOString().split('T')[0]);",
+                  "",
+                  "// Generate random Jordanian phone numbers",
+                  "const jordanPrefixes = ['77', '78', '79'];",
+                  "const randomPrefix = jordanPrefixes[Math.floor(Math.random() * jordanPrefixes.length)];",
+                  "const randomNumber = Math.floor(Math.random() * 10000000).toString().padStart(7, '0');",
+                  "pm.environment.set(\"random_jordan_phone\", `+962${randomPrefix}${randomNumber}`);",
+                  "",
+                  "// Generate test IDs",
+                  "pm.environment.set(\"test_service_id\", \"service-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "pm.environment.set(\"test_booking_id\", \"booking-test-\" + pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "",
+                  "// Set business hours",
+                  "pm.environment.set(\"business_hours_start\", \"08:00\");",
+                  "pm.environment.set(\"business_hours_end\", \"22:00\");",
+                  "pm.environment.set(\"booking_time\", \"14:30\");",
+                  "",
+                  "// Generate Arabic test data",
+                  "const arabicNames = ['أحمد محمد', 'فاطمة علي', 'محمد أحمد', 'زينب حسن'];",
+                  "const arabicBusinessNames = ['صالون الجمال', 'مركز التجميل', 'صالون الأناقة'];",
+                  "const arabicServices = ['قص الشعر', 'صبغة الشعر', 'مانيكير', 'تنظيف الوجه'];",
+                  "",
+                  "pm.environment.set(\"arabic_customer_name\", arabicNames[Math.floor(Math.random() * arabicNames.length)]);",
+                  "pm.environment.set(\"arabic_business_name\", arabicBusinessNames[Math.floor(Math.random() * arabicBusinessNames.length)]);",
+                  "pm.environment.set(\"arabic_service_name\", arabicServices[Math.floor(Math.random() * arabicServices.length)]);",
+                  "",
+                  "console.log(\"Test data generated successfully\");",
+                  "console.log(\"Future date:\", futureDate.toISOString().split('T')[0]);",
+                  "console.log(\"Test phone:\", `+962${randomPrefix}${randomNumber}`);",
+                  "",
+                  "pm.test(\"Test data generated\", function () {",
+                  "    pm.expect(pm.environment.get(\"future_date\")).to.be.a('string');",
+                  "    pm.expect(pm.environment.get(\"random_jordan_phone\")).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Generates test data including future dates, Jordanian phone numbers, and Arabic names for use in booking tests."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication and setup requests for generating JWT tokens and test data. Run this folder first to prepare the environment for testing.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Collection-level pre-request script",
+              "// Set common headers",
+              "pm.request.headers.add({",
+              "    key: \"Content-Type\",",
+              "    value: \"application/json\"",
+              "});",
+              "",
+              "// Set default timeout",
+              "pm.request.timeout = 30000;",
+              "",
+              "// Generate timestamp for logging",
+              "pm.environment.set(\"request_timestamp\", new Date().toISOString());"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_version",
+      "value": "1.0",
+      "type": "string"
+    },
+    {
+      "key": "default_limit",
+      "value": "20",
+      "type": "string"
+    },
+    {
+      "key": "default_timeout",
+      "value": "30000",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_start",
+      "value": "08:00",
+      "type": "string"
+    },
+    {
+      "key": "business_hours_end",
+      "value": "22:00",
+      "type": "string"
+    },
+    {
+      "key": "supported_languages",
+      "value": "[\"ar\", \"en\"]",
+      "type": "string"
+    },
+    {
+      "key": "supported_payment_methods",
+      "value": "[\"cash\", \"card\", \"online\"]",
+      "type": "string"
+    },
+    {
+      "key": "booking_statuses",
+      "value": "[\"pending\", \"confirmed\", \"completed\", \"cancelled\", \"no_show\"]",
+      "type": "string"
+    },
+    {
+      "key": "jordan_phone_prefixes",
+      "value": "[\"77\", \"78\", \"79\"]",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script for all requests",
+          "",
+          "// Set common headers",
+          "pm.request.headers.add({",
+          "    key: \"Content-Type\",",
+          "    value: \"application/json\"",
+          "});",
+          "",
+          "// Add timestamp for tracking",
+          "pm.environment.set(\"last_request_time\", new Date().toISOString());",
+          "",
+          "// Generate request ID for tracking",
+          "pm.environment.set(\"request_id\", \"req_\" + Date.now() + \"_\" + Math.random().toString(36).substr(2, 9));",
+          "",
+          "// Log request details",
+          "console.log(\"Making request to:\", pm.request.url);",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Ensure required environment variables are set",
+          "const requiredVars = ['base_url'];",
+          "const missingVars = requiredVars.filter(varName => !pm.environment.get(varName));",
+          "",
+          "if (missingVars.length > 0) {",
+          "    console.warn(\"Missing required environment variables:\", missingVars);",
+          "}",
+          "",
+          "// Set default values if not present",
+          "if (!pm.environment.get(\"base_url\")) {",
+          "    pm.environment.set(\"base_url\", \"http://localhost:3000\");",
+          "    console.log(\"Set default base_url to localhost\");",
+          "}",
+          "",
+          "// Generate future date if not set",
+          "if (!pm.environment.get(\"future_date\")) {",
+          "    const futureDate = new Date();",
+          "    futureDate.setDate(futureDate.getDate() + 3);",
+          "    pm.environment.set(\"future_date\", futureDate.toISOString().split('T')[0]);",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "",
+          "// Basic response validation",
+          "pm.test(\"Response status is valid\", function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403, 404, 409, 422, 429, 500]);",
+          "});",
+          "",
+          "// Response time validation",
+          "pm.test(\"Response time is acceptable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// JSON response validation",
+          "if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+          "    pm.test(\"Response is valid JSON\", function () {",
+          "        pm.response.to.be.json;",
+          "    });",
+          "    ",
+          "    pm.test(\"Response has success field\", function () {",
+          "        pm.response.to.have.jsonBody(\"success\");",
+          "    });",
+          "}",
+          "",
+          "// Rate limiting headers validation",
+          "pm.test(\"Rate limit headers present\", function () {",
+          "    if (pm.response.headers.has(\"X-RateLimit-Limit\")) {",
+          "        pm.response.to.have.header(\"X-RateLimit-Remaining\");",
+          "        pm.response.to.have.header(\"X-RateLimit-Reset\");",
+          "    }",
+          "});",
+          "",
+          "// Security headers validation",
+          "pm.test(\"Security headers present\", function () {",
+          "    // Check for common security headers",
+          "    const securityHeaders = ['X-Content-Type-Options', 'X-Frame-Options', 'X-XSS-Protection'];",
+          "    securityHeaders.forEach(header => {",
+          "        if (pm.response.headers.has(header)) {",
+          "            pm.expect(pm.response.headers.get(header)).to.be.a('string');",
+          "        }",
+          "    });",
+          "});",
+          "",
+          "// Log response details",
+          "console.log(\"Response Status:\", pm.response.status);",
+          "console.log(\"Response Time:\", pm.response.responseTime + \"ms\");",
+          "console.log(\"Request ID:\", pm.environment.get(\"request_id\"));",
+          "",
+          "// Store response data for debugging",
+          "if (pm.response.json && pm.response.json().success === false) {",
+          "    console.log(\"Error Response:\", pm.response.json());",
+          "}",
+          "",
+          "// Jordan-specific validations",
+          "if (pm.response.json && pm.response.json().data) {",
+          "    const data = pm.response.json().data;",
+          "    ",
+          "    // Phone number validation",
+          "    if (data.phone || data.userPhone) {",
+          "        const phone = data.phone || data.userPhone;",
+          "        pm.test(\"Phone number is in Jordanian format\", function () {",
+          "            pm.expect(phone).to.match(/^\\+962(77|78|79)\\d{7}$/);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Currency validation",
+          "    if (data.amount || data.price) {",
+          "        const amount = data.amount || data.price;",
+          "        pm.test(\"Amount is in valid JOD format\", function () {",
+          "            pm.expect(amount).to.be.a('number');",
+          "            pm.expect(amount).to.be.at.least(0);",
+          "            pm.expect(amount).to.be.at.most(1000);",
+          "        });",
+          "    }",
+          "    ",
+          "    // Arabic content validation",
+          "    if (data.providerName || data.serviceName) {",
+          "        const arabicText = data.providerName || data.serviceName;",
+          "        if (arabicText && typeof arabicText === 'string') {",
+          "            pm.test(\"Arabic content is present\", function () {",
+          "                pm.expect(arabicText).to.match(/[\\u0600-\\u06FF]/);",
+          "            });",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

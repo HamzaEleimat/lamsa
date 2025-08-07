@@ -234,7 +234,9 @@
     "phoneRequired": "Phone number is required",
     "phoneInvalid": "Please enter a valid Jordanian phone number",
     "otpSent": "OTP sent successfully",
-    "otpError": "Failed to send OTP. Please try again."
+    "otpError": "Failed to send OTP. Please try again.",
+    "preferEmail": "Prefer to use email?",
+    "signupWithEmail": "Sign up with email"
   },
   "otp": {
     "title": "Verify Your Phone",
@@ -861,6 +863,32 @@
     "mapView": "Map View",
     "showingResults": "Showing {{count}} results",
     "noProvidersMatchSearch": "No providers match your search",
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join Lamsa to book beauty services",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "phone": "Phone Number",
+      "createAccount": "Create Account",
+      "usePhone": "Use Phone Number Instead",
+      "alreadyHaveAccount": "Already have an account?",
+      "login": "Sign In",
+      "nameRequired": "Name is required",
+      "nameTooShort": "Name must be at least 2 characters",
+      "emailRequired": "Email is required",
+      "invalidEmail": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordWeak": "Password must contain uppercase, lowercase, and number",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match",
+      "phoneRequired": "Phone number is required",
+      "invalidPhone": "Please enter a valid Jordanian phone number",
+      "success": "Account created successfully!",
+      "error": "Failed to create account. Please try again."
+    },
     "onboarding": {
       "basicInfo": "Let's get to know you",
       "basicInfoSubtitle": "We need a few details to personalize your experience",

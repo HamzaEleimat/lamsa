@@ -25,7 +25,7 @@ import OTPInput from '../../components/auth/OTPInput/OTPInput';
 import ResendTimer from '../../components/auth/OTPInput/ResendTimer';
 import i18n, { isRTL } from '../../i18n';
 import { Button } from '../../components/ui';
-import { spacing, shadows } from '../../theme';
+import { spacing, shadows } from '../../theme/index';
 
 type AuthStackParamList = {
   Welcome: undefined;
