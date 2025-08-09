@@ -3,15 +3,15 @@
  * Tests provider-specific booking management workflows
  */
 
-import request from 'supertest';
-import app from '../../src/app';
-import { testDatabase } from '../utils/database';
-import { startTestServer, stopTestServer } from '../utils/testServer';
-import MockHelpers from '../utils/mockHelpers';
-import UserFactory from '../factories/userFactory';
-import ProviderFactory from '../factories/providerFactory';
-import ServiceFactory from '../factories/serviceFactory';
-import BookingFactory from '../factories/bookingFactory';
+const request = require('supertest');
+const app = require('../../src/app');
+const { testDatabase } = require('../utils/database');
+const { startTestServer, stopTestServer } = require('../utils/testServer');
+const MockHelpers = require('../utils/mockHelpers');
+const UserFactory = require('../factories/userFactory').default || require('../factories/userFactory');
+const ProviderFactory = require('../factories/providerFactory').default || require('../factories/providerFactory');
+const ServiceFactory = require('../factories/serviceFactory').default || require('../factories/serviceFactory');
+const BookingFactory = require('../factories/bookingFactory').default || require('../factories/bookingFactory');
 
 describe('Provider Workflow E2E Tests', () => {
   let server;

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ========================================
-# BeautyCort Authentication Testing Suite
+# Lamsa Authentication Testing Suite
 # ========================================
 # Comprehensive testing script for all authentication endpoints
 # Includes happy path, error cases, rate limiting, and security tests

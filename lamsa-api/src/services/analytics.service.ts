@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { format } from 'date-fns';
 import { RevenueService } from './revenue.service';
 import { CustomerAnalyticsService } from './customer-analytics.service';

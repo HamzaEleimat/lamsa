@@ -10,7 +10,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../middleware/error.middleware';
 import { ApiResponse, AuthRequest } from '../types';
 import { accountLockoutService } from '../services/account-lockout.service';
-import { db, supabaseAdmin } from '../config/supabase-simple';
+import { db, supabaseAdmin } from '../config/supabase';
 import { logger } from '../utils/logger';
 
 export class AdminController {

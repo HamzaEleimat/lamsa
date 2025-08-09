@@ -4,7 +4,7 @@
  */
 
 import { getEnvironmentConfig } from '../utils/environment-validation';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { logger } from '../utils/logger';
 
 export interface StartupValidationResult {

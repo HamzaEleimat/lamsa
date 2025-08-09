@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import jwt from 'jsonwebtoken';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { RevenueService } from './revenue.service';
 import { GamificationService } from './gamification.service';
 import { CustomerAnalyticsService } from './customer-analytics.service';

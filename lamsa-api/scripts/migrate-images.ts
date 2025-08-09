@@ -96,7 +96,7 @@ class ImageMigrationScript {
     
     if (hasS3) {
       console.log('✅ AWS S3 configured');
-      console.log(`   Bucket: ${process.env.AWS_S3_BUCKET || 'beautycort-images'}`);
+      console.log(`   Bucket: ${process.env.AWS_S3_BUCKET || 'lamsa-images'}`);
     }
     
     // Test database connection
@@ -111,7 +111,7 @@ class ImageMigrationScript {
   private async getDatabaseSize(phase: 'before' | 'after'): Promise<void> {
     try {
       const { data, error } = await supabase.rpc('pg_database_size', {
-        database_name: 'beautycort' // Replace with actual database name
+        database_name: 'lamsa' // Replace with actual database name
       });
       
       if (!error && data) {

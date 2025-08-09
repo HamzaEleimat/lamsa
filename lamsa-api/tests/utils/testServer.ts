@@ -65,7 +65,13 @@ export async function stopTestServer(serverInstance?: Server): Promise<void> {
     setTimeout(() => {
       if (targetServer.listening) {
         console.log('Force closing test server...');
-        targetServer.destroy();
+        // Force close all connections
+        try {
+          targetServer.close();
+          targetServer.unref();
+        } catch (err) {
+          console.error('Error force closing server:', err);
+        }
         server = null;
         resolve();
       }

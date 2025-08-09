@@ -4,10 +4,11 @@
  * Handles bilingual messaging, fallback mechanisms, and delivery tracking
  */
 
-import { supabase } from '../config/supabase-simple';
-import { AppError } from '../middleware/error.middleware';
 import { getEnvironmentConfig } from '../utils/environment-validation';
-import { logger } from '../utils/logger';
+import { smsNotificationService } from './notification-sms.service';
+import { websocketNotificationService } from './notification-websocket.service';
+import { pushNotificationService } from './notification-push.service';
+import { deliveryService } from './notification-delivery.service';
 
 export type NotificationChannel = 'sms' | 'websocket' | 'push' | 'email';
 export type NotificationPriority = 'urgent' | 'high' | 'normal' | 'low';
@@ -127,6 +128,7 @@ export class NotificationService {
    */
   setRealtimeService(realtimeService: any): void {
     this.realtimeService = realtimeService;
+    websocketNotificationService.setRealtimeService(realtimeService);
   }
 
   /**
@@ -167,7 +169,7 @@ export class NotificationService {
       const content = this.renderTemplate(template, data.recipient.language, data.data);
       
       // Track notification in database
-      await this.logNotification(notificationId, data, template);
+      // Note: Individual deliveries will be tracked per channel in the loop below
 
       // Send through channels with fallback
       const deliveryStatuses: NotificationDeliveryStatus[] = [];
@@ -182,8 +184,15 @@ export class NotificationService {
             notificationId
           );
 
+          const deliveryId = await deliveryService.trackDelivery(
+            notificationId,
+            channel,
+            result.success ? 'sent' : 'failed',
+            result.externalId
+          );
+
           const status: NotificationDeliveryStatus = {
-            id: this.generateDeliveryId(),
+            id: deliveryId,
             notificationId,
             channel,
             status: result.success ? 'sent' : 'failed',
@@ -195,7 +204,6 @@ export class NotificationService {
           };
 
           deliveryStatuses.push(status);
-          await this.logDeliveryStatus(status);
 
           if (result.success && !primarySuccess) {
             primarySuccess = true;
@@ -205,18 +213,24 @@ export class NotificationService {
             }
           }
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const deliveryId = await deliveryService.trackDelivery(
+            notificationId,
+            channel,
+            'failed'
+          );
+
           const status: NotificationDeliveryStatus = {
-            id: this.generateDeliveryId(),
+            id: deliveryId,
             notificationId,
             channel,
             status: 'failed',
             attempts: 1,
             lastAttemptAt: new Date(),
-            failureReason: error instanceof Error ? error.message : 'Unknown error'
+            failureReason: errorMessage
           };
 
           deliveryStatuses.push(status);
-          await this.logDeliveryStatus(status);
         }
       }
 
@@ -244,146 +258,11 @@ export class NotificationService {
     content: { title: string; body: string },
     notificationId: string
   ): Promise<{ success: boolean; error?: string; externalId?: string }> {
-    try {
-      if (!recipient.phone) {
-        return { success: false, error: 'No phone number provided' };
-      }
-
-      // Combine title and body for SMS
-      const message = content.title 
-        ? `${content.title}\n\n${content.body}` 
-        : content.body;
-
-      // Primary: Send via Supabase/Twilio
-      const primaryResult = await this.sendSMSViaSupabase(recipient.phone, message, notificationId);
-      
-      if (primaryResult.success) {
-        return primaryResult;
-      }
-
-      logger.warn(`Primary SMS failed for ${notificationId}: ${primaryResult.error}`);
-
-      // Fallback 1: Direct Twilio API (if configured)
-      if (this.envConfig.TWILIO_ACCOUNT_SID && this.envConfig.TWILIO_AUTH_TOKEN) {
-        const twilioResult = await this.sendSMSViaTwilioDirect(recipient.phone, message, notificationId);
-        
-        if (twilioResult.success) {
-          console.log(`SMS sent via direct Twilio fallback for ${notificationId}`);
-          return twilioResult;
-        }
-        
-        logger.warn(`Direct Twilio fallback failed for ${notificationId}: ${twilioResult.error}`);
-      }
-
-      // Fallback 2: Alternative SMS provider (placeholder)
-      // const altProviderResult = await this.sendSMSViaAlternativeProvider(recipient.phone, message, notificationId);
-
-      // Final fallback: Return primary error
-      return primaryResult;
-
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'SMS sending failed'
-      };
-    }
+    return await smsNotificationService.sendSMS(recipient, content, notificationId);
   }
 
-  /**
-   * Send SMS via Supabase/Twilio integration
-   */
-  private async sendSMSViaSupabase(
-    phone: string,
-    message: string,
-    notificationId: string
-  ): Promise<{ success: boolean; error?: string; externalId?: string }> {
-    try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        phone,
-        options: {
-          channel: 'sms',
-          data: {
-            message,
-            notificationId,
-            isNotification: true
-          }
-        }
-      });
 
-      if (error) {
-        return { success: false, error: `Supabase SMS: ${error.message}` };
-      }
 
-      return {
-        success: true,
-        externalId: data.messageId || notificationId
-      };
-
-    } catch (error) {
-      return {
-        success: false,
-        error: `Supabase SMS exception: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  }
-
-  /**
-   * Send SMS via direct Twilio API (fallback)
-   */
-  private async sendSMSViaTwilioDirect(
-    phone: string,
-    message: string,
-    notificationId: string
-  ): Promise<{ success: boolean; error?: string; externalId?: string }> {
-    try {
-      // TODO: Implement direct Twilio API call
-      // const twilio = require('twilio')(envConfig.TWILIO_ACCOUNT_SID, envConfig.TWILIO_AUTH_TOKEN);
-      // const messageResponse = await twilio.messages.create({
-      //   body: message,
-      //   from: envConfig.TWILIO_PHONE_NUMBER,
-      //   to: phone
-      // });
-      
-      // For now, simulate success/failure
-      console.log(`Direct Twilio SMS would be sent to ${phone}: ${message}`);
-      
-      return {
-        success: false, // Set to false until implemented
-        error: 'Direct Twilio integration not implemented yet'
-      };
-
-    } catch (error) {
-      return {
-        success: false,
-        error: `Direct Twilio: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  }
-
-  /**
-   * Send SMS via alternative provider (placeholder)
-   */
-  private async sendSMSViaAlternativeProvider(
-    phone: string,
-    message: string,
-    notificationId: string
-  ): Promise<{ success: boolean; error?: string; externalId?: string }> {
-    try {
-      // TODO: Implement alternative SMS provider (e.g., AWS SNS, MessageBird, etc.)
-      console.log(`Alternative SMS provider would send to ${phone}: ${message}`);
-      
-      return {
-        success: false, // Set to false until implemented
-        error: 'Alternative SMS provider not implemented yet'
-      };
-
-    } catch (error) {
-      return {
-        success: false,
-        error: `Alternative provider: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  }
 
   /**
    * Send WebSocket notification
@@ -393,32 +272,7 @@ export class NotificationService {
     content: { title: string; body: string },
     notificationId: string
   ): Promise<{ success: boolean; error?: string; externalId?: string }> {
-    try {
-      if (!this.realtimeService) {
-        return { success: false, error: 'WebSocket service not available' };
-      }
-
-      const payload = {
-        id: notificationId,
-        type: 'notification',
-        title: content.title,
-        message: content.body,
-        timestamp: new Date().toISOString(),
-        priority: 'normal',
-        actionRequired: false
-      };
-
-      // Send to specific user via WebSocket
-      await this.realtimeService.sendToUser(recipient.id, payload);
-
-      return { success: true, externalId: notificationId };
-
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'WebSocket sending failed'
-      };
-    }
+    return await websocketNotificationService.sendToUser(recipient, content, notificationId);
   }
 
   /**
@@ -429,28 +283,7 @@ export class NotificationService {
     content: { title: string; body: string },
     notificationId: string
   ): Promise<{ success: boolean; error?: string; externalId?: string }> {
-    try {
-      if (!recipient.deviceToken) {
-        return { success: false, error: 'No device token provided' };
-      }
-
-      // TODO: Integrate with Expo Push Notifications
-      // For now, just log the push notification
-      console.log('Push notification:', {
-        to: recipient.deviceToken,
-        title: content.title,
-        body: content.body,
-        data: { notificationId }
-      });
-
-      return { success: true, externalId: notificationId };
-
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Push notification failed'
-      };
-    }
+    return await pushNotificationService.sendPushNotification(recipient, content, notificationId);
   }
 
   /**
@@ -582,31 +415,6 @@ export class NotificationService {
     };
   }
 
-  /**
-   * Log notification in database
-   */
-  private async logNotification(
-    notificationId: string,
-    data: NotificationData,
-    template: NotificationTemplate
-  ): Promise<void> {
-    // TODO: Implement database logging
-    console.log('Notification logged:', {
-      id: notificationId,
-      event: data.event,
-      recipientId: data.recipient.id,
-      templateId: template.id,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  /**
-   * Log delivery status in database
-   */
-  private async logDeliveryStatus(status: NotificationDeliveryStatus): Promise<void> {
-    // TODO: Implement delivery status logging
-    console.log('Delivery status logged:', status);
-  }
 
   /**
    * Generate unique notification ID
@@ -743,6 +551,12 @@ export class NotificationService {
 
 // Export a getter function instead of the instance directly to delay initialization
 export const getNotificationService = () => NotificationService.getInstance();
+
+// Re-export types and services from split modules for backward compatibility
+export * from './notification-sms.service';
+export * from './notification-websocket.service';
+export * from './notification-push.service';
+export * from './notification-delivery.service';
 
 // For backward compatibility, export a proxy that will get the instance when accessed
 export const notificationService = new Proxy({} as NotificationService, {

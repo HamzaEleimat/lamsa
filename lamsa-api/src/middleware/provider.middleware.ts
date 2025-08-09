@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import { AppError } from './error.middleware';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 
 // Middleware to validate provider access
 export const validateProvider = async (

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
 
 export interface RevenueSummary {

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { format, addDays, startOfDay } from 'date-fns';
 
 // Type definitions for joined queries

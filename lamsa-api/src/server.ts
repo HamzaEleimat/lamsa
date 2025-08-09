@@ -1,5 +1,5 @@
 import app from './app';
-import { supabase } from './config/supabase-simple';
+import { supabase } from './config/supabase';
 import { secureLogger } from './utils/secure-logger';
 
 const PORT = process.env.PORT || 3001;

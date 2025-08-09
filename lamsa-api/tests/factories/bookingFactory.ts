@@ -38,7 +38,7 @@ export class BookingFactory {
     const platformFee = amount <= 25 ? 2.00 : 5.00;
     const providerFee = Number((amount - platformFee).toFixed(2));
 
-    const bookingDate = faker.date.future({ days: 30 });
+    const bookingDate = faker.date.future({ years: 0.1 }); // ~1 month ahead
     const startTime = this.generateBusinessHourTime();
     const endTime = this.calculateEndTime(startTime, faker.helpers.arrayElement([30, 45, 60, 90, 120]));
 
@@ -137,7 +137,7 @@ export class BookingFactory {
     serviceId: string,
     overrides: Partial<TestBooking> = {}
   ): TestBooking {
-    const pastDate = faker.date.past({ days: 30 });
+    const pastDate = faker.date.past({ years: 0.1 }); // ~1 month ago
     
     return this.create(userId, providerId, serviceId, {
       status: 'completed',

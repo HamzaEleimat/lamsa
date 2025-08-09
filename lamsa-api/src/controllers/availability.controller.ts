@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { availabilityService } from '../services/availability.service';
 import { prayerTimeService } from '../services/prayer-time.service';
 import { format, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns';

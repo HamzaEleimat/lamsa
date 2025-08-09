@@ -12,7 +12,7 @@ import {
   AuthAction,
   AuthResult
 } from '../types/auth-v2.types';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { validateJordanPhoneNumber } from '../utils/phone-validation';
 import { AppError } from '../middleware/error.middleware';
 import { secureLogger } from '../utils/secure-logger';

@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
-// import { supabase } from '../config/supabase-simple'; // Unused
+// import { supabase } from '../config/supabase'; // Unused
 import { DashboardService } from '../services/dashboard.service';
 import { AnalyticsService } from '../services/analytics.service';
 // import { performanceInsightsService } from '../services/performance-insights.service'; // Temporarily disabled

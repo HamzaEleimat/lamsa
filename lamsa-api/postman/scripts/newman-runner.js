@@ -22,7 +22,7 @@ class LamsaTestRunner {
         this.options = {
             environment: options.environment || 'local',
             collection: options.collection || 'all',
-            reporters: options.reporters || ['cli', 'json', 'html'],
+            reporters: options.reporters || ['cli', 'json'],
             timeout: options.timeout || 300000, // 5 minutes
             delayRequest: options.delayRequest || 500,
             verbose: options.verbose || false,
@@ -161,8 +161,8 @@ class LamsaTestRunner {
         const collections = this.getAvailableCollections();
         console.log(`\n🔄 Running ${collections.length} collections...`);
 
-        // Define execution order
-        const executionOrder = ['auth', 'providers', 'bookings', 'journeys', 'testing'];
+        // Define execution order - setup must run first
+        const executionOrder = ['setup', 'auth', 'providers', 'bookings', 'journeys', 'testing'];
         
         // Sort collections by execution order
         const sortedCollections = collections.sort((a, b) => {
@@ -217,6 +217,14 @@ class LamsaTestRunner {
             suppressExitCode: true,
             color: 'on'
         };
+
+        // Check for data file
+        const dataFilePath = path.join(__dirname, '../data', `${collectionName}-test-data.json`);
+        if (fs.existsSync(dataFilePath)) {
+            runOptions.iterationData = dataFilePath;
+            runOptions.iterationCount = undefined; // Let Newman determine from data file
+            console.log(`📊 Using data file: ${dataFilePath}`);
+        }
 
         return new Promise((resolve, reject) => {
             newman.run(runOptions, (err, summary) => {

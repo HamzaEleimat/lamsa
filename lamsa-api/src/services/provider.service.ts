@@ -3,7 +3,7 @@
  * Handles business logic for provider operations
  */
 
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { PaginatedResponse } from '../types';
 
 export class ProviderService {

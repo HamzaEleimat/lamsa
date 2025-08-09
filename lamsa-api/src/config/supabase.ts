@@ -1,18 +1,17 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { Database } from '../types/database';
+import crypto from 'crypto';
+import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
 import { 
-  User, 
-  Provider, 
-  Service, 
-  Booking, 
-  Review,
-  ServiceCategory,
-  ProviderSearchResult,
-  BookingWithDetails,
-  ProviderWithServices
-} from '../types/database';
-import { secureLogger } from '../utils/secure-logger';
+  PhoneAuthResult, 
+  PhoneAuthErrorCode,
+  OtpConfig,
+  VerifyOtpConfig,
+  PhoneAuthSession,
+  OtpResponse,
+  mapSupabaseError,
+  OtpAttemptTracker
+} from '../utils/auth-types';
 
 dotenv.config();
 
@@ -25,73 +24,552 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_ANON_KEY');
 }
 
-// Create typed Supabase clients
-export const supabase: SupabaseClient<Database> = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-    db: {
-      schema: 'public',
-    },
-    global: {
-      headers: {
-        'x-application-name': 'lamsa-api',
-      },
-    },
-  }
-);
+if (!supabaseServiceKey) {
+  console.warn('SUPABASE_SERVICE_KEY not configured - some admin operations will not be available');
+}
+
+// Create Supabase clients
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: false,
+    detectSessionInUrl: false,
+  },
+});
 
 // Admin client for server-side operations with elevated privileges
-export const supabaseAdmin: SupabaseClient<Database> | null = supabaseServiceKey
-  ? createClient<Database>(supabaseUrl, supabaseServiceKey, {
+export const supabaseAdmin = supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
-      db: {
-        schema: 'public',
-      },
     })
   : null;
 
-// Helper type for Supabase responses
-export type SupabaseResponse<T> = {
-  data: T | null;
-  error: Error | null;
+// Log configuration status on startup
+console.log('Supabase Configuration:', {
+  url: supabaseUrl,
+  hasServiceKey: !!supabaseServiceKey,
+  hasAdminClient: !!supabaseAdmin,
+  isCloudInstance: supabaseUrl.includes('supabase.co')
+});
+
+// Initialize OTP attempt tracker for security
+const otpAttemptTracker = new OtpAttemptTracker();
+
+// Helper function to create SHA-256 hash
+function createHash(value: string): string {
+  return crypto.createHash('sha256').update(value.toLowerCase().trim()).digest('hex');
+}
+
+// Export auth helpers
+export const auth = {
+  async signOut() {
+    return supabase.auth.signOut();
+  },
+  
+  async getSession() {
+    return supabase.auth.getSession();
+  },
+  
+  async getUser() {
+    return supabase.auth.getUser();
+  },
+  
+  async signUpProvider(providerData: any) {
+    try {
+      console.log('=== Provider Signup Debug ===');
+      console.log('Input data:', JSON.stringify(providerData, null, 2));
+      
+      // For development/testing, use admin client to create user with confirmed email
+      if (supabaseAdmin && (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')) {
+        console.log('Using admin client for provider signup (dev/test mode)');
+        
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email: providerData.email,
+          password: providerData.password,
+          email_confirm: true, // Auto-confirm email in development
+          user_metadata: {
+            type: 'provider'
+          }
+        });
+        
+        console.log('Admin auth creation result:', { authData, authError });
+        
+        if (authError || !authData.user) {
+          console.error('Admin auth creation failed:', authError);
+          return { data: null, error: authError };
+        }
+        
+        // Continue with the same flow but use authData.user
+        const transformedAddress = {
+          street_ar: providerData.address.street,
+          street_en: providerData.address.street,
+          area_ar: providerData.address.district,
+          area_en: providerData.address.district,
+          city_ar: providerData.address.city,
+          city_en: providerData.address.city,
+          building_no: ''
+        };
+
+        const insertData: any = {
+          id: authData.user.id,
+          email: providerData.email,
+          phone: providerData.phone,
+          email_hash: createHash(providerData.email),
+          phone_hash: createHash(providerData.phone),
+          business_name_ar: providerData.business_name_ar,
+          business_name_en: providerData.business_name_en,
+          owner_name: providerData.owner_name,
+          address: transformedAddress,
+          license_number: providerData.license_number,
+          password_hash: null,
+        };
+
+        if (providerData.latitude !== undefined && providerData.longitude !== undefined) {
+          insertData.latitude = providerData.latitude;
+          insertData.longitude = providerData.longitude;
+        }
+
+        console.log('Inserting provider data:', JSON.stringify(insertData, null, 2));
+        
+        const { data: provider, error: providerError } = await supabaseAdmin
+          .from('providers')
+          .insert(insertData)
+          .select()
+          .single();
+        
+        console.log('Provider insert result:', { provider, providerError });
+        
+        if (providerError) {
+          console.error('Provider creation failed:', {
+            error: providerError,
+            message: providerError.message,
+            details: providerError.details,
+            hint: providerError.hint,
+            code: providerError.code,
+            insertData: insertData
+          });
+          
+          // Rollback auth user if provider creation fails
+          try {
+            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            console.log('Auth user rolled back successfully');
+          } catch (rollbackError) {
+            console.error('Failed to rollback auth user:', rollbackError);
+          }
+          
+          return { data: null, error: providerError };
+        }
+        
+        return { data: { user: authData.user, provider }, error: null };
+      }
+      
+      // Production mode or no admin client - use regular signup
+      console.log('Using regular client for provider signup');
+      
+      // Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: providerData.email,
+        password: providerData.password,
+      });
+      
+      console.log('Auth signup result:', { authData, authError });
+      
+      if (authError || !authData.user) {
+        console.error('Auth signup failed:', authError);
+        return { data: null, error: authError };
+      }
+      
+      // Transform address to match database schema
+      const transformedAddress = {
+        street_ar: providerData.address.street, // Use English for Arabic temporarily
+        street_en: providerData.address.street,
+        area_ar: providerData.address.district,
+        area_en: providerData.address.district,
+        city_ar: providerData.address.city,
+        city_en: providerData.address.city,
+        building_no: '' // Optional field
+      };
+
+      // Create provider profile
+      const insertData: any = {
+        id: authData.user.id,
+        email: providerData.email,
+        phone: providerData.phone,
+        email_hash: createHash(providerData.email), // Add hash for encrypted lookups
+        phone_hash: createHash(providerData.phone), // Add hash for encrypted lookups
+        business_name_ar: providerData.business_name_ar,
+        business_name_en: providerData.business_name_en,
+        owner_name: providerData.owner_name,
+        address: transformedAddress,
+        license_number: providerData.license_number,
+        password_hash: null, // Null since we use Supabase Auth
+      };
+
+      // Only include location fields if both are provided
+      if (providerData.latitude !== undefined && providerData.longitude !== undefined) {
+        insertData.latitude = providerData.latitude;
+        insertData.longitude = providerData.longitude;
+        // Don't set location directly - let database trigger handle it
+      }
+
+      console.log('Inserting provider data:', JSON.stringify(insertData, null, 2));
+      
+      // Use supabaseAdmin for provider creation to bypass RLS
+      if (!supabaseAdmin) {
+        console.error('supabaseAdmin not configured - falling back to regular client');
+        const { data: provider, error: providerError } = await supabase
+          .from('providers')
+          .insert(insertData)
+          .select()
+          .single();
+        
+        console.log('Provider insert result:', { provider, providerError });
+        
+        if (providerError) {
+          throw providerError;
+        }
+        
+        return { data: { user: authData.user, provider }, error: null };
+      }
+      
+      const { data: provider, error: providerError } = await supabaseAdmin
+        .from('providers')
+        .insert(insertData)
+        .select()
+        .single();
+      
+      console.log('Provider insert result:', { provider, providerError });
+      
+      if (providerError) {
+        console.error('Provider creation failed:', {
+          error: providerError,
+          message: providerError.message,
+          details: providerError.details,
+          hint: providerError.hint,
+          code: providerError.code,
+          insertData: insertData // Log the data we tried to insert for debugging
+        });
+        
+        // Rollback auth user if provider creation fails
+        if (supabaseAdmin) {
+          try {
+            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            console.log('Auth user rolled back successfully');
+          } catch (rollbackError) {
+            console.error('Failed to rollback auth user:', rollbackError);
+          }
+        } else {
+          console.warn('Cannot rollback auth user - supabaseAdmin not configured');
+        }
+        
+        return { data: null, error: providerError };
+      }
+      
+      return { data: { user: authData.user, provider }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+  
+  async signInProvider(email: string, password: string) {
+    try {
+      console.log('[signInProvider] Called with email:', email);
+      
+      // Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      console.log('[signInProvider] Auth result:', {
+        hasUser: !!authData?.user,
+        hasSession: !!authData?.session,
+        error: authError?.message || null
+      });
+      
+      if (authError || !authData.user) {
+        console.log('[signInProvider] Returning error:', authError);
+        return { data: null, error: authError };
+      }
+      
+      // Get provider profile
+      console.log('[signInProvider] Fetching provider with ID:', authData.user.id);
+      
+      const { data: provider, error: providerError } = await supabase
+        .from('providers')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+      
+      console.log('[signInProvider] Provider query result:', {
+        hasProvider: !!provider,
+        error: providerError?.message || null
+      });
+      
+      if (providerError || !provider) {
+        console.log('[signInProvider] Provider error, returning:', providerError);
+        return { data: null, error: providerError || new Error('Provider profile not found') };
+      }
+      
+      console.log('[signInProvider] Success! Returning provider:', provider.email);
+      return { data: { user: authData.user, provider }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+  
+  async signInWithOtp(config: OtpConfig): Promise<PhoneAuthResult<OtpResponse>> {
+    try {
+      // Validate phone number
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(config.phone)
+        : validateJordanPhoneNumber(config.phone);
+      
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INVALID_PHONE_NUMBER,
+            message: validation.error || 'Invalid phone number'
+          }
+        };
+      }
+
+      const normalizedPhone = validation.normalizedPhone!;
+      
+      // Check rate limiting
+      const attemptResult = otpAttemptTracker.recordAttempt(normalizedPhone);
+      if (!attemptResult.allowed) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.TOO_MANY_ATTEMPTS,
+            message: `Too many attempts. Please try again after ${attemptResult.blockedUntil?.toLocaleTimeString()}`,
+            status: 429
+          }
+        };
+      }
+      
+      // Send OTP via Supabase
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: normalizedPhone,
+        options: {
+          channel: config.channel || 'sms',
+          ...(config.captchaToken && { captchaToken: config.captchaToken })
+        }
+      });
+      
+      if (error) {
+        return {
+          success: false,
+          error: mapSupabaseError(error)
+        };
+      }
+      
+      // Check if SMS was actually sent
+      const response: OtpResponse = {
+        messageId: data?.messageId,
+        user: data?.user,
+        session: data?.session
+      };
+      
+      // Log for monitoring (without exposing phone numbers in production)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📱 OTP sent to:', normalizedPhone);
+        if (response.messageId) {
+          console.log('✅ SMS delivered, message ID:', response.messageId);
+        } else {
+          console.log('⚠️  OTP created but SMS delivery status unknown');
+        }
+      }
+      
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: mapSupabaseError(error)
+      };
+    }
+  },
+  
+  async verifyOtp(config: VerifyOtpConfig): Promise<PhoneAuthResult<PhoneAuthSession>> {
+    try {
+      // Validate phone number
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(config.phone)
+        : validateJordanPhoneNumber(config.phone);
+      
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INVALID_PHONE_NUMBER,
+            message: validation.error || 'Invalid phone number'
+          }
+        };
+      }
+
+      const normalizedPhone = validation.normalizedPhone!;
+      
+      // Validate OTP format (6 digits)
+      if (!/^\d{6}$/.test(config.token)) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INVALID_OTP,
+            message: 'Verification code must be 6 digits'
+          }
+        };
+      }
+      
+      // Verify OTP via Supabase
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: normalizedPhone,
+        token: config.token,
+        type: config.type || 'sms',
+        options: config.captchaToken ? { captchaToken: config.captchaToken } : undefined
+      });
+      
+      if (error) {
+        // Map specific OTP errors
+        const mappedError = mapSupabaseError(error);
+        
+        // Special handling for invalid OTP - track failed attempts
+        if (mappedError.code === PhoneAuthErrorCode.INVALID_OTP || 
+            mappedError.code === PhoneAuthErrorCode.EXPIRED_OTP) {
+          const attemptResult = otpAttemptTracker.recordAttempt(normalizedPhone);
+          if (!attemptResult.allowed) {
+            mappedError.code = PhoneAuthErrorCode.TOO_MANY_ATTEMPTS;
+            mappedError.message = `Too many failed attempts. Account locked until ${attemptResult.blockedUntil?.toLocaleTimeString()}`;
+          } else if (attemptResult.remainingAttempts > 0) {
+            mappedError.message += ` (${attemptResult.remainingAttempts} attempts remaining)`;
+          }
+        }
+        
+        return {
+          success: false,
+          error: mappedError
+        };
+      }
+      
+      if (!data.session) {
+        return {
+          success: false,
+          error: {
+            code: PhoneAuthErrorCode.INTERNAL_ERROR,
+            message: 'Verification succeeded but no session was created'
+          }
+        };
+      }
+      
+      // Reset attempt tracker on successful verification
+      otpAttemptTracker.resetAttempts(normalizedPhone);
+      
+      // Return session data
+      const session: PhoneAuthSession = {
+        access_token: data.session.access_token,
+        token_type: data.session.token_type || 'bearer',
+        expires_in: data.session.expires_in || 3600,
+        refresh_token: data.session.refresh_token,
+        user: {
+          id: data.user?.id || data.session.user.id,
+          phone: data.user?.phone || data.session.user.phone || null,
+          phone_confirmed_at: data.user?.phone_confirmed_at || data.session.user.phone_confirmed_at || null,
+          created_at: data.user?.created_at || data.session.user.created_at || new Date().toISOString(),
+          updated_at: data.user?.updated_at || data.session.user.updated_at || new Date().toISOString()
+        }
+      };
+      
+      return {
+        success: true,
+        data: session
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: mapSupabaseError(error)
+      };
+    }
+  },
+  
+  async createCustomerAfterOtp(phone: string, additionalData?: any) {
+    try {
+      // Validate phone is provided
+      if (!phone) {
+        throw new Error('Phone number is required');
+      }
+      
+      // First check if user already exists
+      const { data: existingUser } = await db.users.findByPhone(phone);
+      
+      if (existingUser) {
+        return { data: existingUser, error: null };
+      }
+      
+      // Create new user - ensure phone is string
+      const userPhone = phone as string; // We've already validated it's not undefined
+      const result = await db.users.create({
+        phone: userPhone,
+        name: additionalData?.name || 'User',
+        language: additionalData?.language || 'ar',
+        ...additionalData
+      });
+      
+      // If database is not set up, return mock user for testing
+      if (result.error && process.env.NODE_ENV === 'development') {
+        console.log('⚠️  Database not configured, returning mock user for testing');
+        const mockUser = {
+          id: 'mock-' + Date.now(),
+          phone: userPhone,
+          name: additionalData?.name || 'User',
+          language: additionalData?.language || 'ar',
+          created_at: new Date().toISOString(),
+        };
+        return { data: mockUser, error: null };
+      }
+      
+      return result;
+    } catch (error) {
+      // In development, return mock user if database fails
+      // At this point, we know phone is defined because we checked at the beginning
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⚠️  Database error, returning mock user for testing');
+        const mockUser = {
+          id: 'mock-' + Date.now(),
+          phone: phone as string, // Safe cast because we validated at the beginning
+          name: additionalData?.name || 'User',
+          language: additionalData?.language || 'ar',
+          created_at: new Date().toISOString(),
+        };
+        return { data: mockUser, error: null };
+      }
+      return { data: null, error };
+    }
+  },
 };
 
-// Common error handling wrapper
+// Helper function to handle Supabase operations
 export async function handleSupabaseOperation<T>(
-  operation: PromiseLike<{ data: T | null; error: any }>
-): Promise<SupabaseResponse<T>> {
+  queryBuilder: any
+): Promise<{ data: T | null; error: any }> {
   try {
-    const { data, error } = await operation;
-    
-    if (error) {
-      secureLogger.error('Supabase operation error', error);
-      return { data: null, error: new Error(error.message || 'Database operation failed') };
-    }
-    
-    return { data, error: null };
-  } catch (err) {
-    secureLogger.error('Unexpected error in Supabase operation', err);
-    return { 
-      data: null, 
-      error: err instanceof Error ? err : new Error('Unexpected error occurred') 
-    };
+    const result = await queryBuilder;
+    return result;
+  } catch (error) {
+    return { data: null, error };
   }
 }
 
-// Database helper functions
+// Simple database helpers
 export const db = {
-  // User operations
   users: {
-    async findByPhone(phone: string): Promise<SupabaseResponse<User>> {
+    async findByPhone(phone: string) {
       return handleSupabaseOperation(
         supabase
           .from('users')
@@ -100,8 +578,28 @@ export const db = {
           .single()
       );
     },
-
-    async create(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<SupabaseResponse<User>> {
+    
+    async findByEmail(email: string) {
+      return handleSupabaseOperation(
+        supabase
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .single()
+      );
+    },
+    
+    async findById(id: string) {
+      return handleSupabaseOperation(
+        supabase
+          .from('users')
+          .select('*')
+          .eq('id', id)
+          .single()
+      );
+    },
+    
+    async create(userData: any) {
       return handleSupabaseOperation(
         supabase
           .from('users')
@@ -110,22 +608,10 @@ export const db = {
           .single()
       );
     },
-
-    async update(userId: string, updates: Partial<User>): Promise<SupabaseResponse<User>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('users')
-          .update(updates)
-          .eq('id', userId)
-          .select()
-          .single()
-      );
-    },
   },
-
-  // Provider operations
+  
   providers: {
-    async findByEmail(email: string): Promise<SupabaseResponse<Provider>> {
+    async findByEmail(email: string) {
       return handleSupabaseOperation(
         supabase
           .from('providers')
@@ -134,8 +620,8 @@ export const db = {
           .single()
       );
     },
-
-    async findByPhone(phone: string): Promise<SupabaseResponse<Provider>> {
+    
+    async findByPhone(phone: string) {
       return handleSupabaseOperation(
         supabase
           .from('providers')
@@ -144,372 +630,15 @@ export const db = {
           .single()
       );
     },
-
-    async searchNearby(lat: number, lng: number, radiusKm: number = 10): Promise<SupabaseResponse<ProviderSearchResult[]>> {
-      return handleSupabaseOperation(
-        supabase.rpc('search_providers_nearby', {
-          user_lat: lat,
-          user_lng: lng,
-          radius_km: radiusKm,
-        })
-      );
-    },
-
-    async getWithServices(providerId: string): Promise<SupabaseResponse<ProviderWithServices>> {
+    
+    async findById(id: string) {
       return handleSupabaseOperation(
         supabase
           .from('providers')
-          .select(`
-            *,
-            services (
-              *,
-              category:service_categories (*)
-            ),
-            availability:provider_availability (*)
-          `)
-          .eq('id', providerId)
-          .single()
-      );
-    },
-
-    async updateRating(providerId: string): Promise<SupabaseResponse<Provider>> {
-      // This is handled by trigger, but can be called manually if needed
-      return handleSupabaseOperation(
-        supabase.rpc('update_provider_rating', { provider_id: providerId })
-      );
-    },
-  },
-
-  // Service operations
-  services: {
-    async getByProvider(providerId: string, activeOnly: boolean = true): Promise<SupabaseResponse<Service[]>> {
-      let query = supabase
-        .from('services')
-        .select(`
-          *,
-          category:service_categories (*)
-        `)
-        .eq('provider_id', providerId);
-
-      if (activeOnly) {
-        query = query.eq('active', true);
-      }
-
-      return handleSupabaseOperation(query);
-    },
-
-    async getByCategory(categoryId: string): Promise<SupabaseResponse<Service[]>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('services')
-          .select(`
-            *,
-            provider:providers (
-              id,
-              business_name_ar,
-              business_name_en,
-              rating,
-              total_reviews,
-              latitude,
-              longitude
-            )
-          `)
-          .eq('category_id', categoryId)
-          .eq('active', true)
-      );
-    },
-  },
-
-  // Booking operations
-  bookings: {
-    async checkAvailability(
-      providerId: string,
-      bookingDate: string,
-      startTime: string,
-      endTime: string
-    ): Promise<SupabaseResponse<boolean>> {
-      return handleSupabaseOperation(
-        supabase.rpc('check_provider_availability', {
-          p_provider_id: providerId,
-          p_booking_date: bookingDate,
-          p_start_time: startTime,
-          p_end_time: endTime,
-        })
-      );
-    },
-
-    async create(bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at' | 'provider_fee' | 'platform_fee'>): Promise<SupabaseResponse<Booking>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('bookings')
-          .insert(bookingData)
-          .select()
-          .single()
-      );
-    },
-
-    async getWithDetails(bookingId: string): Promise<SupabaseResponse<BookingWithDetails>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('bookings')
-          .select(`
-            *,
-            user:users (*),
-            provider:providers (*),
-            service:services (*),
-            review:reviews (*)
-          `)
-          .eq('id', bookingId)
-          .single()
-      );
-    },
-
-    async updateStatus(
-      bookingId: string, 
-      status: Database['public']['Enums']['booking_status']
-    ): Promise<SupabaseResponse<Booking>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('bookings')
-          .update({ status })
-          .eq('id', bookingId)
-          .select()
-          .single()
-      );
-    },
-
-    async getUserBookings(
-      userId: string,
-      options?: {
-        status?: Database['public']['Enums']['booking_status'];
-        limit?: number;
-        offset?: number;
-      }
-    ): Promise<SupabaseResponse<BookingWithDetails[]>> {
-      let query = supabase
-        .from('bookings')
-        .select(`
-          *,
-          provider:providers (*),
-          service:services (*),
-          review:reviews (*)
-        `)
-        .eq('user_id', userId)
-        .order('booking_date', { ascending: false });
-
-      if (options?.status) {
-        query = query.eq('status', options.status);
-      }
-
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-
-      if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
-      }
-
-      return handleSupabaseOperation(query);
-    },
-  },
-
-  // Review operations
-  reviews: {
-    async create(reviewData: Omit<Review, 'id' | 'created_at'>): Promise<SupabaseResponse<Review>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('reviews')
-          .insert(reviewData)
-          .select()
-          .single()
-      );
-    },
-
-    async getProviderReviews(
-      providerId: string,
-      options?: { limit?: number; offset?: number }
-    ): Promise<SupabaseResponse<Review[]>> {
-      let query = supabase
-        .from('reviews')
-        .select(`
-          *,
-          user:users (name, phone),
-          booking:bookings (
-            service:services (name_ar, name_en)
-          )
-        `)
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-
-      if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
-      }
-
-      return handleSupabaseOperation(query);
-    },
-  },
-
-  // Service category operations
-  categories: {
-    async getAll(): Promise<SupabaseResponse<ServiceCategory[]>> {
-      return handleSupabaseOperation(
-        supabase
-          .from('service_categories')
           .select('*')
-          .order('sort_order')
+          .eq('id', id)
+          .single()
       );
     },
-  },
-
-  // Settlement operations
-  settlements: {
-    async generateMonthly(month: number, year: number): Promise<SupabaseResponse<void>> {
-      return handleSupabaseOperation(
-        supabase.rpc('generate_monthly_settlements', {
-          target_month: month,
-          target_year: year,
-        })
-      );
-    },
-
-    async getProviderSettlements(
-      providerId: string,
-      year?: number
-    ): Promise<SupabaseResponse<any[]>> {
-      let query = supabase
-        .from('settlements')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('year', { ascending: false })
-        .order('month', { ascending: false });
-
-      if (year) {
-        query = query.eq('year', year);
-      }
-
-      return handleSupabaseOperation(query);
-    },
-  },
-};
-
-// Auth helper functions
-export const auth = {
-  async signUpUser(phone: string, name: string, email?: string): Promise<SupabaseResponse<User>> {
-    // Create user in our users table
-    return db.users.create({ phone, name, email: email || null, language: 'ar' });
-  },
-
-  async signUpProvider(providerData: {
-    email: string;
-    password: string;
-    phone: string;
-    business_name_ar: string;
-    business_name_en: string;
-    owner_name: string;
-    latitude: number;
-    longitude: number;
-    address: any;
-    license_number?: string;
-  }): Promise<SupabaseResponse<{ provider: Provider; auth: any }>> {
-    if (!supabaseAdmin) {
-      return { 
-        data: null, 
-        error: new Error('Admin client not initialized. Service key required for provider signup.') 
-      };
-    }
-
-    // First create auth user with auto-confirmed email in development
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: providerData.email,
-      password: providerData.password,
-      email_confirm: true, // Always confirm in admin mode
-      user_metadata: {
-        type: 'provider'
-      }
-    });
-
-    if (authError) {
-      return { data: null, error: new Error(authError.message) };
-    }
-
-    // Then create provider profile
-    const { password, ...profileData } = providerData;
-    const { data: provider, error: profileError } = await supabaseAdmin
-      .from('providers')
-      .insert({
-        ...profileData,
-        id: authData.user.id,
-        password_hash: 'handled_by_supabase_auth',
-      })
-      .select()
-      .single();
-
-    if (profileError) {
-      // Rollback auth user if profile creation fails
-      try {
-        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      } catch (rollbackError) {
-        // Critical: Log orphaned auth user for manual cleanup
-        console.error('CRITICAL: Failed to rollback auth user after profile creation failure', {
-          userId: authData.user.id,
-          profileError: profileError.message,
-          rollbackError: rollbackError
-        });
-        // Return both errors
-        return { 
-          data: null, 
-          error: new Error(`Profile creation failed: ${profileError.message}. Rollback also failed - manual cleanup required for user ${authData.user.id}`) 
-        };
-      }
-      return { data: null, error: new Error(profileError.message) };
-    }
-
-    return { 
-      data: { provider, auth: authData }, 
-      error: null 
-    };
-  },
-
-  async signInProvider(email: string, password: string): Promise<SupabaseResponse<{ provider: Provider; session: any }>> {
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (authError) {
-      return { data: null, error: new Error(authError.message) };
-    }
-
-    const { data: provider, error: profileError } = await supabase
-      .from('providers')
-      .select('*')
-      .eq('id', authData.user.id)
-      .single();
-
-    if (profileError) {
-      return { data: null, error: new Error(profileError.message) };
-    }
-
-    return { 
-      data: { provider, session: authData.session }, 
-      error: null 
-    };
-  },
-
-  async signOut(): Promise<SupabaseResponse<void>> {
-    const { error } = await supabase.auth.signOut();
-    return { data: null, error: error ? new Error(error.message) : null };
-  },
-
-  async getSession() {
-    return supabase.auth.getSession();
-  },
-
-  async getUser() {
-    return supabase.auth.getUser();
   },
 };

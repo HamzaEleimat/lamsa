@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { assertAuthenticated, assertDefined } from '../utils/null-safety';
 
 // Enhanced service management interfaces

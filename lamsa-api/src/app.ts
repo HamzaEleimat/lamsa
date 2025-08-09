@@ -21,7 +21,6 @@ import { supabase } from './config/supabase';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import providerRoutes from './routes/provider.routes';
-import enhancedProviderRoutes from './routes/enhanced-provider.routes';
 import serviceRoutes from './routes/service.routes';
 import serviceManagementRoutes from './routes/service-management.routes';
 import availabilityRoutes from './routes/availability.routes';
@@ -39,7 +38,7 @@ import mfaRoutes from './routes/mfa.routes';
 import adminRoutes from './routes/admin.routes';
 
 // Import middleware
-import { errorHandler } from './middleware/error.middleware';
+import { enhancedBilingualErrorHandler as errorHandler } from './middleware/enhanced-bilingual-error.middleware';
 import { apiRateLimiter } from './middleware/rate-limit.middleware';
 import { csrfProtection, csrfTokenGenerator, getCSRFToken } from './middleware/csrf.middleware';
 import { enforceHTTPS, addSecurityHeaders } from './middleware/https-redirect.middleware';
@@ -79,7 +78,11 @@ const swaggerOptions = {
       }
     }
   },
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts'], // paths to files containing OpenAPI definitions
+  apis: [
+    './src/routes/*.ts', 
+    './src/controllers/*.ts',
+    './src/docs/swagger/*.swagger.ts'
+  ], // paths to files containing OpenAPI definitions
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -321,7 +324,6 @@ app.use('/api/config', configRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/providers', providerRoutes);
-// app.use('/api/providers', enhancedProviderRoutes); // Enhanced provider features
 app.use('/api/services', serviceRoutes);
 app.use('/api/service-management', serviceManagementRoutes); // Enhanced service management
 app.use('/api/availability', availabilityRoutes); // Availability management
@@ -346,7 +348,7 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-// Error handler
-app.use(errorHandler);
+// Error handler - cast to any to fix TypeScript issue with error handler signature
+app.use(errorHandler as any);
 
 export default app;

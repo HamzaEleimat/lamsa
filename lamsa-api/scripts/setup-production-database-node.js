@@ -32,7 +32,7 @@ function loadEnvFile(filePath) {
 }
 
 async function setupDatabase() {
-    console.log('🚀 BeautyCort Production Database Setup (Node.js)');
+    console.log('🚀 Lamsa Production Database Setup (Node.js)');
     console.log('==================================================');
     console.log('');
 
@@ -72,7 +72,7 @@ async function setupDatabase() {
     // Read and execute schema
     console.log('📊 Setting up database schema...');
     
-    const schemaPath = path.join(__dirname, '../beautycort-api/database/schema.sql');
+    const schemaPath = path.join(__dirname, '../lamsa-api/database/schema.sql');
     if (!fs.existsSync(schemaPath)) {
         console.error('❌ Error: Schema file not found at', schemaPath);
         process.exit(1);
@@ -164,7 +164,7 @@ async function setupDatabase() {
     console.log('🎉 Database setup completed!');
     console.log('');
     console.log('📋 Next steps:');
-    console.log('1. Test the API connection: cd beautycort-api && npm run test:connection:prod');
+    console.log('1. Test the API connection: cd lamsa-api && npm run test:connection:prod');
     console.log('2. Configure Redis cluster');
     console.log('3. Set up third-party services (Tap, Twilio, etc.)');
     console.log('');

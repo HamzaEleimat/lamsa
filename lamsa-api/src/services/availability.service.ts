@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { prayerTimeService } from './prayer-time.service';
 import { AppError } from '../middleware/error.middleware';
 import { format, addMinutes, isAfter, isBefore } from 'date-fns';

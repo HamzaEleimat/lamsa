@@ -6,7 +6,7 @@
  * @copyright Lamsa 2025
  */
 
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import SecureQueryBuilder from '../utils/secure-query';
 import { BookingStatus } from '../types/database';
 import { secureLogger } from '../utils/secure-logger';

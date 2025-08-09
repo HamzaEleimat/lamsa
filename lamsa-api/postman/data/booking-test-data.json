@@ -1,0 +1,87 @@
+[
+  {
+    "test_name": "Standard Hair Cut Booking - Cash Payment",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "notes": "Please call before arriving",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Premium Hair Coloring - Cash Payment",
+    "service_type": "premium",
+    "payment_method": "cash",
+    "notes": "First time customer, allergic to certain products",
+    "expected_platform_fee": 5.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Morning Appointment - Hair Cut",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "booking_time": "09:00",
+    "notes": "Early morning appointment",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Evening Appointment - Hair Coloring",
+    "service_type": "premium",
+    "payment_method": "cash",
+    "booking_time": "17:00",
+    "notes": "After work appointment",
+    "expected_platform_fee": 5.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Weekend Booking - Standard Service",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "booking_days_ahead": 7,
+    "notes": "Weekend appointment",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Last Minute Booking - Next Day",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "booking_days_ahead": 1,
+    "notes": "Urgent appointment needed",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Arabic Notes Test",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "notes": "يرجى الاتصال قبل الوصول",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Long Notes Test",
+    "service_type": "premium",
+    "payment_method": "cash",
+    "notes": "This is a very long note to test the maximum character limit. The customer has specific requirements and needs special attention. They prefer organic products only and have sensitive skin. Please ensure all products used are hypoallergenic. The customer will arrive 10 minutes early to discuss the service in detail. They have a previous bad experience with chemical products so extra care is needed.",
+    "expected_platform_fee": 5.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "No Notes Booking",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "notes": "",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  },
+  {
+    "test_name": "Alternative Provider Test",
+    "service_type": "standard",
+    "payment_method": "cash",
+    "use_provider_2": true,
+    "notes": "Testing with second provider",
+    "expected_platform_fee": 2.00,
+    "expected_status": "pending"
+  }
+]

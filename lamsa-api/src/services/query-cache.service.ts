@@ -4,7 +4,7 @@
  */
 
 import { createHash } from 'crypto';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { AppError } from '../middleware/error.middleware';
 
 interface CacheEntry {

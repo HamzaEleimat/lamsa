@@ -61,7 +61,21 @@ jest.mock('redis', () => ({
     get: jest.fn(),
     set: jest.fn(),
     del: jest.fn(),
-    flushall: jest.fn()
+    flushall: jest.fn(),
+    // Add event handler methods
+    on: jest.fn(),
+    once: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    // Add additional Redis methods that might be used
+    quit: jest.fn(),
+    exists: jest.fn(),
+    expire: jest.fn(),
+    ttl: jest.fn(),
+    setex: jest.fn(),
+    multi: jest.fn(() => ({
+      exec: jest.fn()
+    }))
   }))
 }));
 

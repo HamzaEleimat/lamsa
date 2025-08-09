@@ -3,7 +3,7 @@
  * Tracks booking history and state changes for audit trail and analytics
  */
 
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { AppError } from '../middleware/error.middleware';
 
 export interface AuditEntry {

@@ -1,0 +1,53 @@
+{
+  "testRun": {
+    "environment": "local",
+    "collection": "setup",
+    "startTime": "1970-01-01T00:00:00.862Z",
+    "endTime": "1970-01-01T00:00:05.613Z",
+    "duration": 4751
+  },
+  "overallStats": {
+    "requests": 8,
+    "assertions": 9,
+    "failures": 8,
+    "errors": 8,
+    "skipped": 0,
+    "successRate": "0.00",
+    "assertionPassRate": "11.11"
+  },
+  "collectionResults": [
+    {
+      "collection": "setup",
+      "stats": {
+        "requests": 8,
+        "assertions": 9,
+        "failures": 8,
+        "errors": 8,
+        "skipped": 0,
+        "averageResponseTime": 0
+      },
+      "timestamp": "2025-08-09T13-13-22-484Z"
+    }
+  ],
+  "performance": {
+    "responseTime": null,
+    "commonFailures": [
+      {
+        "reason": "expected PostmanResponse{ …(5) } to have property 'code'",
+        "count": 7
+      },
+      {
+        "reason": "\"undefined\" is not valid JSON",
+        "count": 1
+      }
+    ],
+    "totalResponseTime": 0
+  },
+  "recommendations": [
+    {
+      "type": "reliability",
+      "priority": "high",
+      "message": "Success rate is 0.00%. Investigate failing tests."
+    }
+  ]
+}

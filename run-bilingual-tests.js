@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Comprehensive bilingual test runner for BeautyCort
+ * Comprehensive bilingual test runner for Lamsa
  * Runs all bilingual tests across mobile app, API, and web dashboard
  */
 
@@ -26,26 +26,26 @@ const colors = {
 const testSuites = [
   {
     name: 'Mobile App - Authentication Flow',
-    path: './beautycort-mobile/tests/bilingual/auth-flow.test.js',
-    command: 'cd beautycort-mobile && npm test tests/bilingual/auth-flow.test.js',
+    path: './lamsa-mobile/tests/bilingual/auth-flow.test.js',
+    command: 'cd lamsa-mobile && npm test tests/bilingual/auth-flow.test.js',
     description: 'Tests login, registration, and OTP verification in both languages'
   },
   {
     name: 'Mobile App - Booking Flow',
-    path: './beautycort-mobile/tests/bilingual/booking-flow.test.js',
-    command: 'cd beautycort-mobile && npm test tests/bilingual/booking-flow.test.js',
+    path: './lamsa-mobile/tests/bilingual/booking-flow.test.js',
+    command: 'cd lamsa-mobile && npm test tests/bilingual/booking-flow.test.js',
     description: 'Tests service selection, booking, and payment flows in both languages'
   },
   {
     name: 'API - Bilingual Endpoints',
-    path: './beautycort-api/tests/bilingual/api-endpoints.test.js',
-    command: 'cd beautycort-api && npm test tests/bilingual/api-endpoints.test.js',
+    path: './lamsa-api/tests/bilingual/api-endpoints.test.js',
+    command: 'cd lamsa-api && npm test tests/bilingual/api-endpoints.test.js',
     description: 'Tests API responses and error handling in both languages'
   },
   {
     name: 'Web Dashboard - Bilingual Interface',
-    path: './beautycort-web/tests/bilingual/web-dashboard.test.js',
-    command: 'cd beautycort-web && npm test tests/bilingual/web-dashboard.test.js',
+    path: './lamsa-web/tests/bilingual/web-dashboard.test.js',
+    command: 'cd lamsa-web && npm test tests/bilingual/web-dashboard.test.js',
     description: 'Tests web dashboard components and RTL support in both languages'
   }
 ];
@@ -267,17 +267,17 @@ function preflightChecks() {
     },
     {
       name: 'Mobile app dependencies',
-      check: () => fs.existsSync('./beautycort-mobile/package.json'),
+      check: () => fs.existsSync('./lamsa-mobile/package.json'),
       message: 'Mobile app package.json found'
     },
     {
       name: 'API dependencies',
-      check: () => fs.existsSync('./beautycort-api/package.json'),
+      check: () => fs.existsSync('./lamsa-api/package.json'),
       message: 'API package.json found'
     },
     {
       name: 'Web dashboard dependencies',
-      check: () => fs.existsSync('./beautycort-web/package.json'),
+      check: () => fs.existsSync('./lamsa-web/package.json'),
       message: 'Web dashboard package.json found'
     }
   ];
@@ -300,7 +300,7 @@ function preflightChecks() {
 async function main() {
   const startTime = Date.now();
   
-  logHeader('BeautyCort Bilingual Test Suite');
+  logHeader('Lamsa Bilingual Test Suite');
   logInfo('Testing Arabic and English language support across all components');
   
   // Run pre-flight checks

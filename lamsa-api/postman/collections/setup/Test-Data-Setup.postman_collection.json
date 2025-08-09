@@ -1,0 +1,554 @@
+{
+  "info": {
+    "_postman_id": "lamsa-api-test-data-setup",
+    "name": "Lamsa API - Test Data Setup",
+    "description": "Creates test data (providers, services, users) for testing the Lamsa API. Run this collection first to set up all necessary test data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "lamsa-dev-team"
+  },
+  "item": [
+    {
+      "name": "Pre-flight Checks",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"API server is healthy\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data.status).to.equal('healthy');",
+                  "    ",
+                  "    console.log('✅ API server is running and healthy');",
+                  "});",
+                  "",
+                  "pm.test(\"Database connection is active\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.database.status).to.equal('connected');",
+                  "    ",
+                  "    console.log('✅ Database connection confirmed');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "console.log('🏥 Checking API server health...');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Verifies the API server is running and database is connected before creating test data."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication Setup",
+      "item": [
+        {
+          "name": "Get CSRF Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"CSRF token retrieved\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const token = pm.response.json().csrfToken;",
+                  "    pm.expect(token).to.be.a('string');",
+                  "    pm.environment.set(\"csrf_token\", token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/csrf-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "csrf-token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Providers",
+      "item": [
+        {
+          "name": "Create Test Provider 1",
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "// Generate unique provider data",
+                  "const timestamp = Date.now();",
+                  "const providerData = {",
+                  "    email: `provider${timestamp}@test.com`,",
+                  "    phone: `+96278${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,",
+                  "    password: 'TestProvider123!',",
+                  "    businessNameAr: 'صالون التجميل التجريبي',",
+                  "    businessNameEn: 'Test Beauty Salon',",
+                  "    ownerName: 'Test Provider Owner',",
+                  "    licenseNumber: `LIC-${timestamp}`,",
+                  "    latitude: 31.9539 + (Math.random() * 0.01),",
+                  "    longitude: 35.9106 + (Math.random() * 0.01)",
+                  "};",
+                  "",
+                  "// Store in environment for the request",
+                  "pm.environment.set('temp_provider_email', providerData.email);",
+                  "pm.environment.set('temp_provider_phone', providerData.phone);",
+                  "pm.environment.set('temp_provider_password', providerData.password);",
+                  "pm.environment.set('temp_business_name_ar', providerData.businessNameAr);",
+                  "pm.environment.set('temp_business_name_en', providerData.businessNameEn);",
+                  "pm.environment.set('temp_owner_name', providerData.ownerName);",
+                  "pm.environment.set('temp_license_number', providerData.licenseNumber);",
+                  "pm.environment.set('temp_latitude', providerData.latitude);",
+                  "pm.environment.set('temp_longitude', providerData.longitude);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Provider created successfully\", function () {",
+                  "    if (pm.response.code === 500) {",
+                  "        console.error('❌ Server error creating provider:', pm.response.json());",
+                  "        console.log('Check that the API server is running and database is connected');",
+                  "        pm.expect.fail('Server error - is the API running on port 3000?');",
+                  "    }",
+                  "    ",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('provider');",
+                  "    pm.expect(response.data.provider).to.have.property('id');",
+                  "    pm.expect(response.data).to.have.property('token');",
+                  "    ",
+                  "    // Store provider data",
+                  "    pm.environment.set('test_provider_id', response.data.provider.id);",
+                  "    pm.environment.set('test_provider_token', response.data.token);",
+                  "    pm.environment.set('test_provider_email', pm.environment.get('temp_provider_email'));",
+                  "    pm.environment.set('test_provider_password', pm.environment.get('temp_provider_password'));",
+                  "    ",
+                  "    console.log('✅ Created test provider:', response.data.provider.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{temp_provider_email}}\",\n  \"password\": \"{{temp_provider_password}}\",\n  \"phone\": \"{{temp_provider_phone}}\",\n  \"business_name_ar\": \"{{temp_business_name_ar}}\",\n  \"business_name_en\": \"{{temp_business_name_en}}\",\n  \"owner_name\": \"{{temp_owner_name}}\",\n  \"address\": {\n    \"street\": \"123 Test Street\",\n    \"city\": \"Amman\",\n    \"district\": \"Abdali\",\n    \"country\": \"Jordan\"\n  },\n  \"license_number\": \"{{temp_license_number}}\",\n  \"phoneVerified\": true,\n  \"latitude\": {{temp_latitude}},\n  \"longitude\": {{temp_longitude}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/provider/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "provider", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Create Test Provider 2",
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "// Generate unique provider data",
+                  "const timestamp = Date.now();",
+                  "const providerData = {",
+                  "    email: `provider2_${timestamp}@test.com`,",
+                  "    phone: `+96279${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,",
+                  "    password: 'TestProvider123!',",
+                  "    businessNameAr: 'مركز التجميل التجريبي',",
+                  "    businessNameEn: 'Test Beauty Center',",
+                  "    ownerName: 'Test Provider 2 Owner',",
+                  "    licenseNumber: `LIC2-${timestamp}`,",
+                  "    latitude: 31.9639 + (Math.random() * 0.01),",
+                  "    longitude: 35.9206 + (Math.random() * 0.01)",
+                  "};",
+                  "",
+                  "// Store in environment for the request",
+                  "pm.environment.set('temp_provider_email', providerData.email);",
+                  "pm.environment.set('temp_provider_phone', providerData.phone);",
+                  "pm.environment.set('temp_provider_password', providerData.password);",
+                  "pm.environment.set('temp_business_name_ar', providerData.businessNameAr);",
+                  "pm.environment.set('temp_business_name_en', providerData.businessNameEn);",
+                  "pm.environment.set('temp_owner_name', providerData.ownerName);",
+                  "pm.environment.set('temp_license_number', providerData.licenseNumber);",
+                  "pm.environment.set('temp_latitude', providerData.latitude);",
+                  "pm.environment.set('temp_longitude', providerData.longitude);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Provider 2 created successfully\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('provider');",
+                  "    pm.expect(response.data.provider).to.have.property('id');",
+                  "    pm.expect(response.data).to.have.property('token');",
+                  "    ",
+                  "    // Store provider 2 data",
+                  "    pm.environment.set('test_provider_2_id', response.data.provider.id);",
+                  "    pm.environment.set('test_provider_2_token', response.data.token);",
+                  "    ",
+                  "    console.log('Created test provider 2:', response.data.provider.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{temp_provider_email}}\",\n  \"password\": \"{{temp_provider_password}}\",\n  \"phone\": \"{{temp_provider_phone}}\",\n  \"business_name_ar\": \"{{temp_business_name_ar}}\",\n  \"business_name_en\": \"{{temp_business_name_en}}\",\n  \"owner_name\": \"{{temp_owner_name}}\",\n  \"address\": {\n    \"street\": \"456 Test Avenue\",\n    \"city\": \"Amman\",\n    \"district\": \"Sweifieh\",\n    \"country\": \"Jordan\"\n  },\n  \"license_number\": \"{{temp_license_number}}\",\n  \"phoneVerified\": true,\n  \"latitude\": {{temp_latitude}},\n  \"longitude\": {{temp_longitude}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/provider/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "provider", "signup"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Services",
+      "item": [
+        {
+          "name": "Create Service 1 for Provider 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Service 1 created successfully\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('id');",
+                  "    ",
+                  "    // Store service ID",
+                  "    pm.environment.set('test_service_id', response.data.id);",
+                  "    ",
+                  "    console.log('Created test service 1:', response.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{test_provider_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_ar\": \"قص الشعر\",\n  \"name_en\": \"Hair Cut\",\n  \"description_ar\": \"قص شعر احترافي مع تصفيف\",\n  \"description_en\": \"Professional haircut with styling\",\n  \"category\": \"HAIR\",\n  \"price\": 15.00,\n  \"duration_minutes\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/services",
+              "host": ["{{base_url}}"],
+              "path": ["api", "services"]
+            }
+          }
+        },
+        {
+          "name": "Create Service 2 for Provider 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Service 2 created successfully\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('id');",
+                  "    ",
+                  "    // Store service ID",
+                  "    pm.environment.set('test_service_2_id', response.data.id);",
+                  "    ",
+                  "    console.log('Created test service 2:', response.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{test_provider_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_ar\": \"صبغة الشعر\",\n  \"name_en\": \"Hair Coloring\",\n  \"description_ar\": \"صبغة شعر احترافية بألوان عصرية\",\n  \"description_en\": \"Professional hair coloring with modern colors\",\n  \"category\": \"HAIR\",\n  \"price\": 45.00,\n  \"duration_minutes\": 120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/services",
+              "host": ["{{base_url}}"],
+              "path": ["api", "services"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Customers",
+      "item": [
+        {
+          "name": "Create Test Customer",
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "// Generate unique customer data",
+                  "const timestamp = Date.now();",
+                  "const customerData = {",
+                  "    email: `customer${timestamp}@test.com`,",
+                  "    phone: `+96279${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,",
+                  "    password: 'TestCustomer123!',",
+                  "    fullName: 'Test Customer'",
+                  "};",
+                  "",
+                  "// Store in environment",
+                  "pm.environment.set('test_customer_email', customerData.email);",
+                  "pm.environment.set('test_customer_phone', customerData.phone);",
+                  "pm.environment.set('test_customer_password', customerData.password);",
+                  "pm.environment.set('test_customer_name', customerData.fullName);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Customer created successfully\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('user');",
+                  "    pm.expect(response.data.user).to.have.property('id');",
+                  "    pm.expect(response.data).to.have.property('token');",
+                  "    ",
+                  "    // Store customer data",
+                  "    pm.environment.set('test_customer_id', response.data.user.id);",
+                  "    pm.environment.set('customer_token', response.data.token);",
+                  "    ",
+                  "    console.log('Created test customer:', response.data.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_customer_email}}\",\n  \"password\": \"{{test_customer_password}}\",\n  \"phone\": \"{{test_customer_phone}}\",\n  \"name\": \"{{test_customer_name}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/customer/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "customer", "signup"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Summary",
+      "item": [
+        {
+          "name": "Display Test Data Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "console.log('\\n===== TEST DATA CREATED SUCCESSFULLY =====\\n');",
+                  "console.log('Provider 1 ID:', pm.environment.get('test_provider_id'));",
+                  "console.log('Provider 2 ID:', pm.environment.get('test_provider_2_id'));",
+                  "console.log('Service 1 ID:', pm.environment.get('test_service_id'));",
+                  "console.log('Service 2 ID:', pm.environment.get('test_service_2_id'));",
+                  "console.log('Customer ID:', pm.environment.get('test_customer_id'));",
+                  "console.log('\\nTokens are stored in environment variables.');",
+                  "console.log('\\n========================================\\n');",
+                  "",
+                  "pm.test(\"All test data created\", function () {",
+                  "    pm.expect(pm.environment.get('test_provider_id')).to.not.be.undefined;",
+                  "    pm.expect(pm.environment.get('test_service_id')).to.not.be.undefined;",
+                  "    pm.expect(pm.environment.get('test_customer_id')).to.not.be.undefined;",
+                  "    pm.expect(pm.environment.get('customer_token')).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            },
+            "description": "This is just a dummy request to display the test data summary. Check the console for created IDs."
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level pre-request script",
+          "console.log('Setting up test data for Lamsa API...');"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level test script",
+          "// Can be used for cleanup or validation"
+        ]
+      }
+    }
+  ]
+}

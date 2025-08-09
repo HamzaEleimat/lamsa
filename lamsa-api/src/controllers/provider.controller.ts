@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { encryptedDb } from '../services/encrypted-db.service';
 import SecureQueryBuilder from '../utils/secure-query';
 

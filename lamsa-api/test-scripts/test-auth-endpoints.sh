@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Test script for the restructured auth endpoints
-# Run this script from the beautycort-api directory
+# Run this script from the lamsa-api directory
 
 API_URL="http://localhost:3000/api/auth"
 TEST_PHONE="0791234567"

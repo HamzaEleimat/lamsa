@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../middleware/error.middleware';
 import { ApiResponse, AuthRequest } from '../types';
-import { db, auth, supabase, supabaseAdmin } from '../config/supabase-simple';
+import { db, auth, supabase, supabaseAdmin } from '../config/supabase';
 import { mockOTP } from '../config/mock-otp';
 import { validateJordanPhoneNumber, validateTestPhoneNumber } from '../utils/phone-validation';
 import { getEnvironmentConfig } from '../utils/environment-validation';
@@ -495,12 +495,6 @@ export class AuthController {
       // Use Supabase Auth for provider login
       
       const { data: authResult, error: authError } = await auth.signInProvider(sanitizedEmail, password);
-      
-        hasData: !!authResult,
-        hasError: !!authError,
-        error: authError,
-        provider: authResult?.provider ? { id: authResult.provider.id, email: authResult.provider.email } : null
-      });
 
       if (authError || !authResult) {
         // Record failed attempt
@@ -1163,7 +1157,7 @@ export class AuthController {
             logger.info('Rolled back Supabase Auth user after profile creation failure');
           } catch (rollbackError) {
             // This is a critical state that requires manual cleanup.
-            logger.fatal('CRITICAL: Failed to rollback auth user after profile creation failure.', { 
+            logger.error('CRITICAL: Failed to rollback auth user after profile creation failure.', rollbackError, { 
               userId: authData.user.id,
               error: rollbackError 
             });

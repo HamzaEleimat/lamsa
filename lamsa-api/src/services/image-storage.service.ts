@@ -4,7 +4,7 @@
  * Replaces the previous base64 database storage approach
  */
 
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { AppError } from '../middleware/error.middleware';
 import crypto from 'crypto';
 import path from 'path';

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { subDays, subMonths } from 'date-fns';
 
 export interface ReviewAnalytics {

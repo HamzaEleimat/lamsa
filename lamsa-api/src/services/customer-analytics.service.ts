@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase-simple';
+import { supabase } from '../config/supabase';
 import { format, differenceInDays, differenceInMonths } from 'date-fns';
 
 export interface CustomerMetrics {
