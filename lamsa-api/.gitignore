@@ -44,4 +44,11 @@ coverage/
 # Temporary files
 tmp/
 temp/
-tests/
+*.backup
+*.bak
+.deployment-backup/
+.claude/
+
+# Test results (keep test code)
+test-results/
+*.test-results.json
