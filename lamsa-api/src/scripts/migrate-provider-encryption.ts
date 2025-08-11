@@ -5,7 +5,7 @@
  * This should be run once to encrypt all existing provider PII
  */
 
-import { encryptedDb } from '../services/encrypted-db.service';
+// import { encryptedDb } from '../services/encrypted-db.service';  // TODO: Fix encrypted-db service TypeScript issues
 import { logger } from '../utils/logger';
 import dotenv from 'dotenv';
 

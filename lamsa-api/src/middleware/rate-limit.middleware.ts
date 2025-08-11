@@ -79,6 +79,139 @@ export const apiRateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Provider registration rate limiter - prevent spam registrations
+export const providerRegistrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 2, // Limit each IP to 2 provider registrations per hour
+  message: (req: RateLimitRequest) => {
+    const language = getLanguageFromRequest(req);
+    const bilingualMessage = getBilingualErrorMessage('TOO_MANY_REGISTRATION_ATTEMPTS');
+    
+    return {
+      success: false,
+      error: 'TOO_MANY_REGISTRATION_ATTEMPTS',
+      message: bilingualMessage.en || 'Too many registration attempts. Please try again later.',
+      messageAr: bilingualMessage.ar || 'محاولات تسجيل كثيرة جداً. يرجى المحاولة لاحقاً.',
+      data: {
+        errorCode: 429,
+        category: 'rate_limit',
+        timestamp: new Date().toISOString(),
+        language,
+        rateLimit: {
+          limit: 2,
+          windowMs: 60 * 60 * 1000,
+          retryAfter: Math.ceil((req.rateLimit?.resetTime || Date.now()) / 1000)
+        }
+      }
+    };
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    // Rate limit by IP and email/phone combination
+    const email = req.body.email || '';
+    const phone = req.body.phone || '';
+    return `${req.ip}_${email}_${phone}`;
+  },
+});
+
+// Provider update rate limiter - prevent abuse
+export const providerUpdateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each provider to 20 updates per 15 minutes
+  message: (req: RateLimitRequest) => {
+    const language = getLanguageFromRequest(req);
+    
+    return {
+      success: false,
+      error: 'TOO_MANY_UPDATE_ATTEMPTS',
+      message: 'Too many update attempts. Please slow down.',
+      messageAr: 'محاولات تحديث كثيرة جداً. يرجى الإبطاء.',
+      data: {
+        errorCode: 429,
+        category: 'rate_limit',
+        timestamp: new Date().toISOString(),
+        language,
+        rateLimit: {
+          limit: 20,
+          windowMs: 15 * 60 * 1000,
+          retryAfter: Math.ceil((req.rateLimit?.resetTime || Date.now()) / 1000)
+        }
+      }
+    };
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    // Rate limit by provider ID
+    return (req as any).user?.provider_id || req.params.id || req.ip;
+  },
+});
+
+// Employee management rate limiter
+export const employeeManagementLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each provider to 30 employee operations per 15 minutes
+  message: (req: RateLimitRequest) => {
+    const language = getLanguageFromRequest(req);
+    
+    return {
+      success: false,
+      error: 'TOO_MANY_EMPLOYEE_OPERATIONS',
+      message: 'Too many employee management operations. Please slow down.',
+      messageAr: 'عمليات إدارة موظفين كثيرة جداً. يرجى الإبطاء.',
+      data: {
+        errorCode: 429,
+        category: 'rate_limit',
+        timestamp: new Date().toISOString(),
+        language,
+        rateLimit: {
+          limit: 30,
+          windowMs: 15 * 60 * 1000,
+          retryAfter: Math.ceil((req.rateLimit?.resetTime || Date.now()) / 1000)
+        }
+      }
+    };
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    return (req as any).user?.provider_id || req.ip;
+  },
+});
+
+// Settlement operations rate limiter
+export const settlementOperationsLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit to 10 settlement operations per hour
+  message: (req: RateLimitRequest) => {
+    const language = getLanguageFromRequest(req);
+    
+    return {
+      success: false,
+      error: 'TOO_MANY_SETTLEMENT_OPERATIONS',
+      message: 'Too many settlement operations. Please try again later.',
+      messageAr: 'عمليات تسوية كثيرة جداً. يرجى المحاولة لاحقاً.',
+      data: {
+        errorCode: 429,
+        category: 'rate_limit',
+        timestamp: new Date().toISOString(),
+        language,
+        rateLimit: {
+          limit: 10,
+          windowMs: 60 * 60 * 1000,
+          retryAfter: Math.ceil((req.rateLimit?.resetTime || Date.now()) / 1000)
+        }
+      }
+    };
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    return (req as any).user?.id || req.ip;
+  },
+});
+
 // Auth endpoints rate limiter (login/signup)
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

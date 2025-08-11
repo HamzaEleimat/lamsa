@@ -581,6 +581,229 @@ export class AvailabilityController {
       next(error);
     }
   }
+
+  /**
+   * Get special dates for provider
+   * GET /api/providers/:id/special-dates
+   */
+  async getSpecialDates(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id: providerId } = req.params;
+      const { from, to } = req.query;
+      
+      // Check authorization
+      if (req.user?.type === 'provider' && req.user.id !== providerId) {
+        throw new AppError('Unauthorized to view these special dates', 403);
+      }
+
+      let query = supabase
+        .from('provider_special_dates')
+        .select('*')
+        .eq('provider_id', providerId)
+        .order('date', { ascending: true });
+
+      if (from) {
+        query = query.gte('date', from as string);
+      }
+      
+      if (to) {
+        query = query.lte('date', to as string);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new AppError('Failed to fetch special dates', 500);
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        data: data || []
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Add special date for provider
+   * POST /api/providers/:id/special-dates
+   */
+  async addSpecialDate(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id: providerId } = req.params;
+      const { date, is_holiday, opens_at, closes_at, reason } = req.body;
+      
+      // Check authorization
+      if (req.user?.type !== 'provider' || req.user.id !== providerId) {
+        throw new AppError('Unauthorized to add special dates', 403);
+      }
+
+      // Validate times if provided
+      if (!is_holiday && (!opens_at || !closes_at)) {
+        throw new AppError('Opening and closing times are required for working days', 400);
+      }
+
+      if (opens_at && closes_at && opens_at >= closes_at) {
+        throw new AppError('Closing time must be after opening time', 400);
+      }
+
+      const { data, error } = await supabase
+        .from('provider_special_dates')
+        .insert({
+          provider_id: providerId,
+          date,
+          is_holiday,
+          opens_at: is_holiday ? null : opens_at,
+          closes_at: is_holiday ? null : closes_at,
+          reason
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          throw new AppError('Special date already exists for this date', 409);
+        }
+        throw new AppError('Failed to add special date', 500);
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        data,
+        message: 'Special date added successfully'
+      };
+
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Update special date for provider
+   * PUT /api/providers/:id/special-dates/:date
+   */
+  async updateSpecialDate(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id: providerId, date } = req.params;
+      const updateData = req.body;
+      
+      // Check authorization
+      if (req.user?.type !== 'provider' || req.user.id !== providerId) {
+        throw new AppError('Unauthorized to update special dates', 403);
+      }
+
+      // Validate times if changing to working day
+      if (updateData.is_holiday === false && (!updateData.opens_at || !updateData.closes_at)) {
+        throw new AppError('Opening and closing times are required for working days', 400);
+      }
+
+      if (updateData.opens_at && updateData.closes_at && updateData.opens_at >= updateData.closes_at) {
+        throw new AppError('Closing time must be after opening time', 400);
+      }
+
+      // If changing to holiday, clear times
+      if (updateData.is_holiday === true) {
+        updateData.opens_at = null;
+        updateData.closes_at = null;
+      }
+
+      const { data, error } = await supabase
+        .from('provider_special_dates')
+        .update(updateData)
+        .eq('provider_id', providerId)
+        .eq('date', date)
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') { // Not found
+          throw new AppError('Special date not found', 404);
+        }
+        throw new AppError('Failed to update special date', 500);
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        data,
+        message: 'Special date updated successfully'
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete special date for provider
+   * DELETE /api/providers/:id/special-dates/:date
+   */
+  async deleteSpecialDate(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id: providerId, date } = req.params;
+      
+      // Check authorization
+      if (req.user?.type !== 'provider' || req.user.id !== providerId) {
+        throw new AppError('Unauthorized to delete special dates', 403);
+      }
+
+      const { error } = await supabase
+        .from('provider_special_dates')
+        .delete()
+        .eq('provider_id', providerId)
+        .eq('date', date);
+
+      if (error) {
+        throw new AppError('Failed to delete special date', 500);
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Special date deleted successfully'
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get national holidays
+   * GET /api/availability/national-holidays
+   */
+  async getNationalHolidays(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { year = new Date().getFullYear(), country = 'JO' } = req.query;
+      
+      // Jordan national holidays
+      const holidays = [
+        { date: `${year}-01-01`, name_en: "New Year's Day", name_ar: 'رأس السنة الميلادية', is_public: true },
+        { date: `${year}-05-01`, name_en: 'Labour Day', name_ar: 'عيد العمال', is_public: true },
+        { date: `${year}-05-25`, name_en: 'Independence Day', name_ar: 'عيد الاستقلال', is_public: true },
+        { date: `${year}-12-25`, name_en: 'Christmas Day', name_ar: 'عيد الميلاد', is_public: true },
+        // Islamic holidays (dates vary by year - these are examples)
+        { date: `${year}-03-22`, name_en: 'Eid al-Fitr', name_ar: 'عيد الفطر', is_public: true, is_islamic: true },
+        { date: `${year}-05-28`, name_en: 'Eid al-Adha', name_ar: 'عيد الأضحى', is_public: true, is_islamic: true },
+        { date: `${year}-07-18`, name_en: 'Islamic New Year', name_ar: 'رأس السنة الهجرية', is_public: true, is_islamic: true },
+        { date: `${year}-09-26`, name_en: "Prophet's Birthday", name_ar: 'المولد النبوي', is_public: true, is_islamic: true },
+      ];
+
+      const response: ApiResponse = {
+        success: true,
+        data: holidays,
+        message: 'Note: Islamic holiday dates are approximate and vary by lunar calendar'
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const availabilityController = new AvailabilityController();

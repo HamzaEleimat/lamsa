@@ -114,6 +114,77 @@ router.delete(
   availabilityController.deleteTimeOff
 );
 
+// ====================================
+// SPECIAL DATES MANAGEMENT
+// ====================================
+
+// Get all special dates for provider
+router.get(
+  '/providers/:id/special-dates',
+  authenticate,
+  authorize(UserRole.PROVIDER),
+  validate([
+    param('id').isUUID().withMessage('Invalid provider ID'),
+    query('from').optional().isISO8601().withMessage('Invalid from date'),
+    query('to').optional().isISO8601().withMessage('Invalid to date'),
+  ]),
+  availabilityController.getSpecialDates
+);
+
+// Add special date (holiday/exception)
+router.post(
+  '/providers/:id/special-dates',
+  authenticate,
+  authorize(UserRole.PROVIDER),
+  validate([
+    param('id').isUUID().withMessage('Invalid provider ID'),
+    body('date').isISO8601().toDate().withMessage('Valid date is required'),
+    body('is_holiday').isBoolean().withMessage('Holiday status is required'),
+    body('opens_at').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Opens at must be HH:MM'),
+    body('closes_at').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Closes at must be HH:MM'),
+    body('reason').optional().isString().isLength({ max: 200 }).withMessage('Reason must be max 200 characters'),
+  ]),
+  availabilityController.addSpecialDate
+);
+
+// Update special date
+router.put(
+  '/providers/:id/special-dates/:date',
+  authenticate,
+  authorize(UserRole.PROVIDER),
+  validate([
+    param('id').isUUID().withMessage('Invalid provider ID'),
+    param('date').isISO8601().withMessage('Valid date is required'),
+    body('is_holiday').optional().isBoolean().withMessage('Holiday status must be boolean'),
+    body('opens_at').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Opens at must be HH:MM'),
+    body('closes_at').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Closes at must be HH:MM'),
+    body('reason').optional().isString().isLength({ max: 200 }).withMessage('Reason must be max 200 characters'),
+  ]),
+  availabilityController.updateSpecialDate
+);
+
+// Delete special date
+router.delete(
+  '/providers/:id/special-dates/:date',
+  authenticate,
+  authorize(UserRole.PROVIDER),
+  validate([
+    param('id').isUUID().withMessage('Invalid provider ID'),
+    param('date').isISO8601().withMessage('Valid date is required'),
+  ]),
+  availabilityController.deleteSpecialDate
+);
+
+// Get national holidays
+router.get(
+  '/national-holidays',
+  validate([
+    query('year').optional().isInt({ min: 2024, max: 2030 }).withMessage('Invalid year'),
+    query('country').optional().isString().withMessage('Country must be a string'),
+  ]),
+  availabilityController.getNationalHolidays
+);
+
 // Get prayer settings
 router.get(
   '/providers/:id/availability/prayer-settings',

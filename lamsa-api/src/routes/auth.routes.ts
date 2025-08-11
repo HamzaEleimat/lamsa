@@ -4,6 +4,7 @@ import { authController } from '../controllers/auth.controller';
 import { validate } from '../middleware/validation.middleware';
 import { authenticate } from '../middleware/auth.middleware';
 import { otpRateLimiter, authRateLimiter, otpVerifyRateLimiter } from '../middleware/rate-limit.middleware';
+import { phoneValidation } from '../middleware/phone-validation.middleware';
 
 const router = Router();
 
@@ -27,9 +28,7 @@ router.post(
     body('password')
       .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase and number'),
-    body('phone')
-      .notEmpty().withMessage('Phone number is required')
-      .matches(/^(\+962|962|07|7)[0-9]{8,9}$/).withMessage('Invalid Jordan phone number format'),
+    phoneValidation.auth,
   ]),
   (req, res, next) => authController.customerSignup(req, res, next)
 );
@@ -39,10 +38,7 @@ router.post(
   '/customer/send-otp',
   otpRateLimiter, // Rate limit OTP requests to prevent SMS bombing
   validate([
-    body('phone')
-      .notEmpty().withMessage('Phone number is required')
-      .isString().withMessage('Phone number must be a string')
-      .matches(/^(\+962|962|07|7)[0-9]{8,9}$/).withMessage('Invalid Jordan phone number format')
+    phoneValidation.otp
   ]),
   (req, res, next) => authController.customerSendOTP(req, res, next)
 );
@@ -52,10 +48,7 @@ router.post(
   '/customer/verify-otp',
   otpVerifyRateLimiter, // Rate limit OTP verification attempts to prevent brute force
   validate([
-    body('phone')
-      .notEmpty().withMessage('Phone number is required')
-      .isString().withMessage('Phone number must be a string')
-      .matches(/^(\+962|962|07|7)[0-9]{8,9}$/).withMessage('Invalid Jordan phone number format'),
+    phoneValidation.otp,
     body('otp')
       .notEmpty().withMessage('OTP is required')
       .isString().withMessage('OTP must be a string')
@@ -77,10 +70,7 @@ router.post(
   '/provider/send-otp',
   otpRateLimiter, // Rate limit OTP requests
   validate([
-    body('phone')
-      .notEmpty().withMessage('Phone number is required')
-      .isString().withMessage('Phone number must be a string')
-      .matches(/^(\+962|962|07|7)[0-9]{8,9}$/).withMessage('Invalid Jordan phone number format')
+    phoneValidation.otp
   ]),
   (req, res, next) => authController.providerSendOTP(req, res, next)
 );
@@ -90,10 +80,7 @@ router.post(
   '/provider/verify-otp',
   otpVerifyRateLimiter, // Rate limit OTP verification attempts to prevent brute force
   validate([
-    body('phone')
-      .notEmpty().withMessage('Phone number is required')
-      .isString().withMessage('Phone number must be a string')
-      .matches(/^(\+962|962|07|7)[0-9]{8,9}$/).withMessage('Invalid Jordan phone number format'),
+    phoneValidation.otp,
     body('otp')
       .notEmpty().withMessage('OTP is required')
       .isString().withMessage('OTP must be a string')
@@ -114,9 +101,7 @@ router.post(
     body('password')
       .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase and number'),
-    body('phone')
-      .notEmpty().withMessage('Phone number is required')
-      .matches(/^(\+962|962|07|7)[0-9]{8,9}$/).withMessage('Invalid Jordan phone number format'),
+    phoneValidation.auth,
     body('phoneVerified')
       .optional()
       .isBoolean().withMessage('Phone verified must be a boolean'),

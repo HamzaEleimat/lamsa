@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
 import { AppError } from '../middleware/error.middleware';
 import { supabase } from '../config/supabase';
-import { encryptedDb } from '../services/encrypted-db.service';
+// import { encryptedDb } from '../services/encrypted-db.service';  // TODO: Fix encrypted-db service TypeScript issues
 import SecureQueryBuilder from '../utils/secure-query';
 
 // TypeScript Interfaces

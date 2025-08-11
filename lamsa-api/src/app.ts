@@ -36,6 +36,9 @@ import imageRoutes from './routes/image.routes';
 import configRoutes from './routes/config.routes';
 import mfaRoutes from './routes/mfa.routes';
 import adminRoutes from './routes/admin.routes';
+import employeeRoutes from './routes/employee.routes';
+import settlementRoutes from './routes/settlement.routes';
+import otpManagementRoutes from './routes/otp-management.routes';
 
 // Import middleware
 import { enhancedBilingualErrorHandler as errorHandler } from './middleware/enhanced-bilingual-error.middleware';
@@ -254,6 +257,9 @@ app.get('/', (_req: Request, res: Response) => {
       images: '/api/images',
       mfa: '/api/mfa',
       admin: '/api/admin',
+      employees: '/api/employees',
+      settlements: '/api/settlements',
+      otpManagement: '/api/otp-management',
     },
   });
 });
@@ -338,6 +344,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/mfa', mfaRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/settlements', settlementRoutes);
+app.use('/api/otp-management', otpManagementRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
