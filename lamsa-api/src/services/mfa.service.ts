@@ -465,7 +465,7 @@ export class MFAService {
    * Encrypt secret using proper encryption (same as original)
    */
   private encryptSecret(secret: string): string {
-    const encrypted = encryptionService.encrypt(secret, 'mfa_secret');
+    const encrypted = encryptionService.encrypt(secret);
     if (!encrypted) {
       throw new Error('Failed to encrypt MFA secret');
     }
@@ -476,7 +476,7 @@ export class MFAService {
    * Decrypt secret (same as original)
    */
   private decryptSecret(encryptedSecret: string): string {
-    const decrypted = encryptionService.decrypt(encryptedSecret, 'mfa_secret');
+    const decrypted = encryptionService.decrypt(encryptedSecret);
     if (!decrypted) {
       throw new Error('Failed to decrypt MFA secret');
     }
@@ -487,7 +487,7 @@ export class MFAService {
    * Encrypt backup codes (same as original)
    */
   private encryptBackupCodes(codes: string[]): string {
-    const encrypted = encryptionService.encrypt(JSON.stringify(codes), 'mfa_backup_codes');
+    const encrypted = encryptionService.encrypt(JSON.stringify(codes));
     if (!encrypted) {
       throw new Error('Failed to encrypt MFA backup codes');
     }
@@ -499,7 +499,7 @@ export class MFAService {
    */
   private decryptBackupCodes(encryptedCodes: string): string[] {
     try {
-      const decrypted = encryptionService.decrypt(encryptedCodes, 'mfa_backup_codes');
+      const decrypted = encryptionService.decrypt(encryptedCodes);
       if (!decrypted) {
         return [];
       }

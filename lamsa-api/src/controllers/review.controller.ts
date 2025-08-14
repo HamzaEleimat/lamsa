@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 export class ReviewController {
   async createReview(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -25,7 +25,7 @@ export class ReviewController {
 
       res.status(201).json(response);
     } catch (error) {
-      next(new AppError('Failed to create review', 500));
+      next(new BilingualAppError('Failed to create review', 500));
     }
   }
 
@@ -44,7 +44,7 @@ export class ReviewController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to fetch reviews', 500));
+      next(new BilingualAppError('Failed to fetch reviews', 500));
     }
   }
 
@@ -61,7 +61,7 @@ export class ReviewController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to update review', 500));
+      next(new BilingualAppError('Failed to update review', 500));
     }
   }
 }

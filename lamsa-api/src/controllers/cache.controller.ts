@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { cacheService } from '../services/cache.service';
 
 export class CacheController {
@@ -34,7 +34,7 @@ export class CacheController {
       const { keys, pattern } = req.body;
       
       if (!keys && !pattern) {
-        throw new AppError('Either keys array or pattern is required', 400);
+        throw new BilingualAppError('Either keys array or pattern is required', 400);
       }
 
       let clearedCount = 0;
@@ -99,7 +99,7 @@ export class CacheController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // Import services that we want to warm up
@@ -243,7 +243,7 @@ export class CacheController {
       const { keys } = req.body;
       
       if (!keys || !Array.isArray(keys)) {
-        throw new AppError('Keys array is required', 400);
+        throw new BilingualAppError('Keys array is required', 400);
       }
 
       const results: Record<string, boolean> = {};

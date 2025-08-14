@@ -5,7 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { notificationService, NotificationPreferences } from '../services/notification.service';
 import { notificationQueueService } from '../services/notification-queue.service';
 import { notificationTemplatesService } from '../services/notification-templates.service';
@@ -17,7 +17,7 @@ export class NotificationController {
   async getUserPreferences(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user?.id) {
-        return next(new AppError('User not authenticated', 401));
+        return next(new BilingualAppError('User not authenticated', 401));
       }
 
       const preferences = await notificationService.getUserPreferences(req.user.id);
@@ -29,7 +29,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to get notification preferences', 500));
+      next(new BilingualAppError('Failed to get notification preferences', 500));
     }
   }
 
@@ -39,7 +39,7 @@ export class NotificationController {
   async updateUserPreferences(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user?.id) {
-        return next(new AppError('User not authenticated', 401));
+        return next(new BilingualAppError('User not authenticated', 401));
       }
 
       const preferences: Partial<NotificationPreferences> = req.body;
@@ -47,7 +47,7 @@ export class NotificationController {
       const success = await notificationService.updateUserPreferences(req.user.id, preferences);
 
       if (!success) {
-        return next(new AppError('Failed to update preferences', 500));
+        return next(new BilingualAppError('Failed to update preferences', 500));
       }
 
       const response: ApiResponse = {
@@ -57,7 +57,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to update notification preferences', 500));
+      next(new BilingualAppError('Failed to update notification preferences', 500));
     }
   }
 
@@ -84,7 +84,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to get notification templates', 500));
+      next(new BilingualAppError('Failed to get notification templates', 500));
     }
   }
 
@@ -102,7 +102,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to get template groups', 500));
+      next(new BilingualAppError('Failed to get template groups', 500));
     }
   }
 
@@ -114,13 +114,13 @@ export class NotificationController {
       const { templateId, language = 'en', data = {} } = req.body;
 
       if (!templateId) {
-        return next(new AppError('Template ID is required', 400));
+        return next(new BilingualAppError('Template ID is required', 400));
       }
 
       const rendered = notificationTemplatesService.renderTemplate(templateId, language, data);
 
       if (!rendered) {
-        return next(new AppError('Template not found', 404));
+        return next(new BilingualAppError('Template not found', 404));
       }
 
       const response: ApiResponse = {
@@ -130,7 +130,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to preview template', 500));
+      next(new BilingualAppError('Failed to preview template', 500));
     }
   }
 
@@ -142,7 +142,7 @@ export class NotificationController {
       const { userId, event, data = {}, channels = ['sms'] } = req.body;
 
       if (!userId || !event) {
-        return next(new AppError('User ID and event are required', 400));
+        return next(new BilingualAppError('User ID and event are required', 400));
       }
 
       // Get user details for notification
@@ -194,7 +194,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to send test notification', 500));
+      next(new BilingualAppError('Failed to send test notification', 500));
     }
   }
 
@@ -217,7 +217,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to get queue statistics', 500));
+      next(new BilingualAppError('Failed to get queue statistics', 500));
     }
   }
 
@@ -229,13 +229,13 @@ export class NotificationController {
       const { notificationId } = req.params;
 
       if (!notificationId) {
-        return next(new AppError('Notification ID is required', 400));
+        return next(new BilingualAppError('Notification ID is required', 400));
       }
 
       const status = await notificationQueueService.getNotificationStatus(notificationId);
 
       if (!status) {
-        return next(new AppError('Notification not found', 404));
+        return next(new BilingualAppError('Notification not found', 404));
       }
 
       const response: ApiResponse = {
@@ -245,7 +245,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to get notification status', 500));
+      next(new BilingualAppError('Failed to get notification status', 500));
     }
   }
 
@@ -266,7 +266,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to cleanup notifications', 500));
+      next(new BilingualAppError('Failed to cleanup notifications', 500));
     }
   }
 
@@ -278,7 +278,7 @@ export class NotificationController {
       const { phone, email } = req.query;
 
       if (!phone && !email) {
-        return next(new AppError('Phone number or email is required', 400));
+        return next(new BilingualAppError('Phone number or email is required', 400));
       }
 
       // TODO: Implement opt-out functionality
@@ -296,7 +296,7 @@ export class NotificationController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to process opt-out request', 500));
+      next(new BilingualAppError('Failed to process opt-out request', 500));
     }
   }
 
@@ -325,7 +325,7 @@ export class NotificationController {
       const statusCode = queueHealthy ? 200 : 503;
       res.status(statusCode).json(response);
     } catch (error) {
-      next(new AppError('Health check failed', 500));
+      next(new BilingualAppError('Health check failed', 500));
     }
   }
 }

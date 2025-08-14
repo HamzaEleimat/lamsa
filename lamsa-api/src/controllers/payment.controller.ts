@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 export class PaymentController {
   async processPayment(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -25,7 +25,7 @@ export class PaymentController {
 
       res.status(201).json(response);
     } catch (error) {
-      next(new AppError('Payment processing failed', 500));
+      next(new BilingualAppError('Payment processing failed', 500));
     }
   }
 
@@ -43,7 +43,7 @@ export class PaymentController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to fetch payment history', 500));
+      next(new BilingualAppError('Failed to fetch payment history', 500));
     }
   }
 
@@ -60,7 +60,7 @@ export class PaymentController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Refund failed', 500));
+      next(new BilingualAppError('Refund failed', 500));
     }
   }
 }

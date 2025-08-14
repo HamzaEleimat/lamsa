@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 export class UserController {
   async getProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -21,7 +21,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to fetch profile', 500));
+      next(new BilingualAppError('Failed to fetch profile', 500));
     }
   }
 
@@ -47,7 +47,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to update profile', 500));
+      next(new BilingualAppError('Failed to update profile', 500));
     }
   }
 
@@ -64,7 +64,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to change password', 500));
+      next(new BilingualAppError('Failed to change password', 500));
     }
   }
 
@@ -79,7 +79,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to delete account', 500));
+      next(new BilingualAppError('Failed to delete account', 500));
     }
   }
 
@@ -97,7 +97,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to upload avatar', 500));
+      next(new BilingualAppError('Failed to upload avatar', 500));
     }
   }
 
@@ -112,7 +112,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to fetch favorites', 500));
+      next(new BilingualAppError('Failed to fetch favorites', 500));
     }
   }
 
@@ -129,7 +129,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to add favorite', 500));
+      next(new BilingualAppError('Failed to add favorite', 500));
     }
   }
 
@@ -146,7 +146,7 @@ export class UserController {
 
       res.json(response);
     } catch (error) {
-      next(new AppError('Failed to remove favorite', 500));
+      next(new BilingualAppError('Failed to remove favorite', 500));
     }
   }
 }

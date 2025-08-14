@@ -90,7 +90,7 @@ export interface NotificationDeliveryStatus {
   lastAttemptAt?: Date;
   deliveredAt?: Date;
   failureReason?: string;
-  externalId?: string; // Twilio message SID, etc.
+  externalId?: string; // SMS provider message ID (Blunet, etc.)
 }
 
 export interface SendNotificationResult {

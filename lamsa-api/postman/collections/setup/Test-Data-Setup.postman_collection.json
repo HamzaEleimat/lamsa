@@ -1,0 +1,616 @@
+{
+  "info": {
+    "name": "Lamsa Test Data Setup",
+    "description": "Collection for setting up test data in the Lamsa platform. Run this collection first to create necessary test accounts, providers, and services for comprehensive testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Test Customer",
+      "item": [
+        {
+          "name": "Send OTP to Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"OTP sent successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});",
+                  "",
+                  "// Save mock OTP if in development",
+                  "if (pm.response.json().mockOtp) {",
+                  "    pm.environment.set(\"test_otp\", pm.response.json().mockOtp);",
+                  "    console.log(\"Mock OTP saved: \" + pm.response.json().mockOtp);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"{{customer_phone}}\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/auth/customer/send-otp",
+              "host": ["{{api_url}}"],
+              "path": ["api", "auth", "customer", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify Customer OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Customer created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.user).to.be.an('object');",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "});",
+                  "",
+                  "// Save customer data",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.user) {",
+                  "    pm.environment.set(\"customer_id\", jsonData.user.id);",
+                  "    pm.environment.set(\"jwt_token\", jsonData.token);",
+                  "    console.log(\"Customer ID saved: \" + jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"{{customer_phone}}\",\n    \"otp\": \"{{test_otp}}\",\n    \"name\": \"{{customer_name}}\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/auth/customer/verify-otp",
+              "host": ["{{api_url}}"],
+              "path": ["api", "auth", "customer", "verify-otp"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Create Test Provider",
+      "item": [
+        {
+          "name": "Send OTP to Provider",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"OTP sent successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});",
+                  "",
+                  "// Save mock OTP if in development",
+                  "if (pm.response.json().mockOtp) {",
+                  "    pm.environment.set(\"test_otp\", pm.response.json().mockOtp);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"{{provider_phone}}\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/auth/provider/send-otp",
+              "host": ["{{api_url}}"],
+              "path": ["api", "auth", "provider", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify Provider Phone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Phone verified successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"{{provider_phone}}\",\n    \"otp\": \"{{test_otp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/auth/provider/verify-otp",
+              "host": ["{{api_url}}"],
+              "path": ["api", "auth", "provider", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Provider Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Provider created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.provider).to.be.an('object');",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "});",
+                  "",
+                  "// Save provider data",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.provider) {",
+                  "    pm.environment.set(\"provider_id\", jsonData.provider.id);",
+                  "    pm.environment.set(\"provider_token\", jsonData.token);",
+                  "    console.log(\"Provider ID saved: \" + jsonData.provider.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{provider_email}}\",\n    \"password\": \"{{test_password}}\",\n    \"phone\": \"{{provider_phone}}\",\n    \"phoneVerified\": true,\n    \"business_name_ar\": \"{{business_name_ar}}\",\n    \"business_name_en\": \"{{business_name_en}}\",\n    \"owner_name\": \"{{owner_name}}\",\n    \"address\": {\n        \"street\": \"123 Test Street\",\n        \"city\": \"Amman\",\n        \"district\": \"Abdali\",\n        \"country\": \"Jordan\"\n    },\n    \"latitude\": {{test_lat}},\n    \"longitude\": {{test_lng}},\n    \"license_number\": \"LIC-2024-001\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/auth/provider/signup",
+              "host": ["{{api_url}}"],
+              "path": ["api", "auth", "provider", "signup"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Create Test Services",
+      "item": [
+        {
+          "name": "Create Hair Service",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Use provider token for this request",
+                  "pm.request.headers.add({",
+                  "    key: 'Authorization',",
+                  "    value: 'Bearer ' + pm.environment.get('provider_token')",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Service created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.service).to.be.an('object');",
+                  "});",
+                  "",
+                  "// Save first service ID",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.service && !pm.environment.get(\"service_id\")) {",
+                  "    pm.environment.set(\"service_id\", jsonData.service.id);",
+                  "    console.log(\"Service ID saved: \" + jsonData.service.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_ar\": \"قص شعر\",\n    \"name_en\": \"Haircut\",\n    \"description_ar\": \"قص شعر احترافي مع استشارة مجانية\",\n    \"description_en\": \"Professional haircut with free consultation\",\n    \"category\": \"hair\",\n    \"price\": 15,\n    \"duration\": 45,\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/service-management/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "service-management", "services"]
+            }
+          }
+        },
+        {
+          "name": "Create Nail Service",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Use provider token for this request",
+                  "pm.request.headers.add({",
+                  "    key: 'Authorization',",
+                  "    value: 'Bearer ' + pm.environment.get('provider_token')",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Service created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_ar\": \"مانيكير\",\n    \"name_en\": \"Manicure\",\n    \"description_ar\": \"مانيكير احترافي مع طلاء أظافر\",\n    \"description_en\": \"Professional manicure with nail polish\",\n    \"category\": \"nails\",\n    \"price\": 20,\n    \"duration\": 60,\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/service-management/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "service-management", "services"]
+            }
+          }
+        },
+        {
+          "name": "Create Facial Service",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Use provider token for this request",
+                  "pm.request.headers.add({",
+                  "    key: 'Authorization',",
+                  "    value: 'Bearer ' + pm.environment.get('provider_token')",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Service created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_ar\": \"تنظيف بشرة\",\n    \"name_en\": \"Facial Treatment\",\n    \"description_ar\": \"تنظيف عميق للبشرة مع ماسك مغذي\",\n    \"description_en\": \"Deep facial cleansing with nourishing mask\",\n    \"category\": \"skin\",\n    \"price\": 35,\n    \"duration\": 90,\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/service-management/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "service-management", "services"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Set Provider Availability",
+      "item": [
+        {
+          "name": "Set Weekly Schedule",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Use provider token for this request",
+                  "pm.request.headers.add({",
+                  "    key: 'Authorization',",
+                  "    value: 'Bearer ' + pm.environment.get('provider_token')",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Availability set successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"schedule\": {\n        \"monday\": {\n            \"isOpen\": true,\n            \"openTime\": \"09:00\",\n            \"closeTime\": \"18:00\",\n            \"breaks\": []\n        },\n        \"tuesday\": {\n            \"isOpen\": true,\n            \"openTime\": \"09:00\",\n            \"closeTime\": \"18:00\",\n            \"breaks\": []\n        },\n        \"wednesday\": {\n            \"isOpen\": true,\n            \"openTime\": \"09:00\",\n            \"closeTime\": \"18:00\",\n            \"breaks\": []\n        },\n        \"thursday\": {\n            \"isOpen\": true,\n            \"openTime\": \"09:00\",\n            \"closeTime\": \"18:00\",\n            \"breaks\": []\n        },\n        \"friday\": {\n            \"isOpen\": false\n        },\n        \"saturday\": {\n            \"isOpen\": true,\n            \"openTime\": \"10:00\",\n            \"closeTime\": \"20:00\",\n            \"breaks\": []\n        },\n        \"sunday\": {\n            \"isOpen\": true,\n            \"openTime\": \"10:00\",\n            \"closeTime\": \"20:00\",\n            \"breaks\": []\n        }\n    }\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/availability/schedule",
+              "host": ["{{api_url}}"],
+              "path": ["api", "availability", "schedule"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Verify Setup",
+      "item": [
+        {
+          "name": "Get Customer Profile",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Use customer token",
+                  "pm.request.headers.add({",
+                  "    key: 'Authorization',",
+                  "    value: 'Bearer ' + pm.environment.get('jwt_token')",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Customer profile retrieved\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.user.role).to.eql('customer');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/auth/me",
+              "host": ["{{api_url}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Provider Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Provider profile retrieved\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.provider).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/providers/{{provider_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "{{provider_id}}"]
+            }
+          }
+        },
+        {
+          "name": "List Provider Services",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Services listed successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.services).to.be.an('array');",
+                  "    pm.expect(jsonData.services.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "console.log(\"Test setup complete!\");",
+                  "console.log(\"Customer ID: \" + pm.environment.get('customer_id'));",
+                  "console.log(\"Provider ID: \" + pm.environment.get('provider_id'));",
+                  "console.log(\"Service ID: \" + pm.environment.get('service_id'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/providers/{{provider_id}}/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "{{provider_id}}", "services"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "console.log(\"Executing: \" + pm.info.requestName);",
+          "",
+          "// Add timestamp for unique data",
+          "pm.globals.set(\"timestamp\", new Date().getTime());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "// Check for error responses",
+          "if (pm.response.code >= 400) {",
+          "    console.error(\"Error Response:\", pm.response.json());",
+          "}"
+        ]
+      }
+    }
+  ]
+}

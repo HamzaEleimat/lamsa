@@ -5,7 +5,7 @@
  */
 
 import { supabase } from '../config/supabase';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import crypto from 'crypto';
 import path from 'path';
 
@@ -51,7 +51,7 @@ export class ImageStorageService {
       const formats = allowedFormats || this.DEFAULT_ALLOWED_FORMATS;
       
       if (!formats.includes(ext)) {
-        throw new AppError(
+        throw new BilingualAppError(
           `Invalid file format. Allowed formats: ${formats.join(', ')}`,
           400
         );
@@ -68,7 +68,7 @@ export class ImageStorageService {
         .createSignedUploadUrl(key);
 
       if (error || !data) {
-        throw new AppError('Failed to generate upload URL', 500);
+        throw new BilingualAppError('Failed to generate upload URL', 500);
       }
 
       // Construct the public URL (will be accessible after upload)
@@ -81,9 +81,9 @@ export class ImageStorageService {
         expiresAt: new Date(Date.now() + this.UPLOAD_URL_EXPIRY_SECONDS * 1000)
       };
     } catch (error) {
-      if (error instanceof AppError) throw error;
+      if (error instanceof BilingualAppError) throw error;
       console.error('Error generating presigned URL:', error);
-      throw new AppError('Failed to generate upload URL', 500);
+      throw new BilingualAppError('Failed to generate upload URL', 500);
     }
   }
 
@@ -98,12 +98,12 @@ export class ImageStorageService {
 
       if (error) {
         console.error('Error deleting image:', error);
-        throw new AppError('Failed to delete image', 500);
+        throw new BilingualAppError('Failed to delete image', 500);
       }
     } catch (error) {
-      if (error instanceof AppError) throw error;
+      if (error instanceof BilingualAppError) throw error;
       console.error('Error in deleteImage:', error);
-      throw new AppError('Failed to delete image', 500);
+      throw new BilingualAppError('Failed to delete image', 500);
     }
   }
 
@@ -126,7 +126,7 @@ export class ImageStorageService {
         });
 
       if (error || !data || data.length === 0) {
-        throw new AppError('Image not found or upload failed', 404);
+        throw new BilingualAppError('Image not found or upload failed', 404);
       }
 
       const file = data[0];
@@ -136,7 +136,7 @@ export class ImageStorageService {
       if (file.metadata?.size && file.metadata.size > maxSize) {
         // Delete the oversized file
         await this.deleteImage(bucket, key);
-        throw new AppError(
+        throw new BilingualAppError(
           `Image size exceeds ${maxSizeInMB || this.DEFAULT_MAX_SIZE_MB}MB limit`,
           400
         );
@@ -152,9 +152,9 @@ export class ImageStorageService {
         uploadedAt: new Date()
       };
     } catch (error) {
-      if (error instanceof AppError) throw error;
+      if (error instanceof BilingualAppError) throw error;
       console.error('Error validating image:', error);
-      throw new AppError('Failed to validate uploaded image', 500);
+      throw new BilingualAppError('Failed to validate uploaded image', 500);
     }
   }
 
@@ -171,12 +171,12 @@ export class ImageStorageService {
 
       if (error) {
         console.error('Error batch deleting images:', error);
-        throw new AppError('Failed to delete images', 500);
+        throw new BilingualAppError('Failed to delete images', 500);
       }
     } catch (error) {
-      if (error instanceof AppError) throw error;
+      if (error instanceof BilingualAppError) throw error;
       console.error('Error in deleteImages:', error);
-      throw new AppError('Failed to delete images', 500);
+      throw new BilingualAppError('Failed to delete images', 500);
     }
   }
 
@@ -196,7 +196,7 @@ export class ImageStorageService {
         .download(sourceKey);
 
       if (error || !data) {
-        throw new AppError('Failed to download source image', 404);
+        throw new BilingualAppError('Failed to download source image', 404);
       }
 
       // Upload to destination
@@ -208,14 +208,14 @@ export class ImageStorageService {
         });
 
       if (uploadError) {
-        throw new AppError('Failed to copy image', 500);
+        throw new BilingualAppError('Failed to copy image', 500);
       }
 
       return `${process.env.SUPABASE_URL}/storage/v1/object/public/${destBucket}/${destKey}`;
     } catch (error) {
-      if (error instanceof AppError) throw error;
+      if (error instanceof BilingualAppError) throw error;
       console.error('Error copying image:', error);
-      throw new AppError('Failed to copy image', 500);
+      throw new BilingualAppError('Failed to copy image', 500);
     }
   }
 

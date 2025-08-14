@@ -14,7 +14,7 @@ import {
 } from '../types/auth-v2.types';
 import { supabase } from '../config/supabase';
 import { validateJordanPhoneNumber } from '../utils/phone-validation';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { secureLogger } from '../utils/secure-logger';
 
 // Mock SMS function for development - will be replaced with actual SMS service
@@ -67,7 +67,7 @@ export class VerificationService {
       .single();
 
     if (error) {
-      throw new AppError('Failed to create verification session', 500);
+      throw new BilingualAppError('Failed to create verification session', 500);
     }
 
     return data;

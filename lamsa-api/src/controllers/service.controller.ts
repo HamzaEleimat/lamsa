@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { supabase } from '../config/supabase';
 
 // TypeScript Interfaces
@@ -46,20 +46,20 @@ export class ServiceController {
       
       // Check if user is a provider
       if (req.user?.type !== 'provider') {
-        throw new AppError('Only providers can create services', 403);
+        throw new BilingualAppError('Only providers can create services', 403);
       }
       
       // Validate required fields
       if (!serviceData.name_ar || !serviceData.name_en) {
-        throw new AppError('Service name in both Arabic and English is required', 400);
+        throw new BilingualAppError('Service name in both Arabic and English is required', 400);
       }
       
       if (!serviceData.price || serviceData.price <= 0) {
-        throw new AppError('Valid price is required', 400);
+        throw new BilingualAppError('Valid price is required', 400);
       }
       
       if (!serviceData.duration_minutes || serviceData.duration_minutes <= 0) {
-        throw new AppError('Valid duration is required', 400);
+        throw new BilingualAppError('Valid duration is required', 400);
       }
       
       // Create service in database
@@ -95,7 +95,7 @@ export class ServiceController {
           res.status(201).json(response);
           return;
         }
-        throw new AppError('Failed to create service', 500);
+        throw new BilingualAppError('Failed to create service', 500);
       }
 
       const response: ApiResponse = {
@@ -122,17 +122,17 @@ export class ServiceController {
       
       // Check if user is a provider
       if (req.user?.type !== 'provider') {
-        throw new AppError('Only providers can update services', 403);
+        throw new BilingualAppError('Only providers can update services', 403);
       }
       
       // Validate price if provided
       if (updateData.price !== undefined && updateData.price <= 0) {
-        throw new AppError('Price must be greater than 0', 400);
+        throw new BilingualAppError('Price must be greater than 0', 400);
       }
       
       // Validate duration if provided
       if (updateData.duration_minutes !== undefined && updateData.duration_minutes <= 0) {
-        throw new AppError('Duration must be greater than 0', 400);
+        throw new BilingualAppError('Duration must be greater than 0', 400);
       }
       
       // First, check if the service belongs to the provider
@@ -162,12 +162,12 @@ export class ServiceController {
           res.json(response);
           return;
         }
-        throw new AppError('Service not found', 404);
+        throw new BilingualAppError('Service not found', 404);
       }
       
       // Check ownership
       if (existingService.provider_id !== req.user.id) {
-        throw new AppError('You can only update your own services', 403);
+        throw new BilingualAppError('You can only update your own services', 403);
       }
       
       // Update service
@@ -182,7 +182,7 @@ export class ServiceController {
         .single();
       
       if (updateError) {
-        throw new AppError('Failed to update service', 500);
+        throw new BilingualAppError('Failed to update service', 500);
       }
 
       const response: ApiResponse = {
@@ -208,7 +208,7 @@ export class ServiceController {
       
       // Check if user is a provider
       if (req.user?.type !== 'provider') {
-        throw new AppError('Only providers can delete services', 403);
+        throw new BilingualAppError('Only providers can delete services', 403);
       }
       
       // First, check if the service belongs to the provider
@@ -230,12 +230,12 @@ export class ServiceController {
           res.json(response);
           return;
         }
-        throw new AppError('Service not found', 404);
+        throw new BilingualAppError('Service not found', 404);
       }
       
       // Check ownership
       if (existingService.provider_id !== req.user.id) {
-        throw new AppError('You can only delete your own services', 403);
+        throw new BilingualAppError('You can only delete your own services', 403);
       }
       
       // Soft delete service
@@ -248,7 +248,7 @@ export class ServiceController {
         .eq('id', id);
       
       if (deleteError) {
-        throw new AppError('Failed to delete service', 500);
+        throw new BilingualAppError('Failed to delete service', 500);
       }
 
       const response: ApiResponse = {
@@ -368,7 +368,7 @@ export class ServiceController {
           res.json(response);
           return;
         }
-        throw new AppError('Failed to fetch services', 500);
+        throw new BilingualAppError('Failed to fetch services', 500);
       }
       
       // Group services by category
@@ -464,7 +464,7 @@ export class ServiceController {
           res.json(response);
           return;
         }
-        throw new AppError('Failed to fetch categories', 500);
+        throw new BilingualAppError('Failed to fetch categories', 500);
       }
 
       const response: ApiResponse = {
@@ -518,7 +518,7 @@ export class ServiceController {
           res.json({ success: true, data: [] });
           return;
         }
-        throw new AppError('Failed to fetch services', 500);
+        throw new BilingualAppError('Failed to fetch services', 500);
       }
 
       const response: ApiResponse = {
@@ -554,7 +554,7 @@ export class ServiceController {
         .single();
       
       if (error || !service) {
-        throw new AppError('Service not found', 404);
+        throw new BilingualAppError('Service not found', 404);
       }
 
       const response: ApiResponse = {
@@ -619,7 +619,7 @@ export class ServiceController {
       const { data: services, error } = await query;
       
       if (error) {
-        throw new AppError('Search failed', 500);
+        throw new BilingualAppError('Search failed', 500);
       }
       
       // If location is provided, filter by distance (simplified)

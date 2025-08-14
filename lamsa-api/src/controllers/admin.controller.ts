@@ -7,7 +7,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { ApiResponse, AuthRequest } from '../types';
 import { accountLockoutService } from '../services/account-lockout.service';
 import { db, supabaseAdmin } from '../config/supabase';
@@ -22,12 +22,12 @@ export class AdminController {
       const { identifier, type } = req.params;
 
       if (!identifier || !type) {
-        throw new AppError('Identifier and type are required', 400);
+        throw new BilingualAppError('Identifier and type are required', 400);
       }
 
       const validTypes = ['customer', 'provider', 'otp', 'mfa'];
       if (!validTypes.includes(type)) {
-        throw new AppError('Invalid lockout type', 400);
+        throw new BilingualAppError('Invalid lockout type', 400);
       }
 
       const status = await accountLockoutService.getLockoutStatus(
@@ -55,17 +55,17 @@ export class AdminController {
       const adminId = req.user?.id;
 
       if (!identifier) {
-        throw new AppError('Identifier is required', 400);
+        throw new BilingualAppError('Identifier is required', 400);
       }
 
       if (!adminId) {
-        throw new AppError('Admin ID not found', 401);
+        throw new BilingualAppError('Admin ID not found', 401);
       }
 
       // Verify admin has permission
       const { data: admin } = await db.providers.findById(adminId);
       if (!admin || (admin as any).role !== 'admin') {
-        throw new AppError('Insufficient permissions', 403);
+        throw new BilingualAppError('Insufficient permissions', 403);
       }
 
       await accountLockoutService.adminUnlock(identifier, adminId);
@@ -97,14 +97,14 @@ export class AdminController {
       const { limit = 50, offset = 0 } = req.query;
 
       if (!identifier) {
-        throw new AppError('Identifier is required', 400);
+        throw new BilingualAppError('Identifier is required', 400);
       }
 
       // Verify admin has permission
       const adminId = req.user?.id;
       const { data: admin } = await db.providers.findById(adminId!);
       if (!admin || (admin as any).role !== 'admin') {
-        throw new AppError('Insufficient permissions', 403);
+        throw new BilingualAppError('Insufficient permissions', 403);
       }
 
       const events = await accountLockoutService.getSecurityEvents(
@@ -136,12 +136,12 @@ export class AdminController {
       const adminId = req.user?.id;
       const { data: admin } = await db.providers.findById(adminId!);
       if (!admin || (admin as any).role !== 'admin') {
-        throw new AppError('Insufficient permissions', 403);
+        throw new BilingualAppError('Insufficient permissions', 403);
       }
 
       // Query database for all locked accounts
       if (!supabaseAdmin) {
-        throw new AppError('Admin client not configured', 500);
+        throw new BilingualAppError('Admin client not configured', 500);
       }
       const { data: lockedAccounts, error } = await supabaseAdmin
         .from('account_lockouts')
@@ -150,7 +150,7 @@ export class AdminController {
         .order('locked_until', { ascending: true });
 
       if (error) {
-        throw new AppError('Failed to fetch locked accounts', 500);
+        throw new BilingualAppError('Failed to fetch locked accounts', 500);
       }
 
       const response: ApiResponse = {
@@ -177,14 +177,14 @@ export class AdminController {
       const adminId = req.user?.id;
       const { data: admin } = await db.providers.findById(adminId!);
       if (!admin || (admin as any).role !== 'admin') {
-        throw new AppError('Insufficient permissions', 403);
+        throw new BilingualAppError('Insufficient permissions', 403);
       }
 
       const { type, maxAttempts, lockoutDuration, resetWindow } = req.body;
 
       const validTypes = ['customer', 'provider', 'otp', 'mfa'];
       if (!validTypes.includes(type)) {
-        throw new AppError('Invalid lockout type', 400);
+        throw new BilingualAppError('Invalid lockout type', 400);
       }
 
       // Note: In a real implementation, you would store these configs in the database
@@ -225,7 +225,7 @@ export class AdminController {
       const adminId = req.user?.id;
       const { data: admin } = await db.providers.findById(adminId!);
       if (!admin || (admin as any).role !== 'admin') {
-        throw new AppError('Insufficient permissions', 403);
+        throw new BilingualAppError('Insufficient permissions', 403);
       }
 
       const now = new Date();
@@ -234,7 +234,7 @@ export class AdminController {
 
       // Get security event statistics
       if (!supabaseAdmin) {
-        throw new AppError('Admin client not configured', 500);
+        throw new BilingualAppError('Admin client not configured', 500);
       }
       const { data: dailyEvents } = await supabaseAdmin
         .from('security_events')

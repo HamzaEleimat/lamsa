@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { supabase } from '../config/supabase';
 import { assertAuthenticated, assertDefined } from '../utils/null-safety';
 
@@ -109,7 +109,7 @@ export class ServiceManagementController {
       const { data: templates, error } = await query;
       
       if (error) {
-        throw new AppError('Failed to fetch service templates', 500);
+        throw new BilingualAppError('Failed to fetch service templates', 500);
       }
       
       const response: ApiResponse = {
@@ -131,13 +131,13 @@ export class ServiceManagementController {
     try {
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider') {
-        throw new AppError('Only providers can create services', 403);
+        throw new BilingualAppError('Only providers can create services', 403);
       }
       
       const { template_ids, customizations } = req.body;
       
       if (!Array.isArray(template_ids) || template_ids.length === 0) {
-        throw new AppError('Template IDs are required', 400);
+        throw new BilingualAppError('Template IDs are required', 400);
       }
       
       // Fetch templates
@@ -147,7 +147,7 @@ export class ServiceManagementController {
         .in('id', template_ids);
       
       if (templateError || !templates) {
-        throw new AppError('Failed to fetch templates', 500);
+        throw new BilingualAppError('Failed to fetch templates', 500);
       }
       
       // Create services from templates
@@ -173,7 +173,7 @@ export class ServiceManagementController {
         .select();
       
       if (createError) {
-        throw new AppError('Failed to create services', 500);
+        throw new BilingualAppError('Failed to create services', 500);
       }
       
       // Add suggested tags
@@ -225,13 +225,13 @@ export class ServiceManagementController {
     try {
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider') {
-        throw new AppError('Only providers can perform bulk operations', 403);
+        throw new BilingualAppError('Only providers can perform bulk operations', 403);
       }
       
       const operation: BulkServiceOperation = req.body;
       
       if (!operation.service_ids || operation.service_ids.length === 0) {
-        throw new AppError('Service IDs are required', 400);
+        throw new BilingualAppError('Service IDs are required', 400);
       }
       
       // Verify ownership of all services
@@ -241,12 +241,12 @@ export class ServiceManagementController {
         .in('id', operation.service_ids);
       
       if (verifyError || !services) {
-        throw new AppError('Failed to verify services', 500);
+        throw new BilingualAppError('Failed to verify services', 500);
       }
       
       const unauthorizedServices = services.filter(s => s.provider_id !== req.user.id);
       if (unauthorizedServices.length > 0) {
-        throw new AppError('You can only modify your own services', 403);
+        throw new BilingualAppError('You can only modify your own services', 403);
       }
       
       let result;
@@ -275,7 +275,7 @@ export class ServiceManagementController {
           
         case 'update_price':
           if (!operation.data?.price_adjustment) {
-            throw new AppError('Price adjustment is required', 400);
+            throw new BilingualAppError('Price adjustment is required', 400);
           }
           
           const priceAdjustment = operation.data.price_adjustment;
@@ -310,7 +310,7 @@ export class ServiceManagementController {
           
         case 'update_category':
           if (!operation.data?.category_id) {
-            throw new AppError('Category ID is required', 400);
+            throw new BilingualAppError('Category ID is required', 400);
           }
           
           result = await supabase
@@ -323,11 +323,11 @@ export class ServiceManagementController {
           break;
           
         default:
-          throw new AppError('Invalid operation', 400);
+          throw new BilingualAppError('Invalid operation', 400);
       }
       
       if (result.error) {
-        throw new AppError('Failed to perform bulk operation', 500);
+        throw new BilingualAppError('Failed to perform bulk operation', 500);
       }
       
       const response: ApiResponse = {
@@ -349,22 +349,22 @@ export class ServiceManagementController {
     try {
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider') {
-        throw new AppError('Only providers can create packages', 403);
+        throw new BilingualAppError('Only providers can create packages', 403);
       }
       
       const packageData: ServicePackageData = req.body;
       
       // Validate required fields
       if (!packageData.name_en || !packageData.name_ar) {
-        throw new AppError('Package name in both languages is required', 400);
+        throw new BilingualAppError('Package name in both languages is required', 400);
       }
       
       if (!packageData.service_ids || packageData.service_ids.length < 2) {
-        throw new AppError('Package must contain at least 2 services', 400);
+        throw new BilingualAppError('Package must contain at least 2 services', 400);
       }
       
       if (!packageData.package_price || packageData.package_price <= 0) {
-        throw new AppError('Valid package price is required', 400);
+        throw new BilingualAppError('Valid package price is required', 400);
       }
       
       // Verify ownership of all services
@@ -375,12 +375,12 @@ export class ServiceManagementController {
         .in('id', serviceIds);
       
       if (verifyError || !services || services.length !== serviceIds.length) {
-        throw new AppError('Invalid services selected', 400);
+        throw new BilingualAppError('Invalid services selected', 400);
       }
       
       const unauthorizedServices = services.filter(s => s.provider_id !== req.user.id);
       if (unauthorizedServices.length > 0) {
-        throw new AppError('You can only include your own services in packages', 403);
+        throw new BilingualAppError('You can only include your own services in packages', 403);
       }
       
       // Calculate total duration and original price
@@ -398,7 +398,7 @@ export class ServiceManagementController {
       
       // Ensure package price is less than original
       if (packageData.package_price >= originalPrice) {
-        throw new AppError('Package price must be less than the sum of individual services', 400);
+        throw new BilingualAppError('Package price must be less than the sum of individual services', 400);
       }
       
       // Create package
@@ -424,7 +424,7 @@ export class ServiceManagementController {
         .single();
       
       if (packageError || !newPackage) {
-        throw new AppError('Failed to create package', 500);
+        throw new BilingualAppError('Failed to create package', 500);
       }
       
       // Create package service links
@@ -447,7 +447,7 @@ export class ServiceManagementController {
           .delete()
           .eq('id', newPackage.id);
         
-        throw new AppError('Failed to link services to package', 500);
+        throw new BilingualAppError('Failed to link services to package', 500);
       }
       
       const response: ApiResponse = {
@@ -497,7 +497,7 @@ export class ServiceManagementController {
       const { data: packages, error } = await query;
       
       if (error) {
-        throw new AppError('Failed to fetch packages', 500);
+        throw new BilingualAppError('Failed to fetch packages', 500);
       }
       
       const response: ApiResponse = {
@@ -519,7 +519,7 @@ export class ServiceManagementController {
     try {
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider') {
-        throw new AppError('Only providers can duplicate services', 403);
+        throw new BilingualAppError('Only providers can duplicate services', 403);
       }
       
       const { id } = req.params;
@@ -533,11 +533,11 @@ export class ServiceManagementController {
         .single();
       
       if (verifyError || !originalService) {
-        throw new AppError('Service not found', 404);
+        throw new BilingualAppError('Service not found', 404);
       }
       
       if (originalService.provider_id !== req.user.id) {
-        throw new AppError('You can only duplicate your own services', 403);
+        throw new BilingualAppError('You can only duplicate your own services', 403);
       }
       
       // Call duplicate function
@@ -549,7 +549,7 @@ export class ServiceManagementController {
         });
       
       if (duplicateError) {
-        throw new AppError('Failed to duplicate service', 500);
+        throw new BilingualAppError('Failed to duplicate service', 500);
       }
       
       // Fetch the new service with details
@@ -575,7 +575,7 @@ export class ServiceManagementController {
         .single();
       
       if (fetchError || !newService) {
-        throw new AppError('Failed to fetch duplicated service', 500);
+        throw new BilingualAppError('Failed to fetch duplicated service', 500);
       }
       
       const response: ApiResponse = {
@@ -602,7 +602,7 @@ export class ServiceManagementController {
       // Check authorization
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('You can only view your own analytics', 403);
+        throw new BilingualAppError('You can only view your own analytics', 403);
       }
       
       let analyticsQuery = supabase
@@ -633,7 +633,7 @@ export class ServiceManagementController {
       const { data: analytics, error: analyticsError } = await analyticsQuery;
       
       if (analyticsError) {
-        throw new AppError('Failed to fetch analytics', 500);
+        throw new BilingualAppError('Failed to fetch analytics', 500);
       }
       
       // Get summary statistics
@@ -655,7 +655,7 @@ export class ServiceManagementController {
       const { data: services, error: servicesError } = await summaryQuery;
       
       if (servicesError) {
-        throw new AppError('Failed to fetch service summary', 500);
+        throw new BilingualAppError('Failed to fetch service summary', 500);
       }
       
       const response: ApiResponse = {
@@ -686,7 +686,7 @@ export class ServiceManagementController {
     try {
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider') {
-        throw new AppError('Only providers can manage variations', 403);
+        throw new BilingualAppError('Only providers can manage variations', 403);
       }
       
       const { id } = req.params;
@@ -700,11 +700,11 @@ export class ServiceManagementController {
         .single();
       
       if (verifyError || !service) {
-        throw new AppError('Service not found', 404);
+        throw new BilingualAppError('Service not found', 404);
       }
       
       if (service.provider_id !== req.user.id) {
-        throw new AppError('You can only modify your own services', 403);
+        throw new BilingualAppError('You can only modify your own services', 403);
       }
       
       // Delete existing variations
@@ -734,7 +734,7 @@ export class ServiceManagementController {
           .insert(variationData);
         
         if (insertError) {
-          throw new AppError('Failed to create variations', 500);
+          throw new BilingualAppError('Failed to create variations', 500);
         }
       }
       
@@ -749,7 +749,7 @@ export class ServiceManagementController {
         .single();
       
       if (fetchError) {
-        throw new AppError('Failed to fetch updated service', 500);
+        throw new BilingualAppError('Failed to fetch updated service', 500);
       }
       
       const response: ApiResponse = {
@@ -788,7 +788,7 @@ export class ServiceManagementController {
       const { data: tags, error } = await query;
       
       if (error) {
-        throw new AppError('Failed to fetch tags', 500);
+        throw new BilingualAppError('Failed to fetch tags', 500);
       }
       
       const response: ApiResponse = {
@@ -810,7 +810,7 @@ export class ServiceManagementController {
     try {
       assertAuthenticated(req, 'Authentication required');
       if (req.user.type !== 'provider') {
-        throw new AppError('Only providers can manage tags', 403);
+        throw new BilingualAppError('Only providers can manage tags', 403);
       }
       
       const { id } = req.params;
@@ -824,11 +824,11 @@ export class ServiceManagementController {
         .single();
       
       if (verifyError || !service) {
-        throw new AppError('Service not found', 404);
+        throw new BilingualAppError('Service not found', 404);
       }
       
       if (service.provider_id !== req.user.id) {
-        throw new AppError('You can only modify your own services', 403);
+        throw new BilingualAppError('You can only modify your own services', 403);
       }
       
       // Delete existing tags
@@ -849,7 +849,7 @@ export class ServiceManagementController {
           .insert(tagLinks);
         
         if (insertError) {
-          throw new AppError('Failed to update tags', 500);
+          throw new BilingualAppError('Failed to update tags', 500);
         }
         
         // Update tag usage counts

@@ -500,25 +500,43 @@ export const auth = {
   
   async createCustomerAfterOtp(phone: string, additionalData?: any) {
     try {
+      console.log('createCustomerAfterOtp called with:', { phone, additionalData });
+      
       // Validate phone is provided
       if (!phone) {
         throw new Error('Phone number is required');
       }
       
       // First check if user already exists
-      const { data: existingUser } = await db.users.findByPhone(phone);
+      console.log('Checking for existing user with phone:', phone);
+      const { data: existingUser, error: findError } = await db.users.findByPhone(phone);
+      
+      if (findError) {
+        console.error('Error finding user by phone:', findError);
+      }
       
       if (existingUser) {
+        console.log('Found existing user:', existingUser);
         return { data: existingUser, error: null };
       }
       
       // Create new user - ensure phone is string
+      console.log('Creating new user...');
       const userPhone = phone as string; // We've already validated it's not undefined
-      const result = await db.users.create({
+      
+      const userData = {
         phone: userPhone,
         name: additionalData?.name || 'User',
-        language: additionalData?.language || 'ar',
-        ...additionalData
+        email: additionalData?.email,
+        language: additionalData?.language || 'ar'
+      };
+      console.log('User data to create:', userData);
+      
+      const result = await db.users.create(userData);
+      
+      console.log('Create user result:', { 
+        data: result.data, 
+        error: result.error 
       });
       
       // If database is not set up, return mock user for testing
@@ -600,8 +618,10 @@ export const db = {
     },
     
     async create(userData: any) {
+      // Use admin client to bypass RLS policies for user creation
+      const client = supabaseAdmin || supabase;
       return handleSupabaseOperation(
-        supabase
+        client
           .from('users')
           .insert(userData)
           .select()
@@ -617,7 +637,7 @@ export const db = {
           .from('providers')
           .select('*')
           .eq('email', email)
-          .single()
+          .maybeSingle()
       );
     },
     
@@ -627,7 +647,7 @@ export const db = {
           .from('providers')
           .select('*')
           .eq('phone', phone)
-          .single()
+          .maybeSingle()
       );
     },
     

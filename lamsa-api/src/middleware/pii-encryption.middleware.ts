@@ -139,11 +139,12 @@ export function requireEncryption(_req: Request, res: Response, next: NextFuncti
     
     // In production, we should enforce encryption
     if (process.env.NODE_ENV === 'production') {
-      return res.status(503).json({
+      res.status(503).json({
         success: false,
         error: 'SERVICE_UNAVAILABLE',
         message: 'PII encryption is required but not configured'
       });
+      return;
     }
   }
   

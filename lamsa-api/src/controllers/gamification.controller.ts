@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { GamificationService } from '../services/gamification.service';
 
 export class GamificationController {
@@ -16,7 +16,7 @@ export class GamificationController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const level = await this.gamificationService.getProviderLevel(providerId);
@@ -39,7 +39,7 @@ export class GamificationController {
       const { date } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const targetDate = date ? new Date(date as string) : new Date();
@@ -65,7 +65,7 @@ export class GamificationController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const achievements = await this.gamificationService.getProviderAchievements(providerId);
@@ -95,7 +95,7 @@ export class GamificationController {
       const { scope = 'city', limit = 20 } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const leaderboard = await this.gamificationService.getLeaderboard(
@@ -129,7 +129,7 @@ export class GamificationController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const challenges = await this.gamificationService.getActiveChallenges(providerId);
@@ -155,7 +155,7 @@ export class GamificationController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const streaks = await this.gamificationService.getProviderStreaks(providerId);
@@ -178,11 +178,11 @@ export class GamificationController {
       const { goalType, date } = req.body;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       if (!goalType) {
-        throw new AppError('Goal type is required', 400);
+        throw new BilingualAppError('Goal type is required', 400);
       }
 
       const targetDate = date ? new Date(date) : new Date();
@@ -209,7 +209,7 @@ export class GamificationController {
       const { providerId, achievementType, achievementName, level, points, currentValue, targetValue } = req.body;
       
       if (!providerId || !achievementType || !achievementName) {
-        throw new AppError('Provider ID, achievement type, and name are required', 400);
+        throw new BilingualAppError('Provider ID, achievement type, and name are required', 400);
       }
 
       const success = await this.gamificationService.awardAchievement(
@@ -239,7 +239,7 @@ export class GamificationController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const badges = await this.gamificationService.getAvailableBadges(providerId);
@@ -270,7 +270,7 @@ export class GamificationController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // Get all gamification data in parallel
@@ -346,7 +346,7 @@ export class GamificationController {
       const { providerId, points } = req.body;
       
       if (!providerId || points === undefined) {
-        throw new AppError('Provider ID and points are required', 400);
+        throw new BilingualAppError('Provider ID and points are required', 400);
       }
 
       await this.gamificationService.updateProviderPoints(providerId, Number(points));

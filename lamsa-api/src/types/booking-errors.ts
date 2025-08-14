@@ -3,11 +3,11 @@
  * Provides specific error handling for different booking scenarios
  */
 
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
-export class BookingError extends AppError {
-  constructor(message: string, statusCode: number = 400, code?: string) {
-    super(message, statusCode, code);
+export class BookingError extends BilingualAppError {
+  constructor(message: string, statusCode: number = 400, code: string = 'BOOKING_ERROR') {
+    super(code, statusCode, { en: message, ar: message });
     this.name = 'BookingError';
   }
 }

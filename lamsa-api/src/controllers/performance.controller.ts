@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { getPerformanceStats, queryMonitor } from '../middleware/query-performance.middleware';
 import { performanceCacheService } from '../services/performance-cache.service';
 import { getErrorMessage } from '../utils/error-handling';
@@ -98,7 +98,7 @@ export class PerformanceController {
       const { data: dbSlowQueries, error } = await supabase.rpc('get_slow_queries');
       
       if (error) {
-        throw new AppError('Failed to fetch slow queries', 500);
+        throw new BilingualAppError('Failed to fetch slow queries', 500);
       }
 
       const response: ApiResponse = {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { supabase } from '../config/supabase';
 import { availabilityService } from '../services/availability.service';
 import { prayerTimeService } from '../services/prayer-time.service';
@@ -17,7 +17,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to view these settings', 403);
+        throw new BilingualAppError('Unauthorized to view these settings', 403);
       }
 
       const { data: settings, error } = await supabase
@@ -27,7 +27,7 @@ export class AvailabilityController {
         .single();
 
       if (error && error.code !== 'PGRST116') { // Not found error
-        throw new AppError('Failed to fetch settings', 500);
+        throw new BilingualAppError('Failed to fetch settings', 500);
       }
 
       // Return settings or defaults
@@ -69,7 +69,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to update these settings', 403);
+        throw new BilingualAppError('Unauthorized to update these settings', 403);
       }
 
       const settings = req.body;
@@ -85,7 +85,7 @@ export class AvailabilityController {
         .single();
 
       if (error) {
-        throw new AppError('Failed to update settings', 500);
+        throw new BilingualAppError('Failed to update settings', 500);
       }
 
       const response: ApiResponse = {
@@ -110,7 +110,7 @@ export class AvailabilityController {
       const { date, serviceId, includeInstant, customerGender } = req.query;
 
       if (!date) {
-        throw new AppError('Date is required', 400);
+        throw new BilingualAppError('Date is required', 400);
       }
 
       const slots = await availabilityService.getAvailableSlots(
@@ -144,7 +144,7 @@ export class AvailabilityController {
       const { serviceId, date, time } = req.body;
 
       if (!serviceId || !date || !time) {
-        throw new AppError('Service ID, date, and time are required', 400);
+        throw new BilingualAppError('Service ID, date, and time are required', 400);
       }
 
       const availability = await availabilityService.checkSlotAvailability({
@@ -175,7 +175,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to add time off', 403);
+        throw new BilingualAppError('Unauthorized to add time off', 403);
       }
 
       const timeOffData = req.body;
@@ -190,7 +190,7 @@ export class AvailabilityController {
         .single();
 
       if (error) {
-        throw new AppError('Failed to add time off', 500);
+        throw new BilingualAppError('Failed to add time off', 500);
       }
 
       // Handle existing bookings if needed
@@ -220,7 +220,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to delete time off', 403);
+        throw new BilingualAppError('Unauthorized to delete time off', 403);
       }
 
       const { error } = await supabase
@@ -230,7 +230,7 @@ export class AvailabilityController {
         .eq('provider_id', providerId);
 
       if (error) {
-        throw new AppError('Failed to delete time off', 500);
+        throw new BilingualAppError('Failed to delete time off', 500);
       }
 
       const response: ApiResponse = {
@@ -254,7 +254,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to view prayer settings', 403);
+        throw new BilingualAppError('Unauthorized to view prayer settings', 403);
       }
 
       const { data: settings } = await supabase
@@ -310,7 +310,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to update prayer settings', 403);
+        throw new BilingualAppError('Unauthorized to update prayer settings', 403);
       }
 
       const prayerSettings = req.body;
@@ -326,7 +326,7 @@ export class AvailabilityController {
         .single();
 
       if (error) {
-        throw new AppError('Failed to update prayer settings', 500);
+        throw new BilingualAppError('Failed to update prayer settings', 500);
       }
 
       const response: ApiResponse = {
@@ -352,7 +352,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to view Ramadan schedule', 403);
+        throw new BilingualAppError('Unauthorized to view Ramadan schedule', 403);
       }
 
       const currentYear = year ? parseInt(year as string) : new Date().getFullYear();
@@ -403,7 +403,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to update Ramadan schedule', 403);
+        throw new BilingualAppError('Unauthorized to update Ramadan schedule', 403);
       }
 
       const scheduleData = req.body;
@@ -419,7 +419,7 @@ export class AvailabilityController {
         .single();
 
       if (error) {
-        throw new AppError('Failed to update Ramadan schedule', 500);
+        throw new BilingualAppError('Failed to update Ramadan schedule', 500);
       }
 
       const response: ApiResponse = {
@@ -515,7 +515,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to create schedule', 403);
+        throw new BilingualAppError('Unauthorized to create schedule', 403);
       }
 
       const { schedule, shifts, breaks } = req.body;
@@ -531,7 +531,7 @@ export class AvailabilityController {
         .single();
 
       if (scheduleError) {
-        throw new AppError('Failed to create schedule', 500);
+        throw new BilingualAppError('Failed to create schedule', 500);
       }
 
       // Create shifts
@@ -548,7 +548,7 @@ export class AvailabilityController {
         if (shiftsError) {
           // Rollback
           await supabase.from('provider_working_schedules').delete().eq('id', newSchedule.id);
-          throw new AppError('Failed to create shifts', 500);
+          throw new BilingualAppError('Failed to create shifts', 500);
         }
       }
 
@@ -566,7 +566,7 @@ export class AvailabilityController {
         if (breaksError) {
           // Rollback
           await supabase.from('provider_working_schedules').delete().eq('id', newSchedule.id);
-          throw new AppError('Failed to create breaks', 500);
+          throw new BilingualAppError('Failed to create breaks', 500);
         }
       }
 
@@ -593,7 +593,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type === 'provider' && req.user.id !== providerId) {
-        throw new AppError('Unauthorized to view these special dates', 403);
+        throw new BilingualAppError('Unauthorized to view these special dates', 403);
       }
 
       let query = supabase
@@ -613,7 +613,7 @@ export class AvailabilityController {
       const { data, error } = await query;
 
       if (error) {
-        throw new AppError('Failed to fetch special dates', 500);
+        throw new BilingualAppError('Failed to fetch special dates', 500);
       }
 
       const response: ApiResponse = {
@@ -638,16 +638,16 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to add special dates', 403);
+        throw new BilingualAppError('Unauthorized to add special dates', 403);
       }
 
       // Validate times if provided
       if (!is_holiday && (!opens_at || !closes_at)) {
-        throw new AppError('Opening and closing times are required for working days', 400);
+        throw new BilingualAppError('Opening and closing times are required for working days', 400);
       }
 
       if (opens_at && closes_at && opens_at >= closes_at) {
-        throw new AppError('Closing time must be after opening time', 400);
+        throw new BilingualAppError('Closing time must be after opening time', 400);
       }
 
       const { data, error } = await supabase
@@ -665,9 +665,9 @@ export class AvailabilityController {
 
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
-          throw new AppError('Special date already exists for this date', 409);
+          throw new BilingualAppError('Special date already exists for this date', 409);
         }
-        throw new AppError('Failed to add special date', 500);
+        throw new BilingualAppError('Failed to add special date', 500);
       }
 
       const response: ApiResponse = {
@@ -693,16 +693,16 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to update special dates', 403);
+        throw new BilingualAppError('Unauthorized to update special dates', 403);
       }
 
       // Validate times if changing to working day
       if (updateData.is_holiday === false && (!updateData.opens_at || !updateData.closes_at)) {
-        throw new AppError('Opening and closing times are required for working days', 400);
+        throw new BilingualAppError('Opening and closing times are required for working days', 400);
       }
 
       if (updateData.opens_at && updateData.closes_at && updateData.opens_at >= updateData.closes_at) {
-        throw new AppError('Closing time must be after opening time', 400);
+        throw new BilingualAppError('Closing time must be after opening time', 400);
       }
 
       // If changing to holiday, clear times
@@ -721,9 +721,9 @@ export class AvailabilityController {
 
       if (error) {
         if (error.code === 'PGRST116') { // Not found
-          throw new AppError('Special date not found', 404);
+          throw new BilingualAppError('Special date not found', 404);
         }
-        throw new AppError('Failed to update special date', 500);
+        throw new BilingualAppError('Failed to update special date', 500);
       }
 
       const response: ApiResponse = {
@@ -748,7 +748,7 @@ export class AvailabilityController {
       
       // Check authorization
       if (req.user?.type !== 'provider' || req.user.id !== providerId) {
-        throw new AppError('Unauthorized to delete special dates', 403);
+        throw new BilingualAppError('Unauthorized to delete special dates', 403);
       }
 
       const { error } = await supabase
@@ -758,7 +758,7 @@ export class AvailabilityController {
         .eq('date', date);
 
       if (error) {
-        throw new AppError('Failed to delete special date', 500);
+        throw new BilingualAppError('Failed to delete special date', 500);
       }
 
       const response: ApiResponse = {

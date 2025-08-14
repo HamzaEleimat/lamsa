@@ -24,7 +24,10 @@ async function migrateProviderEncryption() {
     
     // Migrate providers table
     logger.info('Migrating providers table...');
-    const { migrated, errors } = await encryptedDb.migrateUnencryptedData('providers', 100);
+    // const { migrated, errors } = await encryptedDb.migrateUnencryptedData('providers', 100);
+    const migrated = 0;
+    const errors = 0;
+    logger.warn('Provider encryption migration is disabled - encryptedDb service needs to be implemented');
     
     logger.info(`Migration completed:`);
     logger.info(`- Providers migrated: ${migrated}`);

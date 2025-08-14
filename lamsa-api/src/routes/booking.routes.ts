@@ -107,7 +107,7 @@ router.post(
   bookingCancellationLimiter,
   ...validateCancelBooking,
   enhancedValidate,
-  bookingController.cancelBooking
+  bookingController.cancelBooking.bind(bookingController)
 );
 
 // Reschedule booking

@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '../config/supabase';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 export interface AuditEntry {
   id: string;
@@ -162,7 +162,7 @@ export class BookingAuditService {
         totalPages
       };
     } catch (error) {
-      throw new AppError('Failed to fetch audit history', 500);
+      throw new BilingualAppError('Failed to fetch audit history', 500);
     }
   }
 
@@ -195,7 +195,7 @@ export class BookingAuditService {
         uniqueUsers: Array.from(uniqueUsers)
       };
     } catch (error) {
-      throw new AppError('Failed to fetch audit summary', 500);
+      throw new BilingualAppError('Failed to fetch audit summary', 500);
     }
   }
 

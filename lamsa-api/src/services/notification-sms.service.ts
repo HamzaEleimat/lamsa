@@ -1,12 +1,13 @@
 /**
  * SMS Notification Service
- * Handles SMS sending functionality with multiple provider support and fallbacks
+ * Handles SMS sending functionality with Blunet SMS Gateway for Jordan
  */
 
 import { supabase } from '../config/supabase';
 import { getEnvironmentConfig } from '../utils/environment-validation';
 import { logger } from '../utils/logger';
 import { NotificationRecipient } from './notification.service';
+import { blunetSMSService } from './blunet-sms.service';
 
 export interface SMSSendResult {
   success: boolean;
@@ -54,8 +55,8 @@ export class SMSNotificationService {
         ? `${content.title}\n\n${content.body}` 
         : content.body;
 
-      // Primary: Send via Supabase/Twilio
-      const primaryResult = await this.sendSMSViaSupabase(recipient.phone, message, notificationId);
+      // Primary: Send via Blunet SMS Gateway
+      const primaryResult = await this.sendSMSViaBlunet(recipient.phone, message, notificationId);
       
       if (primaryResult.success) {
         return primaryResult;
@@ -63,21 +64,18 @@ export class SMSNotificationService {
 
       logger.warn(`Primary SMS failed for ${notificationId}: ${primaryResult.error}`);
 
-      // Fallback 1: Direct Twilio API (if configured)
+      // Fallback: Try Supabase OTP (if configured)
       const envConfig = this.getEnvConfig();
-      if (envConfig.TWILIO_ACCOUNT_SID && envConfig.TWILIO_AUTH_TOKEN) {
-        const twilioResult = await this.sendSMSViaTwilioDirect(recipient.phone, message, notificationId);
+      if (envConfig.ENABLE_MOCK_OTP) {
+        const supabaseResult = await this.sendSMSViaSupabase(recipient.phone, message, notificationId);
         
-        if (twilioResult.success) {
-          logger.info(`SMS sent via direct Twilio fallback for ${notificationId}`);
-          return twilioResult;
+        if (supabaseResult.success) {
+          logger.info(`SMS sent via Supabase mock OTP for ${notificationId}`);
+          return supabaseResult;
         }
         
-        logger.warn(`Direct Twilio fallback failed for ${notificationId}: ${twilioResult.error}`);
+        logger.warn(`Supabase fallback failed for ${notificationId}: ${supabaseResult.error}`);
       }
-
-      // Fallback 2: Alternative SMS provider (placeholder)
-      // const altProviderResult = await this.sendSMSViaAlternativeProvider(recipient.phone, message, notificationId);
 
       // Final fallback: Return primary error
       return primaryResult;
@@ -129,59 +127,102 @@ export class SMSNotificationService {
   }
 
   /**
-   * Send SMS via direct Twilio API (fallback)
+   * Send SMS via Blunet SMS Gateway
    */
-  private async sendSMSViaTwilioDirect(
+  private async sendSMSViaBlunet(
     phone: string,
     message: string,
     notificationId: string
   ): Promise<SMSSendResult> {
     try {
-      // TODO: Implement direct Twilio API call
-      // const twilio = require('twilio')(envConfig.TWILIO_ACCOUNT_SID, envConfig.TWILIO_AUTH_TOKEN);
-      // const messageResponse = await twilio.messages.create({
-      //   body: message,
-      //   from: envConfig.TWILIO_PHONE_NUMBER,
-      //   to: phone
-      // });
+      // Check if Blunet is configured
+      if (!blunetSMSService.isConfigured()) {
+        logger.warn('Blunet SMS service not configured');
+        return {
+          success: false,
+          error: 'SMS service not configured'
+        };
+      }
+
+      // Send SMS via Blunet
+      const result = await blunetSMSService.sendSMS(phone, message);
       
-      // For now, simulate success/failure
-      logger.info(`Direct Twilio SMS would be sent to ${phone}: ${message}`);
+      if (result.success) {
+        logger.info(`SMS sent successfully via Blunet for ${notificationId}`, {
+          messageId: result.messageId,
+          phone
+        });
+        
+        return {
+          success: true,
+          externalId: result.messageId || notificationId
+        };
+      }
+      
+      logger.error(`Blunet SMS failed for ${notificationId}`, {
+        error: result.error,
+        errorCode: result.errorCode,
+        phone
+      });
       
       return {
-        success: false, // Set to false until implemented
-        error: 'Direct Twilio integration not implemented yet'
+        success: false,
+        error: result.error || 'SMS sending failed'
       };
 
     } catch (error) {
+      logger.error(`Blunet SMS exception for ${notificationId}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        phone
+      });
+      
       return {
         success: false,
-        error: `Direct Twilio: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `Blunet SMS: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
 
   /**
-   * Send SMS via alternative provider (placeholder)
+   * Check SMS delivery status via Blunet
    */
-  private async sendSMSViaAlternativeProvider(
-    phone: string,
-    message: string,
-    notificationId: string
-  ): Promise<SMSSendResult> {
+  async checkSMSStatus(messageId: string): Promise<{
+    status: string;
+    description: string;
+  }> {
     try {
-      // TODO: Implement alternative SMS provider (e.g., AWS SNS, MessageBird, etc.)
-      logger.info(`Alternative SMS provider would send to ${phone}: ${message}`);
+      return await blunetSMSService.checkStatus(messageId);
+    } catch (error) {
+      logger.error('Error checking SMS status', {
+        messageId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       
       return {
-        success: false, // Set to false until implemented
-        error: 'Alternative SMS provider not implemented yet'
+        status: 'ERROR',
+        description: 'Failed to check status'
       };
+    }
+  }
 
+  /**
+   * Check SMS balance via Blunet
+   */
+  async checkSMSBalance(): Promise<{
+    success: boolean;
+    balance?: number;
+    error?: string;
+  }> {
+    try {
+      return await blunetSMSService.checkBalance();
     } catch (error) {
+      logger.error('Error checking SMS balance', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
       return {
         success: false,
-        error: `Alternative provider: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: error instanceof Error ? error.message : 'Balance check failed'
       };
     }
   }
@@ -200,10 +241,16 @@ export class SMSNotificationService {
    */
   getServiceStatus(): { available: boolean; providers: string[] } {
     const envConfig = this.getEnvConfig();
-    const providers: string[] = ['supabase'];
+    const providers: string[] = [];
     
-    if (envConfig.TWILIO_ACCOUNT_SID && envConfig.TWILIO_AUTH_TOKEN) {
-      providers.push('twilio-direct');
+    // Check Blunet configuration
+    if (blunetSMSService.isConfigured()) {
+      providers.push('blunet');
+    }
+    
+    // Check mock OTP for development
+    if (envConfig.ENABLE_MOCK_OTP) {
+      providers.push('mock-otp');
     }
 
     return {

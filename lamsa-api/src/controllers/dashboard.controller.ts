@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 // import { supabase } from '../config/supabase'; // Unused
 import { DashboardService } from '../services/dashboard.service';
 import { AnalyticsService } from '../services/analytics.service';
@@ -22,7 +22,7 @@ export class DashboardController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // Get today's date range
@@ -80,7 +80,7 @@ export class DashboardController {
       const { period = 'week', date } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const referenceDate = date ? new Date(date as string) : new Date();
@@ -101,7 +101,7 @@ export class DashboardController {
         previousStartDate = startOfMonth(subMonths(referenceDate, 1));
         previousEndDate = endOfMonth(subMonths(referenceDate, 1));
       } else {
-        throw new AppError('Invalid period. Use "week" or "month"', 400);
+        throw new BilingualAppError('Invalid period. Use "week" or "month"', 400);
       }
 
       // Fetch current and previous period data
@@ -144,7 +144,7 @@ export class DashboardController {
       const { page = 1, limit = 20, days = 7 } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const startDate = new Date();
@@ -177,7 +177,7 @@ export class DashboardController {
       const { page = 1, limit = 10, sentiment, rating, needsResponse } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const filters = {
@@ -224,7 +224,7 @@ export class DashboardController {
       const { period = 'month', date, groupBy = 'day' } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const referenceDate = date ? new Date(date as string) : new Date();
@@ -242,7 +242,7 @@ export class DashboardController {
         startDate = new Date(req.query.startDate as string);
         endDate = new Date(req.query.endDate as string);
       } else {
-        throw new AppError('Invalid period or missing date range', 400);
+        throw new BilingualAppError('Invalid period or missing date range', 400);
       }
 
       // Fetch revenue data
@@ -290,7 +290,7 @@ export class DashboardController {
       const { period = 'month', includeChurned = false } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const referenceDate = new Date();
@@ -304,7 +304,7 @@ export class DashboardController {
         startDate = new Date(referenceDate.getFullYear(), Math.floor(referenceDate.getMonth() / 3) * 3, 1);
         endDate = new Date(referenceDate.getFullYear(), Math.floor(referenceDate.getMonth() / 3) * 3 + 3, 0);
       } else {
-        throw new AppError('Invalid period. Use "month" or "quarter"', 400);
+        throw new BilingualAppError('Invalid period. Use "month" or "quarter"', 400);
       }
 
       // Fetch customer data
@@ -354,7 +354,7 @@ export class DashboardController {
       const { period = 'month', limit = 10, sortBy = 'bookings' } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const referenceDate = new Date();
@@ -368,7 +368,7 @@ export class DashboardController {
         startDate = startOfMonth(referenceDate);
         endDate = endOfMonth(referenceDate);
       } else {
-        throw new AppError('Invalid period', 400);
+        throw new BilingualAppError('Invalid period', 400);
       }
 
       // Fetch service performance data
@@ -411,7 +411,7 @@ export class DashboardController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // Generate comprehensive business intelligence report
@@ -435,7 +435,7 @@ export class DashboardController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // const insights = await performanceInsightsService.generatePerformanceInsights(providerId);
@@ -465,7 +465,7 @@ export class DashboardController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // const marketIntelligence = await performanceInsightsService.getMarketIntelligence(providerId);
@@ -488,7 +488,7 @@ export class DashboardController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       // const predictions = await performanceInsightsService.getPredictiveAnalytics(providerId);
@@ -512,7 +512,7 @@ export class DashboardController {
       const { unreadOnly = false, type } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const notifications = await this.dashboardService.getNotifications(
@@ -539,11 +539,11 @@ export class DashboardController {
       const { format = 'csv', dataType, startDate, endDate } = req.query;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       if (!dataType || !startDate || !endDate) {
-        throw new AppError('Data type and date range are required', 400);
+        throw new BilingualAppError('Data type and date range are required', 400);
       }
 
       const exportData = await this.analyticsService.exportData(
