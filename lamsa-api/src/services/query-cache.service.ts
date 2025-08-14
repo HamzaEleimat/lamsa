@@ -5,7 +5,7 @@
 
 import { createHash } from 'crypto';
 import { supabase } from '../config/supabase';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 interface CacheEntry {
     key: string;

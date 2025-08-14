@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../config/supabase';
-import { AppError } from '../utils/errors';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { normalizePhoneNumber } from '../utils/phone.utils';
 
 class OTPManagementController {
@@ -126,11 +126,12 @@ class OTPManagementController {
         .lte('expires_at', cutoffDate.toISOString());
 
       if (!force && count && count > 1000) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `This will delete ${count} records. Use force=true to confirm.`,
           data: { recordsToDelete: count }
         });
+        return;
       }
 
       // Perform deletion
@@ -338,7 +339,7 @@ class OTPManagementController {
 
       // Verify API key (should match environment variable)
       if (api_key !== process.env.CRON_API_KEY) {
-        throw new AppError('Invalid API key', 401);
+        throw new BilingualAppError('Invalid API key', 401);
       }
 
       // Clean up OTPs older than 24 hours

@@ -7,7 +7,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from './error.middleware';
+import { BilingualAppError } from './enhanced-bilingual-error.middleware';
 import path from 'path';
 import crypto from 'crypto';
 
@@ -92,54 +92,54 @@ const DANGEROUS_PATTERNS = [
  */
 export function validateFileName(fileName: string, bucket: string): void {
   if (!fileName || typeof fileName !== 'string') {
-    throw new AppError('Invalid file name', 400);
+    throw new BilingualAppError('INVALID_FILE_NAME', 400);
   }
 
   // Check for path traversal attempts
   const normalizedPath = path.normalize(fileName);
   if (normalizedPath.includes('..') || normalizedPath.includes('./')) {
-    throw new AppError('Invalid file name: path traversal detected', 400);
+    throw new BilingualAppError('PATH_TRAVERSAL_DETECTED', 400);
   }
 
   // Check for dangerous patterns
   if (DANGEROUS_PATTERNS.some(pattern => pattern.test(fileName))) {
-    throw new AppError('File type not allowed', 400);
+    throw new BilingualAppError('FILE_TYPE_NOT_ALLOWED', 400);
   }
 
   // Check for null bytes (used in some attacks)
   if (fileName.includes('\0')) {
-    throw new AppError('Invalid file name: null byte detected', 400);
+    throw new BilingualAppError('NULL_BYTE_DETECTED', 400);
   }
 
   // Get file extension
   const ext = path.extname(fileName).toLowerCase();
   if (!ext) {
-    throw new AppError('File must have an extension', 400);
+    throw new BilingualAppError('FILE_EXTENSION_REQUIRED', 400);
   }
 
   // Validate against allowed extensions for bucket
   const config = FILE_TYPE_CONFIGS[bucket];
   if (!config) {
-    throw new AppError('Invalid bucket type', 400);
+    throw new BilingualAppError('INVALID_BUCKET_TYPE', 400);
   }
 
   if (!config.extensions.includes(ext)) {
-    throw new AppError(
-      `File type ${ext} not allowed. Allowed types: ${config.extensions.join(', ')}`,
-      400
-    );
+    throw new BilingualAppError('FILE_EXTENSION_NOT_ALLOWED', 400, {
+      en: `File type ${ext} not allowed. Allowed types: ${config.extensions.join(', ')}`,
+      ar: `نوع الملف ${ext} غير مسموح. الأنواع المسموحة: ${config.extensions.join(', ')}`
+    });
   }
 
   // Check file name length
   if (fileName.length > 255) {
-    throw new AppError('File name too long (max 255 characters)', 400);
+    throw new BilingualAppError('FILE_NAME_TOO_LONG', 400);
   }
 
   // Check for special characters that could cause issues
   const safeFileNamePattern = /^[\w\-. ]+$/;
   const baseName = path.basename(fileName, ext);
   if (!safeFileNamePattern.test(baseName)) {
-    throw new AppError('File name contains invalid characters', 400);
+    throw new BilingualAppError('INVALID_FILE_NAME_CHARACTERS', 400);
   }
 }
 
@@ -183,14 +183,14 @@ export function sanitizeFileName(fileName: string): string {
 export function validateMimeType(mimeType: string, bucket: string): void {
   const config = FILE_TYPE_CONFIGS[bucket];
   if (!config) {
-    throw new AppError('Invalid bucket type', 400);
+    throw new BilingualAppError('INVALID_BUCKET_TYPE', 400);
   }
 
   if (!config.mimeTypes.includes(mimeType)) {
-    throw new AppError(
-      `MIME type ${mimeType} not allowed. Allowed types: ${config.mimeTypes.join(', ')}`,
-      400
-    );
+    throw new BilingualAppError('MIME_TYPE_NOT_ALLOWED', 400, {
+      en: `MIME type ${mimeType} not allowed. Allowed types: ${config.mimeTypes.join(', ')}`,
+      ar: `نوع MIME ${mimeType} غير مسموح. الأنواع المسموحة: ${config.mimeTypes.join(', ')}`
+    });
   }
 }
 
@@ -200,21 +200,21 @@ export function validateMimeType(mimeType: string, bucket: string): void {
 export function validateFileSize(sizeInBytes: number, bucket: string): void {
   const config = FILE_TYPE_CONFIGS[bucket];
   if (!config) {
-    throw new AppError('Invalid bucket type', 400);
+    throw new BilingualAppError('INVALID_BUCKET_TYPE', 400);
   }
 
   const maxSizeInBytes = config.maxSizeInMB * 1024 * 1024;
   
   if (sizeInBytes > maxSizeInBytes) {
-    throw new AppError(
-      `File too large. Maximum size: ${config.maxSizeInMB}MB`,
-      400
-    );
+    throw new BilingualAppError('FILE_TOO_LARGE', 400, {
+      en: `File too large. Maximum size: ${config.maxSizeInMB}MB`,
+      ar: `الملف كبير جداً. الحد الأقصى: ${config.maxSizeInMB}ميجابايت`
+    });
   }
 
   // Minimum size check (empty files or suspiciously small)
   if (sizeInBytes < 100) {
-    throw new AppError('File too small or empty', 400);
+    throw new BilingualAppError('FILE_TOO_SMALL', 400);
   }
 }
 

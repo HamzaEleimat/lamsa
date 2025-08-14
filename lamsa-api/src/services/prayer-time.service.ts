@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { supabase } from '../config/supabase';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 interface PrayerTimesData {
   Fajr: string;
@@ -70,7 +70,7 @@ export class PrayerTimeService {
     try {
       const cityData = this.jordanCities.find(c => c.city.toLowerCase() === city.toLowerCase());
       if (!cityData) {
-        throw new AppError(`City ${city} not found in Jordan cities`, 400);
+        throw new BilingualAppError(`City ${city} not found in Jordan cities`, 400);
       }
 
       // const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD // Commented out to suppress unused variable warning
@@ -123,7 +123,7 @@ export class PrayerTimeService {
       // Fetch from API if not cached
       const prayerData = await this.fetchPrayerTimes(city, date);
       if (!prayerData) {
-        throw new AppError('Failed to fetch prayer times', 500);
+        throw new BilingualAppError('Failed to fetch prayer times', 500);
       }
 
       // Convert prayer times to TIME format

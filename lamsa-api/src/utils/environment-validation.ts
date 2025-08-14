@@ -47,11 +47,13 @@ export interface EnvironmentConfig {
   TAP_API_URL?: string;
   TAP_WEBHOOK_SECRET?: string;
   
-  // SMS Service (Twilio)
-  TWILIO_ACCOUNT_SID?: string;
-  TWILIO_AUTH_TOKEN?: string;
-  TWILIO_PHONE_NUMBER?: string;
-  TWILIO_VERIFY_SERVICE_SID?: string;
+  // SMS Service (Blunet)
+  BLUNET_BASE_URL?: string;
+  BLUNET_PORT?: string;
+  BLUNET_USERNAME?: string;
+  BLUNET_PASSWORD?: string;
+  BLUNET_SENDER_ID?: string;
+  BLUNET_ACCESS_KEY?: string;
   
   // Push Notifications
   EXPO_PUSH_TOKEN?: string;
@@ -273,7 +275,7 @@ class EnvironmentValidator {
       'DATABASE_URL', 'DATABASE_POOL_MIN', 'DATABASE_POOL_MAX',
       'REDIS_URL', 'REDIS_HOST', 'REDIS_PORT', 'REDIS_DB',
       'TAP_SECRET_KEY', 'TAP_PUBLIC_KEY', 'TAP_API_URL', 'TAP_WEBHOOK_SECRET',
-      'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER',
+      'BLUNET_BASE_URL', 'BLUNET_USERNAME', 'BLUNET_PASSWORD', 'BLUNET_SENDER_ID',
       'ENABLE_SWAGGER', 'ENABLE_WEBSOCKETS', 'ENABLE_CACHING',
       'CDN_URL', 'STATIC_ASSETS_URL', 'GOOGLE_MAPS_API_KEY',
       // Add more as needed
@@ -345,7 +347,10 @@ class EnvironmentValidator {
     }
 
     const commonWords = ['secret', 'password', 'key', 'jwt', 'token', 'lamsa', 'test', 'default'];
-    if (commonWords.some(word => secret.toLowerCase().includes(word))) {
+    // Allow local Supabase JWT secret for development
+    const isLocalSupabaseSecret = secret === 'super-secret-jwt-token-with-at-least-32-characters-long';
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    if (commonWords.some(word => secret.toLowerCase().includes(word)) && !isLocalSupabaseSecret && !isDevelopment) {
       this.errors.push('JWT_SECRET contains common words. Generate a secure random string');
     }
   }

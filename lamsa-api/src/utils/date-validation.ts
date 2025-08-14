@@ -7,7 +7,7 @@
  */
 
 import { parseISO, isValid } from 'date-fns';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 /**
  * Parse and validate an optional date string
@@ -24,7 +24,7 @@ export function parseAndValidateDate(
   
   const parsed = parseISO(dateString);
   if (!isValid(parsed)) {
-    throw new AppError(`Invalid ${fieldName} format`, 400);
+    throw new BilingualAppError(`Invalid ${fieldName} format`, 400);
   }
   
   return parsed;
@@ -42,12 +42,12 @@ export function parseAndValidateDateRequired(
   fieldName: string = 'date'
 ): Date {
   if (!dateString) {
-    throw new AppError(`${fieldName} is required`, 400);
+    throw new BilingualAppError(`${fieldName} is required`, 400);
   }
   
   const parsed = parseISO(dateString);
   if (!isValid(parsed)) {
-    throw new AppError(`Invalid ${fieldName} format`, 400);
+    throw new BilingualAppError(`Invalid ${fieldName} format`, 400);
   }
   
   return parsed;
@@ -68,6 +68,6 @@ export function validateDateRange(
   endFieldName: string = 'end date'
 ): void {
   if (startDate && endDate && endDate < startDate) {
-    throw new AppError(`${endFieldName} must be after ${startFieldName}`, 400);
+    throw new BilingualAppError(`${endFieldName} must be after ${startFieldName}`, 400);
   }
 }

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
-import { AppError } from './error.middleware';
+import { BilingualAppError } from './enhanced-bilingual-error.middleware';
 import { supabase } from '../config/supabase';
 
 // Middleware to validate provider access
@@ -14,7 +14,7 @@ export const validateProvider = async (
     const currentUserId = req.user?.id;
 
     if (!currentUserId) {
-      throw new AppError('User not authenticated', 401);
+      throw new BilingualAppError('USER_NOT_AUTHENTICATED', 401);
     }
 
     // If no specific provider ID is requested, use the current user's ID
@@ -27,15 +27,15 @@ export const validateProvider = async (
         .single();
 
       if (error || !provider) {
-        throw new AppError('Provider not found', 404);
+        throw new BilingualAppError('PROVIDER_NOT_FOUND', 404);
       }
 
       if (!provider.verified) {
-        throw new AppError('Provider account not verified', 403);
+        throw new BilingualAppError('PROVIDER_NOT_VERIFIED', 403);
       }
 
       if (!provider.active) {
-        throw new AppError('Provider account is inactive', 403);
+        throw new BilingualAppError('PROVIDER_ACCOUNT_INACTIVE', 403);
       }
 
       // Set the provider ID in the request for downstream use
@@ -48,7 +48,7 @@ export const validateProvider = async (
     if (requestedProviderId !== currentUserId) {
       // Check if current user has admin rights or is a team member
       // For now, we'll only allow providers to access their own data
-      throw new AppError('Access denied: You can only access your own provider data', 403);
+      throw new BilingualAppError('ACCESS_DENIED_OWN_PROVIDER_DATA', 403);
     }
 
     // Verify the requested provider exists and is active
@@ -59,15 +59,15 @@ export const validateProvider = async (
       .single();
 
     if (error || !provider) {
-      throw new AppError('Provider not found', 404);
+      throw new BilingualAppError('PROVIDER_NOT_FOUND', 404);
     }
 
     if (!provider.verified) {
-      throw new AppError('Provider account not verified', 403);
+      throw new BilingualAppError('PROVIDER_NOT_VERIFIED', 403);
     }
 
     if (!provider.active) {
-      throw new AppError('Provider account is inactive', 403);
+      throw new BilingualAppError('PROVIDER_ACCOUNT_INACTIVE', 403);
     }
 
     next();
@@ -86,7 +86,7 @@ export const requireProvider = async (
     const userId = req.user?.id;
 
     if (!userId) {
-      throw new AppError('User not authenticated', 401);
+      throw new BilingualAppError('USER_NOT_AUTHENTICATED', 401);
     }
 
     const { data: provider, error } = await supabase
@@ -96,7 +96,7 @@ export const requireProvider = async (
       .single();
 
     if (error || !provider) {
-      throw new AppError('Access denied: Provider account required', 403);
+      throw new BilingualAppError('ACCESS_DENIED_PROVIDER_REQUIRED', 403);
     }
 
     next();
@@ -113,11 +113,11 @@ export const validateProviderResource = (resourceIdParam: string = 'id') => {
       const providerId = req.user?.id;
 
       if (!providerId) {
-        throw new AppError('User not authenticated', 401);
+        throw new BilingualAppError('USER_NOT_AUTHENTICATED', 401);
       }
 
       if (!resourceId) {
-        throw new AppError('Resource ID is required', 400);
+        throw new BilingualAppError('RESOURCE_ID_REQUIRED', 400);
       }
 
       // This would need to be customized based on the resource type

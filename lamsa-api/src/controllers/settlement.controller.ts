@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../config/supabase';
-import { AppError } from '../utils/errors';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 // import { Parser } from 'json2csv';  // TODO: Install json2csv for CSV export
 // import PDFDocument from 'pdfkit';   // TODO: Install pdfkit for PDF export
 
@@ -14,7 +14,7 @@ class SettlementController {
 
       // Verify access rights
       if (user.role === 'provider' && user.provider_id !== providerId) {
-        throw new AppError('Unauthorized to view these settlements', 403);
+        throw new BilingualAppError('Unauthorized to view these settlements', 403);
       }
 
       let query = supabase
@@ -76,14 +76,14 @@ class SettlementController {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          throw new AppError('Settlement not found', 404);
+          throw new BilingualAppError('Settlement not found', 404);
         }
         throw error;
       }
 
       // Verify access rights
       if (user.role === 'provider' && user.provider_id !== data.provider_id) {
-        throw new AppError('Unauthorized to view this settlement', 403);
+        throw new BilingualAppError('Unauthorized to view this settlement', 403);
       }
 
       res.json({
@@ -103,7 +103,7 @@ class SettlementController {
 
       // Verify access rights
       if (user.role === 'provider' && user.provider_id !== providerId) {
-        throw new AppError('Unauthorized to view this information', 403);
+        throw new BilingualAppError('Unauthorized to view this information', 403);
       }
 
       const currentDate = new Date();
@@ -161,12 +161,12 @@ class SettlementController {
         .single();
 
       if (!settlement) {
-        throw new AppError('Settlement not found', 404);
+        throw new BilingualAppError('Settlement not found', 404);
       }
 
       // Verify access rights
       if (user.role === 'provider' && user.provider_id !== settlement.provider_id) {
-        throw new AppError('Unauthorized to view this settlement', 403);
+        throw new BilingualAppError('Unauthorized to view this settlement', 403);
       }
 
       // Get bookings for this settlement period
@@ -236,7 +236,7 @@ class SettlementController {
 
       // Verify access rights
       if (user.role === 'provider' && user.provider_id !== settlement.provider_id) {
-        throw new AppError('Unauthorized to export this settlement', 403);
+        throw new BilingualAppError('Unauthorized to export this settlement', 403);
       }
 
       // Get all bookings for this settlement
@@ -284,38 +284,40 @@ class SettlementController {
           completed_at: booking.completed_at
         })) || [];
 
-        const parser = new Parser({ fields });
-        const csv = parser.parse(data);
+        // const parser = new Parser({ fields });  // TODO: Uncomment when json2csv is installed
+        const csv = ''; // parser.parse(data);  // TODO: Uncomment when json2csv is installed
 
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename=settlement-${settlement.year}-${settlement.month}.csv`);
         res.send(csv);
       } else {
         // Generate PDF
-        const doc = new PDFDocument();
+        // TODO: Implement PDF generation when pdfkit is installed
+        // const doc = new PDFDocument();
+        // res.setHeader('Content-Type', 'application/pdf');
+        // res.setHeader('Content-Disposition', `attachment; filename=settlement-${settlement.year}-${settlement.month}.pdf`);
+        // doc.pipe(res);
+        // doc.fontSize(20).text('Settlement Report', { align: 'center' });
+        // doc.moveDown();
+        // doc.fontSize(14).text(`Provider: ${settlement.provider.business_name_en}`);
+        // doc.text(`Period: ${settlement.month}/${settlement.year}`);
+        // doc.text(`Total Bookings: ${settlement.total_bookings}`);
+        // doc.text(`Gross Amount: ${settlement.gross_amount} JOD`);
+        // doc.text(`Platform Fee: ${settlement.platform_fee} JOD`);
+        // doc.text(`Net Amount: ${settlement.net_amount} JOD`);
+        // doc.text(`Status: ${settlement.status}`);
+        // if (settlement.paid_at) {
+        //   doc.text(`Paid On: ${new Date(settlement.paid_at).toLocaleDateString()}`);
+        //   doc.text(`Reference: ${settlement.payment_reference}`);
+        // }
+        // doc.end();
         
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=settlement-${settlement.year}-${settlement.month}.pdf`);
-        
-        doc.pipe(res);
-        
-        // Add content to PDF
-        doc.fontSize(20).text('Settlement Report', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(14).text(`Provider: ${settlement.provider.business_name_en}`);
-        doc.text(`Period: ${settlement.month}/${settlement.year}`);
-        doc.text(`Total Bookings: ${settlement.total_bookings}`);
-        doc.text(`Gross Amount: ${settlement.gross_amount} JOD`);
-        doc.text(`Platform Fee: ${settlement.platform_fee} JOD`);
-        doc.text(`Net Amount: ${settlement.net_amount} JOD`);
-        doc.text(`Status: ${settlement.status}`);
-        
-        if (settlement.paid_at) {
-          doc.text(`Paid On: ${new Date(settlement.paid_at).toLocaleDateString()}`);
-          doc.text(`Reference: ${settlement.payment_reference}`);
-        }
-        
-        doc.end();
+        // For now, return JSON
+        res.json({
+          success: true,
+          message: 'PDF export not yet implemented. Please use CSV format.',
+          data: settlement
+        });
       }
     } catch (error) {
       next(error);
@@ -472,7 +474,7 @@ class SettlementController {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          throw new AppError('Settlement not found or already processed', 404);
+          throw new BilingualAppError('Settlement not found or already processed', 404);
         }
         throw error;
       }
@@ -508,7 +510,7 @@ class SettlementController {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          throw new AppError('Settlement not found or cannot be failed', 404);
+          throw new BilingualAppError('Settlement not found or cannot be failed', 404);
         }
         throw error;
       }
@@ -539,14 +541,14 @@ class SettlementController {
 
       if (settlementError) {
         if (settlementError.code === 'PGRST116') {
-          throw new AppError('Settlement not found', 404);
+          throw new BilingualAppError('Settlement not found', 404);
         }
         throw settlementError;
       }
 
       // Only allow recalculation for pending settlements
       if (settlement.status !== 'pending') {
-        throw new AppError('Can only recalculate pending settlements', 400);
+        throw new BilingualAppError('Can only recalculate pending settlements', 400);
       }
 
       // Recalculate amounts

@@ -6,7 +6,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
 import { imageStorageService, ImageUploadOptions } from '../services/image-storage.service';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 export class ImageController {
   /**
@@ -18,22 +18,22 @@ export class ImageController {
       const { fileName, bucket, maxSizeInMB, sanitizedFileName } = req.body;
       
       if (!fileName || !bucket) {
-        throw new AppError('File name and bucket are required', 400);
+        throw new BilingualAppError('File name and bucket are required', 400);
       }
 
       if (!req.user) {
-        throw new AppError('Unauthorized', 401);
+        throw new BilingualAppError('Unauthorized', 401);
       }
 
       // Validate bucket type
       const validBuckets = ['avatars', 'services', 'reviews', 'certificates'];
       if (!validBuckets.includes(bucket)) {
-        throw new AppError(`Invalid bucket. Must be one of: ${validBuckets.join(', ')}`, 400);
+        throw new BilingualAppError(`Invalid bucket. Must be one of: ${validBuckets.join(', ')}`, 400);
       }
 
       // Additional validation based on user type and bucket
       if (bucket === 'services' && req.user.type !== 'provider') {
-        throw new AppError('Only providers can upload service images', 403);
+        throw new BilingualAppError('Only providers can upload service images', 403);
       }
 
       const options: ImageUploadOptions = {
@@ -69,16 +69,16 @@ export class ImageController {
       const { bucket, key } = req.body;
       
       if (!bucket || !key) {
-        throw new AppError('Bucket and key are required', 400);
+        throw new BilingualAppError('Bucket and key are required', 400);
       }
 
       if (!req.user) {
-        throw new AppError('Unauthorized', 401);
+        throw new BilingualAppError('Unauthorized', 401);
       }
 
       // Validate that the key belongs to the user
       if (!key.startsWith(`${req.user.id}/`)) {
-        throw new AppError('Invalid image key', 403);
+        throw new BilingualAppError('Invalid image key', 403);
       }
 
       const metadata = await imageStorageService.validateUploadedImage(bucket, key);
@@ -104,16 +104,16 @@ export class ImageController {
       const { bucket, key } = req.params;
       
       if (!bucket || !key) {
-        throw new AppError('Bucket and key are required', 400);
+        throw new BilingualAppError('Bucket and key are required', 400);
       }
 
       if (!req.user) {
-        throw new AppError('Unauthorized', 401);
+        throw new BilingualAppError('Unauthorized', 401);
       }
 
       // Validate ownership
       if (!key.startsWith(`${req.user.id}/`)) {
-        throw new AppError('You can only delete your own images', 403);
+        throw new BilingualAppError('You can only delete your own images', 403);
       }
 
       await imageStorageService.deleteImage(bucket, key);
@@ -138,7 +138,7 @@ export class ImageController {
       const { imageUrl, width, height } = req.body;
       
       if (!imageUrl) {
-        throw new AppError('Image URL is required', 400);
+        throw new BilingualAppError('Image URL is required', 400);
       }
 
       const thumbnailUrl = imageStorageService.generateThumbnailUrl(

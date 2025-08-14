@@ -6,7 +6,7 @@
  * @copyright Lamsa 2025
  */
 
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 /**
  * Assert that a value is not null or undefined
@@ -18,7 +18,7 @@ export function assertDefined<T>(
   statusCode: number = 500
 ): asserts value is T {
   if (value === null || value === undefined) {
-    throw new AppError(errorMessage, statusCode);
+    throw new BilingualAppError(errorMessage, statusCode);
   }
 }
 
@@ -30,7 +30,7 @@ export function assertAuthenticated<T extends { user?: any }>(
   errorMessage: string = 'User not authenticated'
 ): asserts req is T & { user: NonNullable<T['user']> } {
   if (!req.user) {
-    throw new AppError(errorMessage, 401);
+    throw new BilingualAppError(errorMessage, 401);
   }
 }
 
@@ -102,7 +102,7 @@ export function ensureExists<T>(
 ): T {
   if (!isDefined(value)) {
     const id = identifier ? ` with ID ${identifier}` : '';
-    throw new AppError(`${entityName}${id} not found`, 404);
+    throw new BilingualAppError(`${entityName}${id} not found`, 404);
   }
   return value;
 }
@@ -151,7 +151,7 @@ export function createRequiredFieldsValidator<T extends Record<string, any>>(
     }
     
     if (missingFields.length > 0) {
-      throw new AppError(
+      throw new BilingualAppError(
         `Missing required fields: ${missingFields.join(', ')}`,
         400
       );

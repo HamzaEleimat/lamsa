@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { authenticate } from '../middleware/auth.middleware';
 import { validateProvider } from '../middleware/provider.middleware';
 import { apiRateLimiter } from '../middleware/rate-limit.middleware';
@@ -21,7 +21,7 @@ router.get(['/analytics/:providerId', '/analytics'], validateProvider, async (re
     const { startDate, endDate } = req.query;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     const analytics = await reviewAnalyticsService.getReviewAnalytics(
@@ -57,7 +57,7 @@ router.get(['/detailed/:providerId', '/detailed'], validateProvider, async (req:
     } = req.query;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     const filters = {
@@ -101,7 +101,7 @@ router.get(['/insights/:providerId', '/insights'], validateProvider, async (req:
     const providerId = req.params.providerId || req.user?.id;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     const insights = await reviewAnalyticsService.generateReviewInsights(providerId);
@@ -123,7 +123,7 @@ router.get(['/response-templates/:providerId', '/response-templates'], validateP
     const providerId = req.params.providerId || req.user?.id;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     const templates = await reviewAnalyticsService.getResponseTemplates(providerId);
@@ -145,7 +145,7 @@ router.post('/response-suggestions', authenticate, async (req: AuthRequest, res:
     const { reviewId, reviewText, rating, sentiment } = req.body;
     
     if (!reviewId || !reviewText || rating === undefined) {
-      throw new AppError('Review ID, text, and rating are required', 400);
+      throw new BilingualAppError('Review ID, text, and rating are required', 400);
     }
 
     const suggestions = await reviewAnalyticsService.getResponseSuggestions(
@@ -174,7 +174,7 @@ router.post('/respond/:reviewId', authenticate, async (req: AuthRequest, res: Re
     const providerId = req.user?.id;
     
     if (!reviewId || !responseText || !providerId) {
-      throw new AppError('Review ID, response text, and provider ID are required', 400);
+      throw new BilingualAppError('Review ID, response text, and provider ID are required', 400);
     }
 
     await reviewAnalyticsService.trackResponsePerformance(
@@ -201,7 +201,7 @@ router.get(['/sentiment-trends/:providerId', '/sentiment-trends'], validateProvi
     const { period: _period = 'month', months = 6 } = req.query;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     // Get analytics for trend analysis
@@ -238,7 +238,7 @@ router.get(['/aspects/:providerId', '/aspects'], validateProvider, async (req: A
     const { timeframe = 'month' } = req.query;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     const endDate = new Date();
@@ -285,7 +285,7 @@ router.get(['/competitor-comparison/:providerId', '/competitor-comparison'], val
     const providerId = req.params.providerId || req.user?.id;
     
     if (!providerId) {
-      throw new AppError('Provider ID is required', 400);
+      throw new BilingualAppError('Provider ID is required', 400);
     }
 
     const analytics = await reviewAnalyticsService.getReviewAnalytics(providerId);

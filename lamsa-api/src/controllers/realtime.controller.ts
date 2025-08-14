@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { realtimeService } from '../services/realtime.service';
 
 export class RealtimeController {
@@ -11,7 +11,7 @@ export class RealtimeController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       const clients = realtimeService.getProviderClients(providerId);
@@ -39,7 +39,7 @@ export class RealtimeController {
       const { title, titleAr, message, messageAr, priority = 'medium' } = req.body;
       
       if (!title || !message) {
-        throw new AppError('Title and message are required', 400);
+        throw new BilingualAppError('Title and message are required', 400);
       }
 
       realtimeService.broadcastSystemAnnouncement({
@@ -67,7 +67,7 @@ export class RealtimeController {
       const { providerId, type, title, titleAr, message, messageAr, data, priority = 'medium' } = req.body;
       
       if (!providerId || !title || !message) {
-        throw new AppError('Provider ID, title, and message are required', 400);
+        throw new BilingualAppError('Provider ID, title, and message are required', 400);
       }
 
       const notification = {
@@ -101,7 +101,7 @@ export class RealtimeController {
       const providerId = req.params.providerId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       await realtimeService.sendMetricsUpdate(providerId);
@@ -173,7 +173,7 @@ export class RealtimeController {
       const providerId = targetProviderId || req.user?.id;
       
       if (!providerId) {
-        throw new AppError('Provider ID is required', 400);
+        throw new BilingualAppError('Provider ID is required', 400);
       }
 
       switch (testType) {
@@ -215,7 +215,7 @@ export class RealtimeController {
           break;
 
         default:
-          throw new AppError('Invalid test type', 400);
+          throw new BilingualAppError('Invalid test type', 400);
       }
 
       const response: ApiResponse = {

@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
-import { supabase } from '../config/supabase';
-// import { encryptedDb } from '../services/encrypted-db.service';  // TODO: Fix encrypted-db service TypeScript issues
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
+import { supabase, db } from '../config/supabase';
 import SecureQueryBuilder from '../utils/secure-query';
 
 // TypeScript Interfaces
@@ -91,8 +90,8 @@ export class ProviderController {
           .lte('longitude', Number(lng) + radiusInDegrees);
       }
       
-      // Only active and verified providers
-      query = query.eq('verified', true).eq('active', true);
+      // Only active providers
+      query = query.eq('status', 'active');
       
       // Pagination
       const offset = (Number(page) - 1) * Number(limit);
@@ -101,6 +100,7 @@ export class ProviderController {
       const { data: providers, error, count } = await query;
       
       if (error) {
+        console.error('Supabase getAllProviders error:', error);
         // Mock data for development if database query fails
         if (process.env.NODE_ENV === 'development') {
           console.log('⚠️  Using mock provider data for development');
@@ -183,7 +183,7 @@ export class ProviderController {
           res.json(response);
           return;
         }
-        throw new AppError('Failed to fetch providers', 500);
+        throw new BilingualAppError('Failed to fetch providers', 500);
       }
       
       // Calculate average ratings
@@ -233,10 +233,10 @@ export class ProviderController {
       const requesterId = (req as AuthRequest).user?.id;
       
       // Fetch provider using encrypted database service
-      const { data: provider, error: providerError } = await encryptedDb.getProviderProfile(id, requesterId);
+      const { data: provider, error: providerError } = await db.providers.findById(id);
       
       if (providerError || !provider) {
-        throw new AppError('Provider not found', 404);
+        throw new BilingualAppError('Provider not found', 404);
       }
       
       // Create a mutable provider object with additional properties
@@ -252,7 +252,7 @@ export class ProviderController {
             name_en,
             description_ar,
             description_en,
-            category,
+            category_id,
             price,
             duration_minutes,
             active
@@ -285,12 +285,12 @@ export class ProviderController {
       providerWithDetails.reviews = reviewsResult.data || [];
       providerWithDetails.availability = availabilityResult.data || [];
       
-      // Group services by category
+      // Group services by category_id
       const servicesByCategory = providerWithDetails.services?.reduce((acc: any, service: any) => {
-        if (!acc[service.category]) {
-          acc[service.category] = [];
+        if (!acc[service.category_id]) {
+          acc[service.category_id] = [];
         }
-        acc[service.category].push(service);
+        acc[service.category_id].push(service);
         return acc;
       }, {}) || {};
       
@@ -345,18 +345,23 @@ export class ProviderController {
         updateData.license_image = req.file.buffer.toString('base64');
       }
       
-      // Update provider using encrypted database service
-      const { data: updatedProvider, error } = await encryptedDb.updateProvider(id, {
-        ...updateData,
-        updated_at: new Date().toISOString()
-      });
+      // Update provider using Supabase
+      const { data: updatedProvider, error } = await supabase
+        .from('providers')
+        .update({
+          ...updateData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
       
       if (error) {
-        throw new AppError('Failed to update provider profile', 500);
+        throw new BilingualAppError('Failed to update provider profile', 500);
       }
       
       if (!updatedProvider) {
-        throw new AppError('Provider not found', 404);
+        throw new BilingualAppError('Provider not found', 404);
       }
 
       const response: ApiResponse = {
@@ -387,7 +392,7 @@ export class ProviderController {
           id,
           name_ar,
           name_en,
-          category,
+          category_id,
           price
         )
       `, { count: 'exact' });
@@ -421,9 +426,9 @@ export class ProviderController {
           .lte('longitude', lng + radiusInDegrees);
       }
       
-      // Filter by services
+      // Filter by services (using category_id)
       if (searchParams.services && searchParams.services.length > 0) {
-        query = query.in('services.category', searchParams.services);
+        query = query.in('services.category_id', searchParams.services);
       }
       
       // Filter by price range
@@ -433,8 +438,8 @@ export class ProviderController {
           .lte('services.price', searchParams.priceRange.max);
       }
       
-      // Only active and verified providers
-      query = query.eq('verified', true).eq('active', true);
+      // Only active providers
+      query = query.eq('status', 'active');
       
       // Pagination
       const offset = (Number(page) - 1) * Number(limit);
@@ -443,7 +448,8 @@ export class ProviderController {
       const { data: providers, error, count } = await query;
       
       if (error) {
-        throw new AppError('Failed to search providers', 500);
+        console.error('Supabase search providers error:', error);
+        throw new BilingualAppError(`Failed to search providers: ${error.message}`, 500);
       }
       
       // Process results
@@ -458,7 +464,7 @@ export class ProviderController {
           average_rating: Math.round(avgRating * 10) / 10,
           review_count: ratings.length,
           matching_services: provider.services?.filter((s: any) => 
-            searchParams.services?.includes(s.category)
+            searchParams.services?.includes(s.category_id)
           ) || []
         };
       }) || [];
@@ -487,17 +493,21 @@ export class ProviderController {
     try {
       const providerData = req.body;
       
-      // Create provider profile using encrypted database service
-      const { data: newProvider, error } = await encryptedDb.createProvider({
-        ...providerData,
-        user_id: req.user?.id,
-        verified: false,
-        active: true,
-        created_at: new Date().toISOString()
-      });
+      // Create provider profile using Supabase
+      const { data: newProvider, error } = await supabase
+        .from('providers')
+        .insert({
+          ...providerData,
+          user_id: req.user?.id,
+          verified: false,
+          active: true,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
       
       if (error) {
-        throw new AppError('Failed to create provider profile', 500);
+        throw new BilingualAppError('Failed to create provider profile', 500);
       }
 
       const response: ApiResponse = {
@@ -528,7 +538,7 @@ export class ProviderController {
         .eq('id', id);
       
       if (error) {
-        throw new AppError('Failed to delete provider profile', 500);
+        throw new BilingualAppError('Failed to delete provider profile', 500);
       }
 
       const response: ApiResponse = {
@@ -554,13 +564,14 @@ export class ProviderController {
         .eq('active', true);
       
       if (category) {
-        query = query.eq('category', category);
+        query = query.eq('category_id', category);
       }
       
-      const { data: services, error } = await query.order('category', { ascending: true });
+      const { data: services, error } = await query.order('category_id', { ascending: true });
       
       if (error) {
-        throw new AppError('Failed to fetch services', 500);
+        console.error('Supabase getProviderServices error:', error);
+        throw new BilingualAppError(`Failed to fetch services: ${error.message}`, 500);
       }
 
       const response: ApiResponse = {
@@ -580,24 +591,66 @@ export class ProviderController {
       const { date } = req.query;
       
       if (!date) {
-        throw new AppError('Date parameter is required', 400);
+        throw new BilingualAppError('Date parameter is required', 400);
       }
       
       // Fetch provider's availability and existing bookings
+      // Parse date safely - handle both string and Date object
+      let dayOfWeek: number;
+      let dateForQuery: string;
+      
+      try {
+        if (typeof date === 'string') {
+          // If it's a string in YYYY-MM-DD format
+          const [year, month, day] = date.split('-').map(Number);
+          const dateObj = new Date(year, month - 1, day);
+          dayOfWeek = dateObj.getDay();
+          dateForQuery = date;
+        } else {
+          // If it's already a Date object or needs conversion
+          const dateObj = new Date(date as unknown as string);
+          dayOfWeek = dateObj.getDay();
+          dateForQuery = dateObj.toISOString().split('T')[0]; // Convert to YYYY-MM-DD
+        }
+        
+        if (isNaN(dayOfWeek)) {
+          throw new Error('Invalid date');
+        }
+
+        // Validate that the date is not in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        const requestedDate = new Date(dateForQuery);
+        
+        if (requestedDate < today) {
+          throw new BilingualAppError('Cannot check availability for past dates', 400);
+        }
+      } catch (error) {
+        console.error('Date parsing error:', error, 'Date:', date);
+        if (error instanceof BilingualAppError) {
+          throw error; // Re-throw bilingual errors as-is
+        }
+        throw new BilingualAppError('Invalid date format. Use YYYY-MM-DD format.', 400);
+      }
+      
       const [availabilityResult, bookingsResult] = await Promise.all([
-        supabase.from('availability')
+        supabase.from('provider_availability')
           .select('*')
           .eq('provider_id', id)
-          .eq('day_of_week', new Date(date as string).getDay()),
+          .eq('day_of_week', dayOfWeek),
         supabase.from('bookings')
-          .select('booking_date, booking_time, duration_minutes')
+          .select('booking_date, start_time, end_time')
           .eq('provider_id', id)
-          .eq('booking_date', date)
+          .eq('booking_date', dateForQuery)
           .in('status', ['confirmed', 'pending'])
       ]);
       
       if (availabilityResult.error || bookingsResult.error) {
-        throw new AppError('Failed to fetch availability', 500);
+        console.error('Supabase availability errors:', {
+          availability: availabilityResult.error,
+          bookings: bookingsResult.error
+        });
+        throw new BilingualAppError(`Failed to fetch availability: ${availabilityResult.error?.message || bookingsResult.error?.message}`, 500);
       }
       
       // Generate time slots based on availability and bookings
@@ -606,13 +659,13 @@ export class ProviderController {
       
       const slots = [];
       if (availability && availability.is_available) {
-        const startTime = new Date(`2000-01-01 ${availability.start_time}`);
-        const endTime = new Date(`2000-01-01 ${availability.end_time}`);
+        const startTime = new Date(`2000-01-01 ${availability.opens_at}`);
+        const endTime = new Date(`2000-01-01 ${availability.closes_at}`);
         const slotDuration = 30; // 30-minute slots
         
         for (let time = startTime; time < endTime; time.setMinutes(time.getMinutes() + slotDuration)) {
           const timeStr = time.toTimeString().slice(0, 5);
-          const isBooked = bookings.some(booking => booking.booking_time === timeStr);
+          const isBooked = bookings.some(booking => booking.start_time === timeStr);
           
           slots.push({
             time: timeStr,

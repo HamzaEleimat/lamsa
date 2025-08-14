@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { AppError } from '../utils/errors';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 
 /**
  * PII Encryption Service
@@ -85,7 +85,7 @@ class EncryptionService {
       return combined.toString('base64');
     } catch (error) {
       console.error('Encryption error:', error);
-      throw new AppError('Failed to encrypt data', 500);
+      throw new BilingualAppError('Failed to encrypt data', 500);
     }
   }
 

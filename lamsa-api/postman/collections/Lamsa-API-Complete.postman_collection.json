@@ -1,0 +1,665 @@
+{
+  "info": {
+    "name": "Lamsa API Complete",
+    "description": "Complete API collection for Lamsa beauty booking platform. Includes all endpoints for authentication, providers, services, bookings, payments, and more.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Customer Authentication",
+          "item": [
+            {
+              "name": "Send Customer OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const response = pm.response.json();",
+                      "if (response.data && response.data.testOtp) {",
+                      "    pm.environment.set(\"test_otp\", response.data.testOtp);",
+                      "    console.log('Test OTP saved:', response.data.testOtp);",
+                      "} else if (response.mockOtp) {",
+                      "    pm.environment.set(\"test_otp\", response.mockOtp);",
+                      "    console.log('Mock OTP saved:', response.mockOtp);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"phone\": \"{{customer_phone}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/customer/send-otp",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "customer", "send-otp"]
+                }
+              }
+            },
+            {
+              "name": "Verify Customer OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "if (jsonData.success && jsonData.data) {",
+                      "    if (jsonData.data.token) {",
+                      "        pm.environment.set(\"jwt_token\", jsonData.data.token);",
+                      "        console.log('JWT token saved');",
+                      "    }",
+                      "    if (jsonData.data.user && jsonData.data.user.id) {",
+                      "        pm.environment.set(\"customer_id\", jsonData.data.user.id);",
+                      "        console.log('Customer ID saved:', jsonData.data.user.id);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"phone\": \"{{customer_phone}}\",\n    \"otp\": \"{{test_otp}}\",\n    \"name\": \"{{customer_name}}\",\n    \"email\": \"{{customer_email}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/customer/verify-otp",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "customer", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "Customer Signup (Email)",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Test Customer\",\n    \"email\": \"customer@test.com\",\n    \"password\": \"Test123!@#\",\n    \"phone\": \"{{customer_phone}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/customer/signup",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "customer", "signup"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Provider Authentication",
+          "item": [
+            {
+              "name": "Send Provider OTP",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"phone\": \"{{provider_phone}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/provider/send-otp",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "provider", "send-otp"]
+                }
+              }
+            },
+            {
+              "name": "Verify Provider OTP",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"phone\": \"{{provider_phone}}\",\n    \"otp\": \"{{test_otp}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/provider/verify-otp",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "provider", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "Provider Signup",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"{{provider_email}}\",\n    \"password\": \"{{test_password}}\",\n    \"phone\": \"{{provider_phone}}\",\n    \"phoneVerified\": true,\n    \"business_name_ar\": \"{{business_name_ar}}\",\n    \"business_name_en\": \"{{business_name_en}}\",\n    \"owner_name\": \"{{owner_name}}\",\n    \"address\": {\n        \"street\": \"123 Test Street\",\n        \"city\": \"Amman\",\n        \"district\": \"Abdali\",\n        \"country\": \"Jordan\"\n    },\n    \"latitude\": {{test_lat}},\n    \"longitude\": {{test_lng}}\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/provider/signup",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "provider", "signup"]
+                }
+              }
+            },
+            {
+              "name": "Provider Login",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"{{provider_email}}\",\n    \"password\": \"{{test_password}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/provider/login",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "provider", "login"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token Management",
+          "item": [
+            {
+              "name": "Get Current User",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+                "url": {
+                  "raw": "{{api_url}}/api/auth/me",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "me"]
+                }
+              }
+            },
+            {
+              "name": "Refresh Token",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{api_url}}/api/auth/refresh",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "refresh"]
+                }
+              }
+            },
+            {
+              "name": "Sign Out",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+                "url": {
+                  "raw": "{{api_url}}/api/auth/signout",
+                  "host": ["{{api_url}}"],
+                  "path": ["api", "auth", "signout"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Provider Management",
+      "item": [
+        {
+          "name": "Get All Providers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/providers?page=1&limit=10&category=hair",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "10"},
+                {"key": "category", "value": "hair"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Providers",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"salon\",\n    \"location\": {\n        \"lat\": {{test_lat}},\n        \"lng\": {{test_lng}},\n        \"radius\": {{search_radius}}\n    },\n    \"services\": [\"hair\", \"nails\"],\n    \"priceRange\": {\n        \"min\": 10,\n        \"max\": 50\n    }\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/providers/search",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "search"]
+            }
+          }
+        },
+        {
+          "name": "Get Provider by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/providers/{{provider_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "{{provider_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Provider Services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/providers/{{provider_id}}/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "{{provider_id}}", "services"]
+            }
+          }
+        },
+        {
+          "name": "Get Provider Availability",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/providers/{{provider_id}}/availability?date=2024-12-25",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "{{provider_id}}", "availability"],
+              "query": [{"key": "date", "value": "2024-12-25"}]
+            }
+          }
+        },
+        {
+          "name": "Update Provider Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{provider_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description_ar\": \"صالون تجميل متخصص\",\n    \"description_en\": \"Specialized beauty salon\",\n    \"working_hours\": {\n        \"monday\": {\"open\": \"09:00\", \"close\": \"18:00\"},\n        \"tuesday\": {\"open\": \"09:00\", \"close\": \"18:00\"}\n    }\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/providers/{{provider_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "providers", "{{provider_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Service Management",
+      "item": [
+        {
+          "name": "Get All Services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "services"]
+            }
+          }
+        },
+        {
+          "name": "Create Service",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{provider_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_ar\": \"قص شعر\",\n    \"name_en\": \"Haircut\",\n    \"description_ar\": \"قص شعر احترافي\",\n    \"description_en\": \"Professional haircut\",\n    \"category\": \"hair\",\n    \"price\": 25,\n    \"duration\": 45,\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/service-management/services",
+              "host": ["{{api_url}}"],
+              "path": ["api", "service-management", "services"]
+            }
+          }
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{provider_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 30,\n    \"duration\": 60\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/service-management/services/{{service_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "service-management", "services", "{{service_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{provider_token}}"}],
+            "url": {
+              "raw": "{{api_url}}/api/service-management/services/{{service_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "service-management", "services", "{{service_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Booking System",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"provider_id\": \"{{provider_id}}\",\n    \"service_id\": \"{{service_id}}\",\n    \"date\": \"2024-12-25\",\n    \"time\": \"14:00\",\n    \"notes\": \"First time customer\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/bookings",
+              "host": ["{{api_url}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookings",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {
+              "raw": "{{api_url}}/api/bookings/user",
+              "host": ["{{api_url}}"],
+              "path": ["api", "bookings", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get Provider Bookings",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{provider_token}}"}],
+            "url": {
+              "raw": "{{api_url}}/api/bookings/provider/{{provider_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "bookings", "provider", "{{provider_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{provider_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"confirmed\",\n    \"reason\": \"Booking confirmed by provider\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/bookings/{{booking_id}}/status",
+              "host": ["{{api_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Change of plans\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/bookings/{{booking_id}}/cancel",
+              "host": ["{{api_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Reschedule Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"date\": \"2024-12-26\",\n    \"time\": \"15:00\",\n    \"reason\": \"Need to reschedule\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/bookings/{{booking_id}}/reschedule",
+              "host": ["{{api_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "reschedule"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Payment System",
+      "item": [
+        {
+          "name": "Initialize Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"booking_id\": \"{{booking_id}}\",\n    \"payment_method\": \"card\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/payments/initialize",
+              "host": ["{{api_url}}"],
+              "path": ["api", "payments", "initialize"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"payment_id\": \"{{payment_id}}\",\n    \"tap_id\": \"tap_test_123\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/payments/confirm",
+              "host": ["{{api_url}}"],
+              "path": ["api", "payments", "confirm"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {
+              "raw": "{{api_url}}/api/payments/{{payment_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "payments", "{{payment_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Review System",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"booking_id\": \"{{booking_id}}\",\n    \"rating\": 5,\n    \"comment\": \"Excellent service!\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/reviews",
+              "host": ["{{api_url}}"],
+              "path": ["api", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Provider Reviews",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/reviews/provider/{{provider_id}}",
+              "host": ["{{api_url}}"],
+              "path": ["api", "reviews", "provider", "{{provider_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Notifications",
+      "item": [
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {
+              "raw": "{{api_url}}/api/notifications",
+              "host": ["{{api_url}}"],
+              "path": ["api", "notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {
+              "raw": "{{api_url}}/api/notifications/{{notification_id}}/read",
+              "host": ["{{api_url}}"],
+              "path": ["api", "notifications", "{{notification_id}}", "read"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Health & Config",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/health",
+              "host": ["{{api_url}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "Get App Config",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/api/config/app",
+              "host": ["{{api_url}}"],
+              "path": ["api", "config", "app"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set common headers",
+          "pm.request.headers.add({",
+          "    key: 'Accept',",
+          "    value: 'application/json'",
+          "});",
+          "",
+          "// Add timestamp for unique data",
+          "pm.globals.set('timestamp', new Date().getTime());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Check for errors",
+          "if (pm.response.code >= 400) {",
+          "    console.error('Error:', pm.response.json());",
+          "}"
+        ]
+      }
+    }
+  ]
+}

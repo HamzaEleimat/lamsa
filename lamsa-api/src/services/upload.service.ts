@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase';
-import { AppError } from '../utils/errors';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import sharp from 'sharp';
 // import { v4 as uuidv4 } from 'uuid';  // TODO: Install @types/uuid
 const uuidv4 = () => Math.random().toString(36).substring(2) + Date.now().toString(36); // Temporary UUID replacement
@@ -40,7 +40,7 @@ export async function uploadImage(
 
     if (error) {
       console.error('Upload error:', error);
-      throw new AppError('Failed to upload image', 500);
+      throw new BilingualAppError('Failed to upload image', 500);
     }
 
     // Get public URL
@@ -51,7 +51,7 @@ export async function uploadImage(
     return publicUrl;
   } catch (error) {
     console.error('Image processing error:', error);
-    throw new AppError('Failed to process image', 500);
+    throw new BilingualAppError('Failed to process image', 500);
   }
 }
 
@@ -114,19 +114,19 @@ export function validateImageFile(
 ): void {
   // Check file type
   if (!file.mimetype.startsWith('image/')) {
-    throw new AppError('File must be an image', 400);
+    throw new BilingualAppError('File must be an image', 400);
   }
 
   // Check file size
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
   if (file.size > maxSizeBytes) {
-    throw new AppError(`Image size must be less than ${maxSizeMB}MB`, 400);
+    throw new BilingualAppError(`Image size must be less than ${maxSizeMB}MB`, 400);
   }
 
   // Check specific image types
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   if (!allowedTypes.includes(file.mimetype)) {
-    throw new AppError('Image must be JPEG, PNG, or WebP format', 400);
+    throw new BilingualAppError('Image must be JPEG, PNG, or WebP format', 400);
   }
 }
 

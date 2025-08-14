@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { validationResult, Result, ValidationError } from 'express-validator';
-import { AppError } from './error.middleware';
+import { BilingualAppError } from './enhanced-bilingual-error.middleware';
 import { AuthRequest, ApiResponse } from '../types';
 
 /**
@@ -275,17 +275,8 @@ export const enhancedErrorHandler = (error: any, req: AuthRequest, res: Response
     response = formatBookingError(error);
   } else if (error.code && error.code.startsWith('23')) { // PostgreSQL constraint errors
     response = formatDatabaseError(error);
-  } else if (error instanceof AppError) {
-    response = {
-      success: false,
-      error: error.name,
-      message: error.message,
-      data: {
-        errorCode: error.statusCode,
-        category: 'application',
-        timestamp: new Date().toISOString()
-      }
-    };
+  } else if (error instanceof BilingualAppError) {
+    response = error.toResponse();
   } else {
     // Generic error handling
     response = {

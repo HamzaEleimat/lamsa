@@ -53,6 +53,10 @@ router.post(
       .notEmpty().withMessage('OTP is required')
       .isString().withMessage('OTP must be a string')
       .matches(/^[0-9]{6}$/).withMessage('OTP must be exactly 6 digits'),
+    body('email')
+      .notEmpty().withMessage('Email is required')
+      .isEmail().withMessage('Please provide a valid email')
+      .normalizeEmail(),
     body('name')
       .optional()
       .trim()

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../config/supabase';
-import { AppError } from '../utils/errors';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { uploadImage } from '../services/upload.service';
 import { normalizePhoneNumber } from '../utils/phone.utils';
 
@@ -88,7 +88,7 @@ class EmployeeController {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          throw new AppError('Employee not found', 404);
+          throw new BilingualAppError('Employee not found', 404);
         }
         throw error;
       }
@@ -118,7 +118,7 @@ class EmployeeController {
           .single();
 
         if (!canPerform) {
-          throw new AppError('Employee cannot perform this service', 400);
+          throw new BilingualAppError('Employee cannot perform this service', 400);
         }
       }
 
@@ -136,16 +136,17 @@ class EmployeeController {
 
       if (specialDate) {
         if (!specialDate.is_available) {
-          return res.json({
+          res.json({
             success: true,
             data: {
               available: false,
               reason: specialDate.reason || 'Employee unavailable'
             }
           });
+          return;
         }
         // Use special date hours
-        return res.json({
+        res.json({
           success: true,
           data: {
             available: true,
@@ -153,6 +154,7 @@ class EmployeeController {
             ends_at: specialDate.ends_at
           }
         });
+        return;
       }
 
       // Get regular weekly availability
@@ -164,13 +166,14 @@ class EmployeeController {
         .single();
 
       if (error || !availability || !availability.is_available) {
-        return res.json({
+        res.json({
           success: true,
           data: {
             available: false,
             reason: 'Employee not available on this day'
           }
         });
+        return;
       }
 
       // Get existing bookings for this employee on this date
@@ -202,7 +205,7 @@ class EmployeeController {
     try {
       const providerId = (req as any).user.provider_id;
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       const employeeData = { ...req.body, provider_id: providerId };
@@ -243,7 +246,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify ownership
@@ -254,7 +257,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to update this employee', 403);
+        throw new BilingualAppError('Unauthorized to update this employee', 403);
       }
 
       const updateData = { ...req.body };
@@ -296,7 +299,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify ownership
@@ -307,7 +310,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to delete this employee', 403);
+        throw new BilingualAppError('Unauthorized to delete this employee', 403);
       }
 
       // Soft delete by setting is_active to false
@@ -335,7 +338,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify employee ownership
@@ -346,7 +349,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to modify this employee', 403);
+        throw new BilingualAppError('Unauthorized to modify this employee', 403);
       }
 
       // Verify all services belong to the provider
@@ -357,7 +360,7 @@ class EmployeeController {
         .in('id', service_ids);
 
       if (!services || services.length !== service_ids.length) {
-        throw new AppError('Some services do not belong to this provider', 400);
+        throw new BilingualAppError('Some services do not belong to this provider', 400);
       }
 
       // Prepare insert data
@@ -390,7 +393,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify employee ownership
@@ -401,7 +404,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to modify this employee', 403);
+        throw new BilingualAppError('Unauthorized to modify this employee', 403);
       }
 
       const { error } = await supabase
@@ -429,7 +432,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify employee ownership
@@ -440,7 +443,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to modify this employee', 403);
+        throw new BilingualAppError('Unauthorized to modify this employee', 403);
       }
 
       // Prepare availability data
@@ -472,7 +475,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify employee ownership
@@ -483,7 +486,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to modify this employee', 403);
+        throw new BilingualAppError('Unauthorized to modify this employee', 403);
       }
 
       const specialDateData = {
@@ -513,7 +516,7 @@ class EmployeeController {
       const providerId = (req as any).user.provider_id;
       
       if (!providerId) {
-        throw new AppError('Provider ID not found', 403);
+        throw new BilingualAppError('Provider ID not found', 403);
       }
 
       // Verify employee ownership
@@ -524,7 +527,7 @@ class EmployeeController {
         .single();
 
       if (!employee || employee.provider_id !== providerId) {
-        throw new AppError('Unauthorized to modify this employee', 403);
+        throw new BilingualAppError('Unauthorized to modify this employee', 403);
       }
 
       const { error } = await supabase
@@ -559,7 +562,7 @@ class EmployeeController {
 
       if (error) {
         if (error.code === '23505') { // Unique violation
-          throw new AppError('Employee already in favorites', 400);
+          throw new BilingualAppError('Employee already in favorites', 400);
         }
         throw error;
       }

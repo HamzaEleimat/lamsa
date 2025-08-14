@@ -116,12 +116,7 @@ export class BookingService {
    * Create a new booking with full validation and transaction handling
    */
   async createBooking(data: CreateBookingData): Promise<BookingWithDetails> {
-    // Start transaction
-    const { data: transactionResult, error: transactionError } = await supabase.rpc('begin_transaction');
-    if (transactionError) {
-      throw new BookingError('Failed to start transaction', 500);
-    }
-
+    // Note: Supabase handles transactions automatically for us
     try {
       // 1. Validate service exists and is active
       const service = await this.validationService.validateService(data.serviceId);
@@ -150,21 +145,15 @@ export class BookingService {
         startTime: data.startTime,
         endTime: endTime,
         servicePrice: service.price,
-        paymentMethod: data.paymentMethod,
-        notes: data.notes
+        paymentMethod: data.paymentMethod
       });
 
       // 8. Send notifications (async)
       await this.notificationService.sendBookingNotifications(booking, 'created', data.userId);
 
-      // Commit transaction
-      await supabase.rpc('commit_transaction');
-
       return this.crudService.formatBookingWithDetails(booking);
 
     } catch (error) {
-      // Rollback transaction
-      await supabase.rpc('rollback_transaction');
       throw error;
     }
   }
@@ -192,12 +181,6 @@ export class BookingService {
       this.validationService.validateBookingNotPastDue(currentBooking);
     }
 
-    // Start transaction
-    const { error: transactionError } = await supabase.rpc('begin_transaction');
-    if (transactionError) {
-      throw new BookingError('Failed to start transaction', 500);
-    }
-
     try {
       // Update booking status
       const updatedBooking = await this.crudService.updateBookingStatusRecord(
@@ -219,12 +202,9 @@ export class BookingService {
       // Send notifications
       await this.notificationService.sendBookingNotifications(updatedBooking, 'status_updated', data.userId);
 
-      await supabase.rpc('commit_transaction');
-
       return this.crudService.formatBookingWithDetails(updatedBooking);
 
     } catch (error) {
-      await supabase.rpc('rollback_transaction');
       throw error;
     }
   }
@@ -272,12 +252,6 @@ export class BookingService {
       data.bookingId // Exclude current booking from conflict check
     );
 
-    // Start transaction
-    const { error: transactionError } = await supabase.rpc('begin_transaction');
-    if (transactionError) {
-      throw new BookingError('Failed to start transaction', 500);
-    }
-
     try {
       // Update booking with new date/time
       const updatedBooking = await this.crudService.rescheduleBookingRecord(
@@ -294,12 +268,9 @@ export class BookingService {
       // Send notifications
       await this.notificationService.sendBookingNotifications(updatedBooking, 'rescheduled', data.userId);
 
-      await supabase.rpc('commit_transaction');
-
       return this.crudService.formatBookingWithDetails(updatedBooking);
 
     } catch (error) {
-      await supabase.rpc('rollback_transaction');
       throw error;
     }
   }

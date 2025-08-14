@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { 
   bookingService, 
   CreateBookingData, 
@@ -36,20 +36,38 @@ export class BookingController {
    * Converts BookingError instances to AppError with proper status code and error code
    */
   private handleBookingError(error: any, next: NextFunction): void {
+    console.error('🔍 BookingController Error Details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      statusCode: error.statusCode,
+      isBookingError: error instanceof BookingError,
+      fullError: error
+    });
+    
     if (error instanceof BookingError) {
-      next(new AppError(error.message, (error as any).statusCode || 400, (error as any).code));
+      next(new BilingualAppError(error.message, (error as any).statusCode || 400, (error as any).code));
     } else {
       next(error);
     }
   }
 
-  async createBooking(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  createBooking = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Use null safety helper instead of non-null assertion
       assertAuthenticated(req, 'Authentication required to create booking');
       
-      const bookingData: CreateBookingData = req.body;
-      bookingData.userId = req.user.id; // Now TypeScript knows user exists
+      // Map from validation format (date, time) to service format (bookingDate, startTime)
+      const bookingData: CreateBookingData = {
+        userId: req.user.id,
+        providerId: req.body.providerId,
+        serviceId: req.body.serviceId,
+        bookingDate: new Date(req.body.date),
+        startTime: req.body.time,
+        endTime: req.body.endTime,
+        paymentMethod: req.body.paymentMethod
+      };
 
       const booking = await bookingService.createBooking(bookingData);
 
@@ -147,15 +165,15 @@ export class BookingController {
       const booking = await bookingService.getBookingById(bookingId);
 
       if (!booking) {
-        return next(new AppError('Booking not found', 404));
+        return next(new BilingualAppError('Booking not found', 404));
       }
 
       // Check ownership based on user type
       if (req.user.type === 'customer' && booking.userId !== req.user.id) {
-        return next(new AppError('Access denied', 403));
+        return next(new BilingualAppError('Access denied', 403));
       }
       if (req.user.type === 'provider' && booking.providerId !== req.user.id) {
-        return next(new AppError('Access denied', 403));
+        return next(new BilingualAppError('Access denied', 403));
       }
 
       const response: ApiResponse = {

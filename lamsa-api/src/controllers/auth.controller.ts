@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { ApiResponse, AuthRequest } from '../types';
 import { db, auth, supabase, supabaseAdmin } from '../config/supabase';
 import { mockOTP } from '../config/mock-otp';
@@ -9,9 +9,10 @@ import { getEnvironmentConfig } from '../utils/environment-validation';
 import { logger } from '../utils/logger';
 import { tokenBlacklist, refreshTokenManager } from '../config/token-storage.config';
 import { accountLockoutService } from '../services/account-lockout.service';
-import { encryptedDb } from '../services/encrypted-db.service';
 import { secureLogger } from '../utils/secure-logger';
 import { passwordUtils } from '../utils/password.utils';
+import { otpService } from '../services/otp.service';
+import { blunetSMSService } from '../services/blunet-sms.service';
 
 // Interfaces for request bodies
 
@@ -86,7 +87,7 @@ export class AuthController {
       cleaned = '+962' + cleaned;
     } else {
       logger.error('Invalid phone format', { original: phone, cleaned });
-      throw new AppError('Invalid phone number format. Please use Jordan format (e.g., 0791234567)', 400);
+      throw new BilingualAppError('INVALID_PHONE_FORMAT', 400);
     }
     
     // Validate final format: +962[7-9]XXXXXXXX (12 digits total with +)
@@ -94,7 +95,7 @@ export class AuthController {
     const jordanPhoneRegex = /^\+962[7-9][0-9]{8}$/;
     if (!jordanPhoneRegex.test(cleaned)) {
       logger.error('Phone failed regex validation', { original: phone, cleaned });
-      throw new AppError('Invalid Jordan mobile number. Must be a valid Jordanian mobile number', 400);
+      throw new BilingualAppError('PHONE_NOT_JORDAN', 400);
     }
     
     return cleaned;
@@ -138,7 +139,7 @@ export class AuthController {
       const { phone } = req.body;
       
       if (!phone) {
-        throw new AppError('Phone number is required', 400);
+        throw new BilingualAppError('PHONE_REQUIRED', 400);
       }
       
       // Validate phone number using centralized validation
@@ -147,7 +148,7 @@ export class AuthController {
         : validateJordanPhoneNumber(phone);
       
       if (!validation.isValid) {
-        throw new AppError(validation.error || 'Invalid phone number', 400);
+        throw new BilingualAppError('INVALID_PHONE_FORMAT', 400);
       }
       
       const normalizedPhone = validation.normalizedPhone!;
@@ -157,69 +158,65 @@ export class AuthController {
         logger.debug('Using test phone number for development', { phone: normalizedPhone });
       }
       
-      // In development mode with mock OTP, skip Supabase if not configured
+      // Handle OTP generation and sending
       let data: any = null;
+      let otpResult: any = null;
       
       if (mockOTP.isMockMode()) {
-        // Check if Supabase is properly configured
-        const hasValidSupabaseConfig = process.env.SUPABASE_URL && 
-                                      process.env.SUPABASE_ANON_KEY && 
-                                      process.env.SUPABASE_URL !== 'your_supabase_url_here';
-        
-        if (hasValidSupabaseConfig) {
-          // Try Supabase first
-          logger.info('Attempting to send OTP via Supabase', { phone: normalizedPhone });
-          const result = await auth.signInWithOtp({ phone: normalizedPhone });
-          
-          if (!result.success) {
-            logger.logApiError('Supabase OTP Error', result.error, req);
-            logger.info('Falling back to mock OTP in development mode');
-          } else {
-            data = result.data;
-            logger.debug('OTP Response', { data });
-          }
-        } else {
-          logger.warn('Supabase not configured - using mock OTP for development');
-        }
-        
-        // Use mock OTP if Supabase failed or not configured
-        if (!data) {
-          logger.info('Using mock OTP for development');
-          mockOTP.generate(normalizedPhone);
-          data = { mockMode: true };
-        }
+        // Use mock OTP for development
+        logger.info('Using mock OTP for development');
+        const mockOtpCode = mockOTP.generate(normalizedPhone);
+        data = { mockMode: true, success: true };
+        otpResult = { code: mockOtpCode, success: true };
       } else {
-        // Production mode - Supabase is required
-        logger.info('Attempting to send OTP', { phone: normalizedPhone });
-        const result = await auth.signInWithOtp({ phone: normalizedPhone });
+        // Production mode - Use custom OTP with Blunet SMS
+        logger.info('Generating OTP for real SMS', { phone: normalizedPhone });
         
-        if (!result.success) {
-          logger.logApiError('OTP Error', result.error, req);
-          throw new AppError(result.error?.message || 'Failed to send OTP', 400);
+        // Generate OTP
+        otpResult = otpService.generateOTP(normalizedPhone);
+        
+        if (!otpResult.success) {
+          throw new BilingualAppError('Failed to generate OTP', 500);
         }
         
-        data = result.data;
-        secureLogger.info('OTP Response received', { status: 'success' });
-      }
-      
-      // Check if SMS was actually sent
-      if (data && !data.mockMode && !data.user && !data.session) {
-        logger.warn('Supabase accepted request but no SMS sent', {
-          possibleIssues: [
-            'Twilio messaging service might need phone number verification',
-            'Phone number might need to be verified in Twilio',
-            'Twilio account might be in trial mode with restrictions'
-          ]
+        // Format OTP message
+        const message = `رمز التحقق الخاص بك في تطبيق لمسة: ${otpResult.code}\n\nYour Lamsa verification code is: ${otpResult.code}\n\nصالح لمدة 10 دقائق / Valid for 10 minutes`;
+        
+        // Send SMS via Blunet
+        logger.info('Sending OTP via Blunet SMS');
+        const smsResult = await blunetSMSService.sendSMS(normalizedPhone, message);
+        
+        if (!smsResult.success) {
+          // Clear the generated OTP if SMS failed
+          otpService.clearOTP(normalizedPhone);
+          logger.error('Failed to send SMS via Blunet', {
+            error: smsResult.error,
+            errorCode: smsResult.errorCode
+          });
+          throw new BilingualAppError('OTP_SEND_FAILED', 503);
+        }
+        
+        data = {
+          success: true,
+          messageId: smsResult.messageId,
+          expiresAt: otpResult.expiresAt
+        };
+        
+        logger.info('OTP sent successfully via Blunet', {
+          messageId: smsResult.messageId,
+          phone: normalizedPhone
         });
-      }
-      
-      // Check if real SMS was sent
-      if (data?.messageId) {
-        logger.info('Real SMS sent successfully', { messageId: data.messageId });
       }
       
       // Security: Never expose OTP codes in API responses (removed development bypass)
       const responseData: any = { phone: normalizedPhone };
+      
+      // DEVELOPMENT ONLY: Return OTP for testing with Postman
+      // This should NEVER be enabled in production
+      if (process.env.NODE_ENV === 'development' && process.env.ENABLE_TEST_OTP_RESPONSE === 'true' && otpResult) {
+        responseData.testOtp = otpResult.code;
+        logger.warn('⚠️  TEST MODE: OTP exposed in response. NEVER use in production!');
+      }
       
       const response: ApiResponse = {
         success: true,
@@ -238,80 +235,126 @@ export class AuthController {
    */
   async verifyOTP(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { phone, otp } = req.body;
+      const { phone, otp, email, name } = req.body;
       
-      // Validate phone is provided
+      // Validate required fields
       if (!phone) {
-        throw new AppError('Phone number is required', 400);
+        throw new BilingualAppError('PHONE_REQUIRED', 400);
       }
       
+      if (!email) {
+        throw new BilingualAppError('Email is required', 400);
+      }
+      
+      // Validate and normalize phone number using centralized validation
+      const validation = process.env.NODE_ENV === 'development' 
+        ? validateTestPhoneNumber(phone)
+        : validateJordanPhoneNumber(phone);
+      
+      if (!validation.isValid) {
+        throw new BilingualAppError('INVALID_PHONE_FORMAT', 400);
+      }
+      
+      const normalizedPhone = validation.normalizedPhone!;
+      
+      // Debug logging
+      logger.info('OTP Verification attempt', {
+        originalPhone: phone,
+        normalizedPhone: normalizedPhone,
+        otp: otp,
+        isMockMode: mockOTP.isMockMode()
+      });
+      
       // Check if account is locked
-      const lockoutStatus = await accountLockoutService.isLocked(phone, 'otp');
+      const lockoutStatus = await accountLockoutService.isLocked(normalizedPhone, 'otp');
       if (lockoutStatus.isLocked) {
         const minutesRemaining = Math.ceil((lockoutStatus.lockoutUntil!.getTime() - Date.now()) / 60000);
-        throw new AppError(
+        throw new BilingualAppError(
           `Account temporarily locked due to too many failed attempts. Please try again in ${minutesRemaining} minutes.`,
           429
         );
       }
       
-      // Try Supabase verification first (for real SMS)
-      const verifyResult = await auth.verifyOtp({ 
-        phone, 
-        token: otp 
-      });
-      
-      // If Supabase verification fails and we're in mock mode, try mock OTP
+      // Verify OTP based on mode
       let otpVerified = false;
-      if (!verifyResult.success && mockOTP.isMockMode()) {
+      
+      if (mockOTP.isMockMode()) {
+        // Use mock OTP verification in development
         logger.info('Trying mock OTP verification');
-        const isValid = mockOTP.verify(phone, otp);
+        const isValid = mockOTP.verify(normalizedPhone, otp);
         if (!isValid) {
           // Record failed attempt
-          const lockoutResult = await accountLockoutService.recordFailedAttempt(phone, 'otp');
+          const lockoutResult = await accountLockoutService.recordFailedAttempt(normalizedPhone, 'otp');
           if (lockoutResult.isLocked) {
-            throw new AppError(
-              'Too many failed OTP attempts. Account temporarily locked.',
-              429
-            );
+            throw new BilingualAppError('OTP_MAX_ATTEMPTS', 429);
           }
-          throw new AppError(
-            `Invalid or expired OTP. ${lockoutResult.remainingAttempts} attempts remaining.`,
-            400
-          );
+          const arMessage = `رمز التحقق غير صحيح. ${lockoutResult.remainingAttempts} محاولات متبقية`;
+          throw new BilingualAppError('INVALID_OTP', 400, {
+            en: `Invalid OTP. ${lockoutResult.remainingAttempts} attempts remaining`,
+            ar: arMessage
+          });
         }
         otpVerified = true;
-      } else if (!verifyResult.success) {
-        // Record failed attempt
-        const lockoutResult = await accountLockoutService.recordFailedAttempt(phone, 'otp');
-        if (lockoutResult.isLocked) {
-          throw new AppError(
-            'Too many failed OTP attempts. Account temporarily locked.',
-            429
+      } else {
+        // Use our custom OTP verification for real SMS
+        logger.info('Verifying OTP from custom service');
+        const verifyResult = otpService.verifyOTP(normalizedPhone, otp);
+        
+        if (!verifyResult.success) {
+          // Record failed attempt
+          const lockoutResult = await accountLockoutService.recordFailedAttempt(normalizedPhone, 'otp');
+          if (lockoutResult.isLocked) {
+            throw new BilingualAppError('OTP_MAX_ATTEMPTS', 429);
+          }
+          const enMessage = verifyResult.error || `Invalid or expired OTP. ${lockoutResult.remainingAttempts} attempts remaining.`;
+          const arMessage = verifyResult.error?.includes('expired') 
+            ? `رمز التحقق منتهي الصلاحية. ${lockoutResult.remainingAttempts} محاولات متبقية.`
+            : `رمز التحقق غير صحيح. ${lockoutResult.remainingAttempts} محاولات متبقية.`;
+          throw new BilingualAppError(
+            verifyResult.error?.includes('expired') ? 'OTP_EXPIRED' : 'INVALID_OTP',
+            400,
+            {
+              en: enMessage,
+              ar: arMessage
+            }
           );
         }
-        throw new AppError(
-          verifyResult.error?.message || `Invalid or expired OTP. ${lockoutResult.remainingAttempts} attempts remaining.`,
-          400
-        );
-      } else {
-        logger.info('Real OTP verified via Supabase/Twilio');
+        
+        logger.info('OTP verified successfully via custom service');
         otpVerified = true;
       }
       
       // Reset lockout attempts on successful verification
       if (otpVerified) {
-        await accountLockoutService.resetAttempts(phone, 'otp');
+        await accountLockoutService.resetAttempts(normalizedPhone, 'otp');
       }
       
       // Now create or fetch the user
+      logger.info('Creating/fetching user after OTP verification', { 
+        phone: normalizedPhone,
+        email: email,
+        name: name || 'User'
+      });
+      
       const { data: user, error: userError } = await auth.createCustomerAfterOtp(
-        phone,
-        { name: req.body.name || 'User' }
+        normalizedPhone,
+        { 
+          name: name || 'User',
+          email: email
+        }
       );
       
       if (userError) {
-        throw new AppError('Failed to create user account', 500);
+        logger.error('Failed to create user account', {
+          error: userError,
+          phone: normalizedPhone
+        });
+        throw new BilingualAppError('Failed to create user account', 500);
+      }
+      
+      if (!user) {
+        logger.error('No user returned after OTP verification');
+        throw new BilingualAppError('Failed to create user account - no user data', 500);
       }
       
       // Generate JWT token
@@ -353,38 +396,30 @@ export class AuthController {
       // Validate password
       const passwordValidation = passwordUtils.validate(providerData.password);
       if (!passwordValidation.isValid) {
-        throw new AppError(passwordValidation.error!, 400);
+        throw new BilingualAppError(passwordValidation.error!, 400);
       }
 
       // Validate phone number
       const validatedPhone = this.validateJordanPhoneNumber(providerData.phone);
 
-      // Check if email already exists using encrypted database
-      try {
-        const { data: existingProvider } = await encryptedDb.findProviderByEmail(providerData.email);
-        if (existingProvider) {
-          throw new AppError('Email already registered', 409);
-        }
-      } catch (error: any) {
-        if (error.message === 'Email already registered') {
-          throw error;
-        }
-        logger.error('Error checking email:', error);
-        throw new AppError('Could not verify email uniqueness. Please try again later.', 500);
+      // Check if email already exists
+      const { data: existingProvider, error: emailCheckError } = await db.providers.findByEmail(providerData.email);
+      if (emailCheckError) {
+        logger.error('Error checking email:', emailCheckError);
+        throw new BilingualAppError('Could not verify email uniqueness. Please try again later.', 500);
+      }
+      if (existingProvider) {
+        throw new BilingualAppError('Email already registered', 409);
       }
 
-      // Check if phone already exists using encrypted database service
-      try {
-        const { data: existingPhone } = await encryptedDb.findProviderByPhone(validatedPhone);
-        if (existingPhone) {
-          throw new AppError('Phone number already registered', 409);
-        }
-      } catch (error: any) {
-        if (error.message === 'Phone number already registered') {
-          throw error;
-        }
-        logger.error('Error checking phone:', error);
-        throw new AppError('Could not verify phone uniqueness. Please try again later.', 500);
+      // Check if phone already exists
+      const { data: existingPhone, error: phoneCheckError } = await db.providers.findByPhone(validatedPhone);
+      if (phoneCheckError) {
+        logger.error('Error checking phone:', phoneCheckError);
+        throw new BilingualAppError('Could not verify phone uniqueness. Please try again later.', 500);
+      }
+      if (existingPhone) {
+        throw new BilingualAppError('Phone number already registered', 409);
       }
 
       // Use Supabase Auth to create provider with proper authentication
@@ -410,9 +445,9 @@ export class AuthController {
         // Include error details in development for debugging
         if (process.env.NODE_ENV === 'development' && error) {
           const errorMessage = (error as any).message || JSON.stringify(error);
-          throw new AppError(`Failed to create provider account: ${errorMessage}`, 500);
+          throw new BilingualAppError(`Failed to create provider account: ${errorMessage}`, 500);
         }
-        throw new AppError('Failed to create provider account', 500);
+        throw new BilingualAppError('Failed to create provider account', 500);
       }
 
       const provider = data.provider;
@@ -470,13 +505,13 @@ export class AuthController {
 
       // Input validation
       if (!email || !password) {
-        throw new AppError('Email and password are required', 400);
+        throw new BilingualAppError('Email and password are required', 400);
       }
 
       // Email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        throw new AppError('Invalid email format', 400);
+        throw new BilingualAppError('Invalid email format', 400);
       }
 
       // Sanitize email input
@@ -486,7 +521,7 @@ export class AuthController {
       const lockoutStatus = await accountLockoutService.isLocked(sanitizedEmail, 'provider');
       if (lockoutStatus.isLocked) {
         const minutesRemaining = Math.ceil((lockoutStatus.lockoutUntil!.getTime() - Date.now()) / 60000);
-        throw new AppError(
+        throw new BilingualAppError(
           `Account temporarily locked due to too many failed login attempts. Please try again in ${minutesRemaining} minutes.`,
           429
         );
@@ -511,7 +546,7 @@ export class AuthController {
         });
 
         if (lockoutResult.isLocked) {
-          throw new AppError(
+          throw new BilingualAppError(
             'Too many failed login attempts. Account temporarily locked.',
             429
           );
@@ -520,13 +555,13 @@ export class AuthController {
         // Handle specific Supabase Auth errors
         const errorMessage = (authError as any)?.message || 'Authentication failed';
         if (errorMessage.includes('Invalid login credentials')) {
-          throw new AppError(
+          throw new BilingualAppError(
             `Invalid email or password. ${lockoutResult.remainingAttempts} attempts remaining.`,
             401
           );
         }
         
-        throw new AppError(
+        throw new BilingualAppError(
           `Invalid email or password. ${lockoutResult.remainingAttempts} attempts remaining.`,
           401
         );
@@ -540,7 +575,7 @@ export class AuthController {
       // Check if provider is active
       const isActive = (provider as any).status === 'active';
       if (!isActive) {
-        throw new AppError('Provider account not verified. Please contact support.', 403);
+        throw new BilingualAppError('Provider account not verified. Please contact support.', 403);
       }
 
       // Check if MFA is enabled
@@ -624,7 +659,7 @@ export class AuthController {
       const { refreshToken } = req.body;
 
       if (!refreshToken) {
-        throw new AppError('Refresh token required', 400);
+        throw new BilingualAppError('Refresh token required', 400);
       }
 
       // Rotate the refresh token (validates, revokes old, generates new)
@@ -653,7 +688,7 @@ export class AuthController {
       res.json(response);
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError || (error as any)?.message?.includes('refresh token')) {
-        next(new AppError('Invalid or expired refresh token', 401));
+        next(new BilingualAppError('Invalid or expired refresh token', 401));
       } else {
         next(error);
       }
@@ -668,7 +703,7 @@ export class AuthController {
       const { phone } = req.body;
       
       if (!phone) {
-        throw new AppError('Phone number is required', 400);
+        throw new BilingualAppError('PHONE_REQUIRED', 400);
       }
       
       // Validate phone number using centralized validation
@@ -677,50 +712,63 @@ export class AuthController {
         : validateJordanPhoneNumber(phone);
       
       if (!validation.isValid) {
-        throw new AppError(validation.error || 'Invalid phone number', 400);
+        throw new BilingualAppError('INVALID_PHONE_FORMAT', 400);
       }
       
       const normalizedPhone = validation.normalizedPhone!;
       
-      // Check if phone is already registered to a provider using encrypted database service
-      const { data: existingProvider } = await encryptedDb.findProviderByPhone(normalizedPhone);
+      // Check if phone is already registered to a provider
+      const { data: existingProvider } = await db.providers.findByPhone(normalizedPhone);
       if (existingProvider) {
-        throw new AppError('This phone number is already registered to another provider', 409);
+        throw new BilingualAppError('This phone number is already registered to another provider', 409);
       }
       
       // Send OTP (same logic as customer OTP)
       let data: any = null;
       
       if (mockOTP.isMockMode()) {
+        // Use mock OTP for development
         logger.info('Using mock OTP for provider verification');
         mockOTP.generate(normalizedPhone);
-        data = { mockMode: true };
+        data = { mockMode: true, success: true };
       } else {
-        logger.info('Attempting to send OTP to provider', { phone: normalizedPhone });
-        const result = await auth.signInWithOtp({ phone: normalizedPhone });
+        // Production mode - Use custom OTP with Blunet SMS
+        logger.info('Generating OTP for provider SMS', { phone: normalizedPhone });
         
-        if (!result.success) {
-          logger.logApiError('OTP Error', result.error, req);
-          throw new AppError(result.error?.message || 'Failed to send OTP', 400);
+        // Generate OTP
+        const otpResult = otpService.generateOTP(normalizedPhone);
+        
+        if (!otpResult.success) {
+          throw new BilingualAppError('Failed to generate OTP', 500);
         }
         
-        data = result.data;
-      }
-      
-      // Check if SMS was actually sent
-      if (data && !data.mockMode && !data.user && !data.session) {
-        logger.warn('Supabase accepted request but no SMS sent', {
-          possibleIssues: [
-            'Twilio messaging service might need phone number verification',
-            'Phone number might need to be verified in Twilio',
-            'Twilio account might be in trial mode with restrictions'
-          ]
+        // Format OTP message for providers
+        const message = `رمز التحقق لتسجيل مقدم الخدمة في لمسة: ${otpResult.code}\n\nYour Lamsa provider verification code is: ${otpResult.code}\n\nصالح لمدة 10 دقائق / Valid for 10 minutes`;
+        
+        // Send SMS via Blunet
+        logger.info('Sending provider OTP via Blunet SMS');
+        const smsResult = await blunetSMSService.sendSMS(normalizedPhone, message);
+        
+        if (!smsResult.success) {
+          // Clear the generated OTP if SMS failed
+          otpService.clearOTP(normalizedPhone);
+          logger.error('Failed to send SMS via Blunet', {
+            error: smsResult.error,
+            errorCode: smsResult.errorCode
+          });
+          throw new BilingualAppError('OTP_SEND_FAILED', 503);
+        }
+        
+        data = {
+          success: true,
+          messageId: smsResult.messageId,
+          expiresAt: otpResult.expiresAt
+        };
+        
+        logger.info('Provider OTP sent successfully via Blunet', {
+          messageId: smsResult.messageId,
+          phone: normalizedPhone
         });
-      }
-      
-      // Check if real SMS was sent
-      if (data?.messageId) {
-        logger.info('Real SMS sent successfully', { messageId: data.messageId });
       }
       
       // Security: Never expose OTP codes in API responses (removed development bypass)
@@ -746,26 +794,34 @@ export class AuthController {
       const { phone, otp } = req.body;
       
       if (!phone || !otp) {
-        throw new AppError('Phone number and OTP are required', 400);
+        throw new BilingualAppError('Phone number and OTP are required', 400);
       }
       
-      // Try Supabase verification first (for real SMS)
-      const verifyResult = await auth.verifyOtp({ 
-        phone, 
-        token: otp 
-      });
+      // Verify OTP based on mode
+      let otpVerified = false;
       
-      // If Supabase verification fails and we're in mock mode, try mock OTP
-      if (!verifyResult.success && mockOTP.isMockMode()) {
+      if (mockOTP.isMockMode()) {
+        // Use mock OTP verification in development
         logger.info('Trying mock OTP verification for provider');
         const isValid = mockOTP.verify(phone, otp);
         if (!isValid) {
-          throw new AppError('Invalid or expired OTP', 400);
+          throw new BilingualAppError('Invalid or expired OTP', 400);
         }
-      } else if (!verifyResult.success) {
-        throw new AppError(verifyResult.error?.message || 'Invalid or expired OTP', 400);
+        otpVerified = true;
       } else {
-        logger.info('Provider phone verified via Supabase/Twilio');
+        // Use our custom OTP verification for real SMS
+        logger.info('Verifying provider OTP from custom service');
+        const verifyResult = otpService.verifyOTP(phone, otp);
+        
+        if (!verifyResult.success) {
+          throw new BilingualAppError(verifyResult.error || 'Invalid or expired OTP', 400);
+        }
+        
+        otpVerified = true;
+      }
+      
+      if (otpVerified) {
+        logger.info('Provider phone verified via SMS service');
       }
       
       const response: ApiResponse = {
@@ -794,7 +850,7 @@ export class AuthController {
       const lockoutStatus = await accountLockoutService.isLocked(providerId, 'mfa');
       if (lockoutStatus.isLocked) {
         const minutesRemaining = Math.ceil((lockoutStatus.lockoutUntil!.getTime() - Date.now()) / 60000);
-        throw new AppError(
+        throw new BilingualAppError(
           `Too many failed MFA attempts. Please try again in ${minutesRemaining} minutes.`,
           429
         );
@@ -808,12 +864,12 @@ export class AuthController {
         // Record failed MFA attempt
         const lockoutResult = await accountLockoutService.recordFailedAttempt(providerId, 'mfa');
         if (lockoutResult.isLocked) {
-          throw new AppError(
+          throw new BilingualAppError(
             'Too many failed MFA attempts. Account temporarily locked.',
             429
           );
         }
-        throw new AppError(
+        throw new BilingualAppError(
           result.error || `Invalid MFA code. ${lockoutResult.remainingAttempts} attempts remaining.`,
           401
         );
@@ -826,7 +882,7 @@ export class AuthController {
       const { data: provider, error } = await db.providers.findById(providerId);
 
       if (error || !provider) {
-        throw new AppError('Provider not found', 404);
+        throw new BilingualAppError('Provider not found', 404);
       }
 
       // Generate JWT token after successful MFA
@@ -874,7 +930,7 @@ export class AuthController {
   async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
-        throw new AppError('Unauthorized', 401);
+        throw new BilingualAppError('Unauthorized', 401);
       }
 
       let userData: any;
@@ -882,7 +938,7 @@ export class AuthController {
       if (req.user.type === 'customer') {
         const { data: customer, error } = await db.users.findById(req.user.id);
         if (error || !customer) {
-          throw new AppError('User not found', 404);
+          throw new BilingualAppError('User not found', 404);
         }
         userData = {
           type: 'customer',
@@ -891,14 +947,14 @@ export class AuthController {
       } else if (req.user.type === 'provider') {
         const { data: provider, error } = await db.providers.findById(req.user.id);
         if (error || !provider) {
-          throw new AppError('Provider not found', 404);
+          throw new BilingualAppError('Provider not found', 404);
         }
         userData = {
           type: 'provider',
           profile: provider,
         };
       } else {
-        throw new AppError('Invalid user type', 400);
+        throw new BilingualAppError('Invalid user type', 400);
       }
 
       const response: ApiResponse = {
@@ -1002,7 +1058,7 @@ export class AuthController {
       // 2. Send email with reset link
       // 3. Store token with expiration
 
-      throw new AppError('Password reset is not yet implemented.', 501);
+      throw new BilingualAppError('Password reset is not yet implemented.', 501);
     } catch (error) {
       next(error);
     }
@@ -1021,7 +1077,7 @@ export class AuthController {
       // 3. Update password in Supabase Auth
       // 4. Invalidate reset token
 
-      throw new AppError('Password reset is not yet implemented.', 501);
+      throw new BilingualAppError('Password reset is not yet implemented.', 501);
     } catch (error) {
       next(error);
     }
@@ -1055,11 +1111,11 @@ export class AuthController {
         existingEmail = result?.data;
       } catch (dbError) {
         logger.error('Database error checking existing email', { email: normalizedEmail, error: dbError });
-        throw new AppError('Database error while checking email', 500);
+        throw new BilingualAppError('Database error while checking email', 500);
       }
       
       if (existingEmail) {
-        throw new AppError('An account with this email already exists', 409);
+        throw new BilingualAppError('An account with this email already exists', 409);
       }
 
       // Check if customer already exists with this phone
@@ -1069,11 +1125,11 @@ export class AuthController {
         existingPhone = result?.data;
       } catch (dbError) {
         logger.error('Database error checking existing phone', { phone: validatedPhone, error: dbError });
-        throw new AppError('Database error while checking phone', 500);
+        throw new BilingualAppError('Database error while checking phone', 500);
       }
       
       if (existingPhone) {
-        throw new AppError('An account with this phone number already exists', 409);
+        throw new BilingualAppError('An account with this phone number already exists', 409);
       }
 
       // Step 1: Create auth user with Supabase Auth
@@ -1088,20 +1144,20 @@ export class AuthController {
         logger.error('Failed to create auth user', authError);
         // Check for specific error codes
         if (authError.message?.includes('already registered')) {
-          throw new AppError('An account with this email already exists', 409);
+          throw new BilingualAppError('An account with this email already exists', 409);
         }
-        throw new AppError(authError?.message || 'Failed to create account', 400);
+        throw new BilingualAppError(authError?.message || 'Failed to create account', 400);
       }
 
       if (!authData.user) {
-        throw new AppError('Failed to create account - no user returned', 400);
+        throw new BilingualAppError('Failed to create account - no user returned', 400);
       }
 
       // Step 2: Create user profile in users table
       // Use supabaseAdmin to bypass RLS policies
       if (!supabaseAdmin) {
         logger.error('supabaseAdmin is null - service role key not configured');
-        throw new AppError('Service role key not configured. Cannot create user profile.', 500);
+        throw new BilingualAppError('Service role key not configured. Cannot create user profile.', 500);
       }
 
       logger.debug('Creating user profile', {
@@ -1167,7 +1223,7 @@ export class AuthController {
         
         // Provide more specific error message
         const errorMessage = (createError as any)?.message || 'Failed to create user profile';
-        throw new AppError(errorMessage, 500);
+        throw new BilingualAppError(errorMessage, 500);
       }
 
       // Generate JWT token

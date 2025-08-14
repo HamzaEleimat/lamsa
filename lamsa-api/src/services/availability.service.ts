@@ -1,6 +1,6 @@
 import { supabase } from '../config/supabase';
 import { prayerTimeService } from './prayer-time.service';
-import { AppError } from '../middleware/error.middleware';
+import { BilingualAppError } from '../middleware/enhanced-bilingual-error.middleware';
 import { format, addMinutes, isAfter, isBefore } from 'date-fns';
 
 interface TimeSlot {
@@ -137,7 +137,7 @@ export class AvailabilityService {
       const { providerId, serviceId, date, time } = check;
       
       if (!time) {
-        throw new AppError('Time is required for availability check', 400);
+        throw new BilingualAppError('Time is required for availability check', 400);
       }
 
       // Get available slots
@@ -203,7 +203,7 @@ export class AvailabilityService {
       });
 
       if (!availability.available) {
-        throw new AppError(
+        throw new BilingualAppError(
           `Slot not available: ${availability.reason}`,
           400
         );
@@ -230,7 +230,7 @@ export class AvailabilityService {
         .single();
 
       if (error) {
-        throw new AppError('Failed to create booking', 500);
+        throw new BilingualAppError('Failed to create booking', 500);
       }
 
       // Update availability cache
@@ -386,7 +386,7 @@ export class AvailabilityService {
       .single();
 
     if (!service) {
-      throw new AppError('Service not found', 404);
+      throw new BilingualAppError('Service not found', 404);
     }
 
     const bufferRules = service.service_buffer_rules?.[0] || {};

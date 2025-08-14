@@ -5,7 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
-import { AppError } from './error.middleware';
+import { BilingualAppError } from './enhanced-bilingual-error.middleware';
 
 /**
  * Middleware to ensure provider can only access their own resources
@@ -17,19 +17,19 @@ export const validateProviderOwnership = (paramName: string = 'id') => {
       const resourceId = req.params[paramName];
       
       if (!resourceId) {
-        throw new AppError('Resource ID is required', 400);
+        throw new BilingualAppError('RESOURCE_ID_REQUIRED', 400);
       }
       
       if (!req.user) {
-        throw new AppError('Authentication required', 401);
+        throw new BilingualAppError('AUTHENTICATION_REQUIRED', 401);
       }
       
       if (req.user.type !== 'provider') {
-        throw new AppError('Provider access required', 403);
+        throw new BilingualAppError('PROVIDER_ACCESS_REQUIRED', 403);
       }
       
       if (req.user.id !== resourceId) {
-        throw new AppError('Access denied: You can only access your own resources', 403);
+        throw new BilingualAppError('ACCESS_DENIED_OWN_RESOURCES', 403);
       }
       
       next();
@@ -49,19 +49,19 @@ export const validateCustomerOwnership = (paramName: string = 'id') => {
       const resourceId = req.params[paramName];
       
       if (!resourceId) {
-        throw new AppError('Resource ID is required', 400);
+        throw new BilingualAppError('RESOURCE_ID_REQUIRED', 400);
       }
       
       if (!req.user) {
-        throw new AppError('Authentication required', 401);
+        throw new BilingualAppError('AUTHENTICATION_REQUIRED', 401);
       }
       
       if (req.user.type !== 'customer') {
-        throw new AppError('Customer access required', 403);
+        throw new BilingualAppError('CUSTOMER_ACCESS_REQUIRED', 403);
       }
       
       if (req.user.id !== resourceId) {
-        throw new AppError('Access denied: You can only access your own resources', 403);
+        throw new BilingualAppError('ACCESS_DENIED_OWN_RESOURCES', 403);
       }
       
       next();
@@ -81,11 +81,11 @@ export const validateBookingOwnership = () => {
       const bookingId = req.params.id;
       
       if (!bookingId) {
-        throw new AppError('Booking ID is required', 400);
+        throw new BilingualAppError('BOOKING_ID_REQUIRED', 400);
       }
       
       if (!req.user) {
-        throw new AppError('Authentication required', 401);
+        throw new BilingualAppError('AUTHENTICATION_REQUIRED', 401);
       }
       
       // Note: Additional database validation should be performed in the controller
@@ -109,11 +109,11 @@ export const validateResourceCreator = (paramName: string = 'id') => {
       const resourceId = req.params[paramName];
       
       if (!resourceId) {
-        throw new AppError('Resource ID is required', 400);
+        throw new BilingualAppError('RESOURCE_ID_REQUIRED', 400);
       }
       
       if (!req.user) {
-        throw new AppError('Authentication required', 401);
+        throw new BilingualAppError('AUTHENTICATION_REQUIRED', 401);
       }
       
       // This middleware validates the request structure
@@ -137,11 +137,11 @@ export const validateOwnershipWithAdminBypass = (paramName: string = 'id') => {
       const resourceId = req.params[paramName];
       
       if (!resourceId) {
-        throw new AppError('Resource ID is required', 400);
+        throw new BilingualAppError('RESOURCE_ID_REQUIRED', 400);
       }
       
       if (!req.user) {
-        throw new AppError('Authentication required', 401);
+        throw new BilingualAppError('AUTHENTICATION_REQUIRED', 401);
       }
       
       // Allow admin access to any resource
@@ -152,7 +152,7 @@ export const validateOwnershipWithAdminBypass = (paramName: string = 'id') => {
       
       // For non-admin users, validate ownership
       if (req.user.id !== resourceId) {
-        throw new AppError('Access denied: You can only access your own resources', 403);
+        throw new BilingualAppError('ACCESS_DENIED_OWN_RESOURCES', 403);
       }
       
       next();

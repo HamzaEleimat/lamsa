@@ -23,7 +23,6 @@ export interface CreateBookingData {
   startTime: string;
   endTime?: string;
   paymentMethod?: PaymentMethod;
-  notes?: string;
 }
 
 export interface UpdateBookingStatusData {
@@ -90,7 +89,6 @@ export class BookingCrudService {
     endTime: string;
     servicePrice: number;
     paymentMethod?: PaymentMethod;
-    notes?: string;
   }): Promise<any> {
     // Calculate fees
     const feeCalculation = FeeCalculationService.getCompleteCalculation(data.servicePrice);
@@ -107,10 +105,10 @@ export class BookingCrudService {
         end_time: data.endTime,
         status: 'pending' as BookingStatus,
         payment_method: data.paymentMethod,
-        amount: feeCalculation.serviceAmount,
+        service_amount: feeCalculation.serviceAmount,
+        total_amount: feeCalculation.serviceAmount + feeCalculation.platformFee,
         platform_fee: feeCalculation.platformFee,
-        provider_fee: feeCalculation.providerEarnings,
-        notes: data.notes
+        provider_fee: feeCalculation.providerEarnings
       })
       .select(`
         *,
@@ -121,6 +119,28 @@ export class BookingCrudService {
       .single();
 
     if (bookingError) {
+      console.error('📋 Database booking error:', {
+        error: bookingError,
+        code: bookingError.code,
+        message: bookingError.message,
+        details: bookingError.details,
+        hint: bookingError.hint,
+        insertData: {
+          user_id: data.userId,
+          provider_id: data.providerId,
+          service_id: data.serviceId,
+          booking_date: format(data.bookingDate, 'yyyy-MM-dd'),
+          start_time: data.startTime,
+          end_time: data.endTime,
+          status: 'pending',
+          payment_method: data.paymentMethod,
+          service_amount: feeCalculation.serviceAmount,
+          total_amount: feeCalculation.serviceAmount + feeCalculation.platformFee,
+          platform_fee: feeCalculation.platformFee,
+          provider_fee: feeCalculation.providerEarnings
+        }
+      });
+      
       if (bookingError.code === '23505') { // Unique constraint violation
         throw new BookingError('Time slot is already booked', 409);
       }
@@ -155,8 +175,7 @@ export class BookingCrudService {
     const { data: updatedBooking, error: updateError } = await supabase
       .from('bookings')
       .update({ 
-        status: newStatus,
-        updated_at: new Date().toISOString()
+        status: newStatus
       })
       .eq('id', bookingId)
       .select(`
@@ -168,7 +187,8 @@ export class BookingCrudService {
       .single();
 
     if (updateError) {
-      throw new BookingError('Failed to update booking status', 500);
+      console.error('Database update error:', updateError);
+      throw new BookingError(`Failed to update booking status: ${updateError.message}`, 500);
     }
 
     // Create audit trail entry
