@@ -69,63 +69,56 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations('provider.sidebar');
 
-  // Desktop Sidebar Content - Simplified for better performance
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-primary">
-      {/* Logo Area */}
-      <div className="flex items-center justify-center h-16 px-4 bg-primary/95 border-b border-primary-foreground/10">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-            <Scissors className="w-5 h-5 text-white" />
+  return (
+    <>
+      {/* Desktop Sidebar - Always visible on large screens, fills container */}
+      <div className="hidden lg:flex lg:flex-col lg:w-full lg:h-full bg-primary">
+        {/* Logo Area */}
+        <div className="flex items-center justify-center h-16 px-4 bg-primary border-b border-white/10">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+              <Scissors className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-semibold text-white">
+              Lamsa Pro
+            </span>
           </div>
-          <span className="text-lg font-semibold text-white">
-            Lamsa Pro
-          </span>
+        </div>
+        
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-white/15 text-white shadow-sm"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
+                )}
+              >
+                <Icon className="w-5 h-5 me-3 flex-shrink-0" />
+                <span className="truncate">{t(item.label)}</span>
+              </Link>
+            );
+          })}
+        </nav>
+        
+        {/* Logout */}
+        <div className="px-3 py-3 border-t border-white/10">
+          <button className="flex items-center w-full px-3 py-2.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+            <LogOut className="w-5 h-5 me-3 flex-shrink-0" />
+            <span className="truncate">{t('logout')}</span>
+          </button>
         </div>
       </div>
       
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
-                isActive
-                  ? "bg-white/15 text-white shadow-sm border border-white/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              )}
-            >
-              <Icon className="w-5 h-5 me-3 flex-shrink-0" />
-              <span className="truncate">{t(item.label)}</span>
-            </Link>
-          );
-        })}
-      </nav>
-      
-      {/* Logout */}
-      <div className="px-3 py-3 border-t border-white/10">
-        <button className="flex items-center w-full px-3 py-2.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 group">
-          <LogOut className="w-5 h-5 me-3 flex-shrink-0" />
-          <span className="truncate">{t('logout')}</span>
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <>
-      {/* Desktop Sidebar - Optimized for desktop layout */}
-      <div className="hidden lg:flex lg:flex-col lg:w-full lg:h-full">
-        <SidebarContent />
-      </div>
-      
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay - Only on mobile */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
@@ -133,14 +126,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         />
       )}
       
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar - Only on mobile */}
       <div className={cn(
         "fixed inset-y-0 left-0 z-50 w-64 shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full bg-primary">
           {/* Mobile Header */}
-          <div className="flex items-center justify-between h-16 px-4 bg-primary/95 border-b border-white/10">
+          <div className="flex items-center justify-between h-16 px-4 bg-primary border-b border-white/10">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
                 <Scissors className="w-5 h-5 text-white" />
@@ -171,7 +164,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   className={cn(
                     "flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-white/15 text-white shadow-sm border border-white/20"
+                      ? "bg-white/15 text-white shadow-sm"
                       : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
                 >

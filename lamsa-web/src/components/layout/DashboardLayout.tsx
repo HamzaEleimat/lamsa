@@ -13,10 +13,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Desktop Layout - Professional and Clean */}
+      {/* Desktop Layout - Fixed sidebar with main content */}
       <div className="hidden lg:flex lg:h-screen lg:overflow-hidden">
         {/* Fixed Sidebar */}
-        <div className="w-64 bg-primary shadow-lg flex-shrink-0 border-r border-primary/20">
+        <div className="w-64 bg-primary shadow-lg flex-shrink-0">
           <Sidebar 
             isOpen={true} 
             onClose={() => {}} 
@@ -24,17 +24,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 shadow-sm z-10 flex-shrink-0">
+          <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
             <TopBar onMenuClick={() => setSidebarOpen(true)} />
           </div>
           
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto bg-gray-50">
-            <div className="p-6 max-w-none">
-              {children}
-            </div>
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+            {children}
           </main>
         </div>
       </div>
@@ -51,7 +49,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
         
-        {/* Mobile Sidebar - Overlay handled inside Sidebar component */}
+        {/* Mobile Sidebar */}
         <Sidebar 
           isOpen={sidebarOpen} 
           onClose={() => setSidebarOpen(false)} 
