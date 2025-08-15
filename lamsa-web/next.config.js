@@ -49,12 +49,16 @@ const nextConfig = {
 
   // API proxy rewrites (optional)
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
-      },
-    ];
+    // Only add API rewrites if the API URL is defined
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+        },
+      ];
+    }
+    return [];
   },
 
   async headers() {
