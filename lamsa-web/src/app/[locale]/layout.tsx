@@ -15,6 +15,16 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
+export const metadata = {
+  title: 'Lamsa - Jordan\'s Premier Beauty Services Platform',
+  description: 'Connect with verified beauty professionals and manage your appointments seamlessly in Jordan',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
+};
+
 interface RootLayoutProps {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
