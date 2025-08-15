@@ -4,7 +4,6 @@
  */
 
 import { getRequestConfig } from 'next-intl/server';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 // Define supported locales
@@ -59,26 +58,10 @@ export function getLocaleFromPathname(pathname: string): Locale {
   return defaultLocale;
 }
 
-// Get locale from headers
+// Get locale from headers (server-side only)
 export async function getLocaleFromHeaders(): Promise<Locale> {
-  const headersList = await headers();
-  const acceptLanguage = headersList.get('Accept-Language');
-  
-  if (acceptLanguage) {
-    // Parse Accept-Language header
-    const languages = acceptLanguage
-      .split(',')
-      .map(lang => lang.split(';')[0].trim())
-      .map(lang => lang.split('-')[0]);
-    
-    // Find first supported locale
-    for (const lang of languages) {
-      if (isValidLocale(lang)) {
-        return lang;
-      }
-    }
-  }
-  
+  // This function can only be used in server components
+  // For client components, use browser detection instead
   return defaultLocale;
 }
 
