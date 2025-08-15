@@ -72,6 +72,9 @@
       "profile": "Profile",
       "settings": "Settings",
       "logout": "Logout"
+    },
+    "header": {
+      "searchPlaceholder": "Search appointments, clients..."
     }
   },
   "common": {

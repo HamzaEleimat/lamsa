@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ProviderLayout } from '@/components/layout/ProviderLayout';
 import { 
   Calendar, 
   DollarSign, 
@@ -20,9 +20,9 @@ export default function ProviderDashboardPage() {
       title: t('todayBookings'),
       value: '12',
       icon: Calendar,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      iconBgColor: 'bg-blue-100'
+      color: 'text-primary',
+      bgColor: 'bg-lamsa-surface',
+      iconBgColor: 'bg-primary/10'
     },
     {
       title: t('monthRevenue'),
@@ -36,17 +36,17 @@ export default function ProviderDashboardPage() {
       title: t('avgRating'),
       value: '4.8',
       icon: Star,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
-      iconBgColor: 'bg-yellow-100'
+      color: 'text-secondary',
+      bgColor: 'bg-lamsa-surface',
+      iconBgColor: 'bg-secondary/10'
     },
     {
       title: t('totalCustomers'),
       value: '156',
       icon: Users,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      iconBgColor: 'bg-purple-100'
+      color: 'text-lamsa-tertiary',
+      bgColor: 'bg-lamsa-surface',
+      iconBgColor: 'bg-lamsa-tertiary/20'
     }
   ];
 
@@ -80,7 +80,7 @@ export default function ProviderDashboardPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-lamsa-primary/10 text-lamsa-primary';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'completed':
@@ -91,11 +91,11 @@ export default function ProviderDashboardPage() {
   };
 
   return (
-    <DashboardLayout>
+    <ProviderLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-lamsa-primary">
             {t('title')}
           </h1>
           <p className="text-gray-600 mt-2 text-lg">
@@ -230,6 +230,6 @@ export default function ProviderDashboardPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </ProviderLayout>
   );
 }

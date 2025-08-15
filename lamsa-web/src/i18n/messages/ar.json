@@ -51,6 +51,9 @@
       "profile": "الملف الشخصي",
       "settings": "الإعدادات",
       "logout": "تسجيل الخروج"
+    },
+    "header": {
+      "searchPlaceholder": "ابحث في المواعيد، العملاء..."
     }
   },
   "common": {
