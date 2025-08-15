@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // CSS Variables from design system
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -42,6 +43,51 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        
+        // Direct Lamsa brand colors for convenience
+        lamsa: {
+          primary: '#4A3643',      // Deep plum
+          secondary: '#CC8899',    // Dusty pink
+          tertiary: '#D4A5A5',     // Soft rose
+          surface: '#F5E6E6',      // Cream blush
+          background: '#FAF7F6',   // Warm white
+        },
+        
+        // Semantic colors
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          light: '#E8F5E8',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          light: '#FFF3E0',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          light: '#E3F2FD',
+        },
+        
+        // Text colors
+        text: {
+          primary: '#2D1B28',
+          secondary: '#6B5D65',
+          tertiary: '#8A7B83',
+          inverse: '#FFFFFF',
+        },
+        
+        // Gray scale (warm-tinted)
+        gray: {
+          50: '#FAF8F7',
+          100: '#F5F2F1',
+          200: '#E8E2E0',
+          300: '#D1C7C4',
+          400: '#A69BA3',
+          500: '#7A6F76',
+          600: '#6B5D65',
+          700: '#4A3F45',
+          800: '#2D1B28',
+          900: '#1A0F15',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -49,12 +95,31 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
         arabic: ['Cairo', 'Noto Sans Arabic', 'sans-serif'],
-        english: ['Inter', 'sans-serif'],
+        mono: ['SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'monospace'],
+      },
+      fontSize: {
+        xs: ['12px', { lineHeight: '1.4' }],
+        sm: ['14px', { lineHeight: '1.5' }],
+        base: ['16px', { lineHeight: '1.5' }],
+        lg: ['18px', { lineHeight: '1.5' }],
+        xl: ['20px', { lineHeight: '1.4' }],
+        '2xl': ['24px', { lineHeight: '1.3' }],
+        '3xl': ['30px', { lineHeight: '1.3' }],
+        '4xl': ['36px', { lineHeight: '1.25' }],
+        '5xl': ['48px', { lineHeight: '1.2' }],
       },
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
+      },
+      boxShadow: {
+        'lamsa-sm': '0 1px 2px rgba(45, 27, 40, 0.1)',
+        'lamsa': '0 2px 4px rgba(45, 27, 40, 0.1)',
+        'lamsa-md': '0 4px 8px rgba(45, 27, 40, 0.12)',
+        'lamsa-lg': '0 8px 16px rgba(45, 27, 40, 0.15)',
+        'lamsa-xl': '0 12px 24px rgba(45, 27, 40, 0.2)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

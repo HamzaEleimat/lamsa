@@ -36,6 +36,7 @@
     "date-fns": "^3.6.0",
     "framer-motion": "^10.16.4",
     "libphonenumber-js": "^1.10.44",
+    "localtunnel": "^2.0.2",
     "lucide-react": "^0.263.1",
     "next": "15.3.5",
     "next-intl": "^3.26.5",

@@ -1,136 +1,231 @@
-import { getTranslations } from 'next-intl/server';
-import { setRequestLocale } from 'next-intl/server';
+'use client';
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
+import { useTranslations } from 'next-intl';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { 
+  Calendar, 
+  DollarSign, 
+  Star, 
+  Users,
+  TrendingUp,
+  Clock,
+  CheckCircle
+} from 'lucide-react';
 
-export default async function ProviderDashboardPage({ params }: PageProps) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  
-  const t = await getTranslations('provider.dashboard');
-  
+export default function ProviderDashboardPage() {
+  const t = useTranslations('provider.dashboard');
+
+  const stats = [
+    {
+      title: t('todayBookings'),
+      value: '12',
+      icon: Calendar,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      iconBgColor: 'bg-blue-100'
+    },
+    {
+      title: t('monthRevenue'),
+      value: '2,450 JOD',
+      icon: DollarSign,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      iconBgColor: 'bg-green-100'
+    },
+    {
+      title: t('avgRating'),
+      value: '4.8',
+      icon: Star,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+      iconBgColor: 'bg-yellow-100'
+    },
+    {
+      title: t('totalCustomers'),
+      value: '156',
+      icon: Users,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      iconBgColor: 'bg-purple-100'
+    }
+  ];
+
+  const recentBookings = [
+    {
+      id: 1,
+      clientName: 'Sarah Johnson',
+      service: 'Hair Cut & Style',
+      time: '10:00 AM',
+      status: 'confirmed',
+      avatar: 'SJ'
+    },
+    {
+      id: 2,
+      clientName: 'Ahmed Hassan',
+      service: 'Beard Trim',
+      time: '11:30 AM',
+      status: 'pending',
+      avatar: 'AH'
+    },
+    {
+      id: 3,
+      clientName: 'Layla Al-Zahra',
+      service: 'Manicure',
+      time: '2:00 PM',
+      status: 'completed',
+      avatar: 'LZ'
+    }
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Lamsa Provider
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-600 hover:text-gray-900">
-                {t('notifications')}
-              </button>
-              <button className="text-gray-600 hover:text-gray-900">
-                {t('profile')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
             {t('title')}
-          </h2>
-          <p className="mt-2 text-gray-600">
+          </h1>
+          <p className="text-muted-foreground mt-1">
             {t('subtitle')}
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-pink-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">📅</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={index}
+                className={`${stat.bgColor} rounded-lg p-6 border border-border/50`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </p>
+                    <p className={`text-2xl font-bold ${stat.color} mt-1`}>
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div className={`${stat.iconBgColor} p-2 rounded-lg`}>
+                    <Icon className={`w-6 h-6 ${stat.color}`} />
+                  </div>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t('todayBookings')}
-                </p>
-                <p className="text-2xl font-semibold text-gray-900">12</p>
+            );
+          })}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Bookings */}
+          <div className="lg:col-span-2">
+            <div className="bg-card rounded-lg border border-border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {t('recentBookings')}
+                </h2>
+                <button className="text-primary hover:text-primary/80 text-sm font-medium">
+                  View all
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {recentBookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                        {booking.avatar}
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {booking.clientName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {booking.service}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-end">
+                      <p className="text-sm font-medium text-foreground">
+                        {booking.time}
+                      </p>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                        {booking.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">💰</span>
+          {/* Quick Actions */}
+          <div className="space-y-6">
+            {/* Today's Schedule */}
+            <div className="bg-card rounded-lg border border-border p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Today's Schedule
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    8:00 AM - 6:00 PM
+                  </span>
                 </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t('monthRevenue')}
-                </p>
-                <p className="text-2xl font-semibold text-gray-900">2,450 JOD</p>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm text-foreground">
+                    8 appointments booked
+                  </span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <TrendingUp className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-foreground">
+                    4 slots available
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">⭐</span>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t('avgRating')}
-                </p>
-                <p className="text-2xl font-semibold text-gray-900">4.8</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">👥</span>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t('totalCustomers')}
-                </p>
-                <p className="text-2xl font-semibold text-gray-900">156</p>
+            {/* Quick Actions */}
+            <div className="bg-card rounded-lg border border-border p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Quick Actions
+              </h3>
+              <div className="space-y-3">
+                <button className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                  {t('addService')}
+                </button>
+                <button className="w-full bg-secondary text-secondary-foreground py-2 px-4 rounded-lg text-sm font-medium hover:bg-secondary/90 transition-colors">
+                  View Calendar
+                </button>
+                <button className="w-full bg-muted text-muted-foreground py-2 px-4 rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors">
+                  Generate Report
+                </button>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Recent Bookings */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {t('recentBookings')}
-            </h3>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                {t('noBookings')}
-              </p>
-              <button className="mt-4 bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                {t('addService')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
