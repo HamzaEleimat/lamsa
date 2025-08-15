@@ -55,6 +55,23 @@
       "recentBookings": "Recent Bookings",
       "noBookings": "No recent bookings to display",
       "addService": "Add New Service"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "appointments": "Appointments",
+      "services": "Services",
+      "clients": "Clients",
+      "analytics": "Analytics",
+      "reviews": "Reviews",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "topbar": {
+      "searchPlaceholder": "Search appointments, clients...",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
     }
   },
   "common": {

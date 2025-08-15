@@ -8,48 +8,54 @@
 
 @layer base {
   :root {
-    --background: 348 47% 98%; /* FFE5EC (Lightest Pink) */
-    --foreground: 338 20% 29%; /* 50373E (Dark Brown) */
+    /* Lamsa Design System - Sophisticated Plum/Mauve Theme */
+    --background: 31 47% 98%; /* #FAF7F6 (Warm white) */
+    --foreground: 322 36% 18%; /* #2D1B28 (Main text) */
     --card: 0 0% 100%; /* White */
-    --card-foreground: 338 20% 29%; /* 50373E (Dark Brown) */
+    --card-foreground: 322 36% 18%; /* #2D1B28 (Main text) */
     --popover: 0 0% 100%;
-    --popover-foreground: 338 20% 29%;
-    --primary: 341 100% 78%; /* FF8FAB (Primary Pink) */
+    --popover-foreground: 322 36% 18%;
+    --primary: 324 25% 29%; /* #4A3643 (Deep plum) */
     --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 344 100% 88%; /* FFC2D1 (Light Pink) */
-    --secondary-foreground: 338 20% 29%;
-    --muted: 348 47% 95%; /* Lighter shade of accent */
-    --muted-foreground: 338 20% 45%;
-    --accent: 342 100% 85%; /* FFB3C6 (Medium Pink) */
-    --accent-foreground: 338 20% 29%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 339 43% 64%; /* #CC8899 (Dusty pink) */
+    --secondary-foreground: 322 36% 18%;
+    --muted: 350 41% 94%; /* #F5E6E6 (Surface/card bg) */
+    --muted-foreground: 317 19% 42%; /* #6B5D65 (Secondary text) */
+    --accent: 350 41% 82%; /* #D4A5A5 (Soft rose) */
+    --accent-foreground: 322 36% 18%;
+    --destructive: 4 90% 58%; /* #F44336 (Error red) */
     --destructive-foreground: 0 0% 100%;
-    --border: 348 30% 90%;
-    --input: 348 30% 90%;
-    --ring: 341 100% 78%; /* FF8FAB (Primary Pink) */
-    --radius: 0.5rem;
+    --border: 20 14% 89%; /* #E8E2E0 (Light border) */
+    --input: 20 14% 89%; /* #E8E2E0 (Input border) */
+    --ring: 324 25% 29%; /* #4A3643 (Focus ring) */
+    --radius: 0.5rem; /* 8px default border radius */
+    
+    /* Success, Warning, Info colors */
+    --success: 122 39% 49%; /* #4CAF50 */
+    --warning: 36 100% 50%; /* #FF9800 */
+    --info: 207 90% 54%; /* #2196F3 */
   }
 
   .dark {
-    --background: 338 20% 15%; /* Dark background */
-    --foreground: 348 47% 95%; /* Light pink/white text */
-    --card: 338 20% 20%; /* Slightly lighter than background */
-    --card-foreground: 348 47% 95%;
-    --popover: 338 20% 20%;
-    --popover-foreground: 348 47% 95%;
-    --primary: 341 100% 78%; /* FF8FAB (Primary Pink) */
-    --primary-foreground: 338 20% 15%;
-    --secondary: 344 80% 70%; /* Darker shade of secondary */
-    --secondary-foreground: 348 47% 95%;
-    --muted: 338 20% 25%;
-    --muted-foreground: 348 30% 70%;
-    --accent: 342 80% 65%; /* Darker shade of accent */
-    --accent-foreground: 348 47% 95%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 348 47% 95%;
-    --border: 338 20% 30%;
-    --input: 338 20% 30%;
-    --ring: 341 100% 78%; /* FF8FAB (Primary Pink) */
+    --background: 322 44% 8%; /* #1A0F15 (Dark background) */
+    --foreground: 31 47% 96%; /* #FAF7F6 (Light text) */
+    --card: 324 25% 15%; /* #352029 (Dark card) */
+    --card-foreground: 31 47% 96%;
+    --popover: 324 25% 15%;
+    --popover-foreground: 31 47% 96%;
+    --primary: 339 43% 64%; /* #CC8899 (Dusty pink for dark mode) */
+    --primary-foreground: 322 44% 8%;
+    --secondary: 350 41% 82%; /* #D4A5A5 (Soft rose for dark) */
+    --secondary-foreground: 31 47% 96%;
+    --muted: 324 25% 20%; /* Dark muted */
+    --muted-foreground: 317 19% 60%; /* Light muted text */
+    --accent: 324 25% 25%; /* Dark accent */
+    --accent-foreground: 31 47% 96%;
+    --destructive: 4 90% 58%; /* #F44336 */
+    --destructive-foreground: 31 47% 96%;
+    --border: 324 25% 25%; /* Dark border */
+    --input: 324 25% 25%; /* Dark input border */
+    --ring: 339 43% 64%; /* Focus ring for dark mode */
   }
 }
 

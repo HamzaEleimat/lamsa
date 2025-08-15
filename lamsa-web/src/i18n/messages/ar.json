@@ -34,6 +34,23 @@
       "recentBookings": "الحجوزات الأخيرة",
       "noBookings": "لا توجد حجوزات حديثة للعرض",
       "addService": "إضافة خدمة جديدة"
+    },
+    "sidebar": {
+      "dashboard": "لوحة التحكم",
+      "appointments": "المواعيد",
+      "services": "الخدمات",
+      "clients": "العملاء",
+      "analytics": "التحليلات",
+      "reviews": "التقييمات",
+      "profile": "الملف الشخصي",
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
+    },
+    "topbar": {
+      "searchPlaceholder": "ابحث في المواعيد، العملاء...",
+      "profile": "الملف الشخصي",
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
     }
   },
   "common": {
