@@ -149,15 +149,45 @@
   
   /* Button variants with RTL support */
   .btn-primary {
-    @apply bg-[color:hsl(var(--primary))] text-[color:hsl(var(--primary-foreground))] hover:bg-[color:hsl(var(--primary)/.9)] focus:ring-[color:hsl(var(--primary))];
+    @apply bg-[color:hsl(var(--primary))] text-[color:hsl(var(--primary-foreground))] hover:bg-[color:hsl(var(--primary)/.9)] focus:ring-[color:hsl(var(--primary))] px-4 py-2 rounded-lg font-medium transition-colors shadow-lamsa-sm hover:shadow-lamsa focus-visible;
   }
   
   .btn-secondary {
-    @apply bg-[color:hsl(var(--secondary))] text-[color:hsl(var(--secondary-foreground))] hover:bg-[color:hsl(var(--secondary)/.8)] focus:ring-[color:hsl(var(--secondary))];
+    @apply bg-[color:hsl(var(--secondary))] text-[color:hsl(var(--secondary-foreground))] hover:bg-[color:hsl(var(--secondary)/.8)] focus:ring-[color:hsl(var(--secondary))] px-4 py-2 rounded-lg font-medium transition-colors shadow-lamsa-sm hover:shadow-lamsa focus-visible;
   }
   
   .btn-destructive {
-    @apply bg-[color:hsl(var(--destructive))] text-[color:hsl(var(--destructive-foreground))] hover:bg-[color:hsl(var(--destructive)/.9)] focus:ring-[color:hsl(var(--destructive))];
+    @apply bg-[color:hsl(var(--destructive))] text-[color:hsl(var(--destructive-foreground))] hover:bg-[color:hsl(var(--destructive)/.9)] focus:ring-[color:hsl(var(--destructive))] px-4 py-2 rounded-lg font-medium transition-colors shadow-lamsa-sm hover:shadow-lamsa focus-visible;
+  }
+
+  /* Lamsa Brand Button Variants */
+  .btn-lamsa-primary {
+    @apply bg-lamsa-primary text-white hover:bg-lamsa-primary-hover active:bg-lamsa-primary-active px-4 py-2 rounded-lg font-medium transition-colors shadow-lamsa-sm hover:shadow-lamsa focus-visible;
+  }
+
+  .btn-lamsa-secondary {
+    @apply bg-lamsa-secondary text-white hover:bg-lamsa-secondary-hover active:bg-lamsa-secondary-active px-4 py-2 rounded-lg font-medium transition-colors shadow-lamsa-sm hover:shadow-lamsa focus-visible;
+  }
+
+  .btn-lamsa-outline {
+    @apply border-2 border-lamsa-primary text-lamsa-primary hover:bg-lamsa-primary hover:text-white active:bg-lamsa-primary-active px-4 py-2 rounded-lg font-medium transition-colors focus-visible;
+  }
+
+  .btn-lamsa-ghost {
+    @apply text-lamsa-primary hover:bg-lamsa-surface active:bg-lamsa-primary/10 px-4 py-2 rounded-lg font-medium transition-colors focus-visible;
+  }
+
+  /* Button sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-lg;
+  }
+
+  .btn-xl {
+    @apply px-8 py-4 text-xl;
   }
   
   /* Card components */
@@ -175,6 +205,40 @@
   
   .card-footer {
     @apply p-6 pt-3;
+  }
+
+  /* Lamsa Card Variants */
+  .card-lamsa-surface {
+    @apply bg-lamsa-surface border-gray-200 shadow-lamsa;
+  }
+
+  .card-lamsa-white {
+    @apply bg-white border-gray-200 shadow-lamsa;
+  }
+
+  .card-lamsa-primary {
+    @apply bg-lamsa-primary text-white border-lamsa-primary shadow-lamsa-md;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lamsa-md hover:-translate-y-0.5;
+  }
+
+  /* Status Cards */
+  .card-success {
+    @apply bg-success-light border-success/20 text-success-dark;
+  }
+
+  .card-warning {
+    @apply bg-warning-light border-warning/20 text-warning-dark;
+  }
+
+  .card-error {
+    @apply bg-error-light border-error/20 text-error-dark;
+  }
+
+  .card-info {
+    @apply bg-info-light border-info/20 text-info-dark;
   }
   
   /* Navigation components */
@@ -220,25 +284,62 @@
     @apply animate-spin rounded-full border-2 border-[color:hsl(var(--primary))] border-t-transparent;
   }
   
+  /* Badge components */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 text-warning border border-warning/30;
+  }
+
+  .badge-error {
+    @apply bg-error/10 text-error border border-error/30;
+  }
+
+  .badge-info {
+    @apply bg-info/10 text-info border border-info/20;
+  }
+
+  .badge-lamsa-primary {
+    @apply bg-lamsa-primary/10 text-lamsa-primary border border-lamsa-primary/20;
+  }
+
+  .badge-lamsa-secondary {
+    @apply bg-lamsa-secondary/10 text-lamsa-secondary border border-lamsa-secondary/20;
+  }
+
+  .badge-gray {
+    @apply bg-gray-100 text-gray-800 border border-gray-200;
+  }
+
   /* Alert components */
   .alert {
     @apply relative w-full rounded-lg border p-4;
   }
   
   .alert-success {
-    @apply border-green-200 bg-green-50 text-green-800;
+    @apply border-success/20 bg-success-light text-success-dark;
   }
   
   .alert-error {
-    @apply border-red-200 bg-red-50 text-red-800;
+    @apply border-error/20 bg-error-light text-error-dark;
   }
   
   .alert-warning {
-    @apply border-yellow-200 bg-yellow-50 text-yellow-800;
+    @apply border-warning/20 bg-warning-light text-warning-dark;
   }
   
   .alert-info {
-    @apply border-blue-200 bg-blue-50 text-blue-800;
+    @apply border-info/20 bg-info-light text-info-dark;
+  }
+
+  .alert-lamsa {
+    @apply border-lamsa-primary/20 bg-lamsa-surface text-lamsa-primary;
   }
 }
 

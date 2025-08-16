@@ -47,8 +47,14 @@ const config: Config = {
         // Direct Lamsa brand colors for convenience
         lamsa: {
           primary: '#4A3643',      // Deep plum
+          'primary-hover': '#3E2B36', // 10% darker
+          'primary-active': '#352029', // 15% darker
           secondary: '#CC8899',    // Dusty pink
+          'secondary-hover': '#B8758A', // 10% darker
+          'secondary-active': '#A6677C', // 15% darker
           tertiary: '#D4A5A5',     // Soft rose
+          'tertiary-hover': '#C49494', // 10% darker
+          'tertiary-active': '#B88383', // 15% darker
           surface: '#F5E6E6',      // Cream blush
           background: '#FAF7F6',   // Warm white
         },
@@ -57,14 +63,22 @@ const config: Config = {
         success: {
           DEFAULT: 'hsl(var(--success))',
           light: '#E8F5E8',
+          dark: '#2E7D32',
         },
         warning: {
           DEFAULT: 'hsl(var(--warning))',
           light: '#FFF3E0',
+          dark: '#F57C00',
         },
         info: {
           DEFAULT: 'hsl(var(--info))',
           light: '#E3F2FD',
+          dark: '#1976D2',
+        },
+        error: {
+          DEFAULT: 'hsl(var(--destructive))',
+          light: '#FFEBEE',
+          dark: '#D32F2F',
         },
         
         // Text colors
