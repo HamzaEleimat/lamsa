@@ -132,7 +132,13 @@ export function StatsCardsGrid() {
       }}
     >
       {statsData.map((stat, index) => (
-        <StatsCard key={index} {...stat} />
+        <div
+          key={index}
+          className="stats-card-stagger"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
+          <StatsCard {...stat} />
+        </div>
       ))}
     </div>
   );

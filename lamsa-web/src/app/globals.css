@@ -133,6 +133,31 @@
   .slide-down {
     animation: slideDown 0.3s ease-out;
   }
+
+  /* Dashboard specific styles */
+  .dashboard-gradient {
+    background: linear-gradient(135deg, 
+      rgba(74, 54, 67, 0.03) 0%, 
+      rgba(204, 136, 153, 0.03) 50%, 
+      rgba(212, 165, 165, 0.03) 100%),
+      hsl(var(--background));
+  }
+
+  /* Stats card stagger animation */
+  .stats-card-stagger {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: statsCardFadeIn 0.6s ease-out forwards;
+  }
+
+  /* Notification bell pulse animation */
+  .notification-bell .notification-badge {
+    animation: notificationPulse 5s infinite;
+  }
+
+  .notification-bell:hover .notification-badge {
+    animation-play-state: paused;
+  }
   
   /* Form inputs with RTL support */
   .form-input {
@@ -400,6 +425,62 @@
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground));
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes statsCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notificationPulse {
+  0%, 90%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  95% {
+    transform: scale(1.1);
+    opacity: 0.8;
   }
 }
 

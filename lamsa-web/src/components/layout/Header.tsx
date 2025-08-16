@@ -46,10 +46,10 @@ export function Header({
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Notification Bell */}
-          <button className="relative text-text-secondary hover:text-primary transition-colors p-2">
+          <button className="relative text-text-secondary hover:text-primary transition-colors p-2 notification-bell">
             <Bell className="w-6 h-6" />
             {notificationCount && notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-white text-xs rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-white text-xs rounded-full flex items-center justify-center notification-badge">
                 {notificationCount}
               </span>
             )}
