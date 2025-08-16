@@ -1,7 +1,6 @@
 'use client';
 
-import { Menu, Search, Bell, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Menu, Search, Bell } from 'lucide-react';
 
 interface HeaderProps {
   onMenuClick?: () => void;
