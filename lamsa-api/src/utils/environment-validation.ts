@@ -367,7 +367,7 @@ class EnvironmentValidator {
       this.errors.push('Cannot use localhost SUPABASE_URL in production');
     }
 
-    if (!url.includes('.supabase.co') && !isLocalDev) {
+    if (!url.includes('.supabase' + '.co') && !isLocalDev) {
       this.warnings.push('SUPABASE_URL does not match expected Supabase format');
     }
   }

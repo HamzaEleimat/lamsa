@@ -102,25 +102,53 @@ Future integrations:
 
 ## Design System
 
-### Color Palette
-The app uses a custom pink-themed color palette:
-- **Primary**: #FF8FAB (Pink)
-- **Secondary**: #FFC2D1 (Light Pink)
-- **Tertiary**: #FFB3C6 (Medium Pink)
-- **Accent**: #FFE5EC (Lightest Pink)
-- **Dark**: #50373E (Dark Brown)
+### Design System
+Lamsa uses a unified design system across web and mobile platforms with a sophisticated plum/mauve color palette for a premium beauty brand experience.
 
-### Theme Implementation
-- Colors are defined in `src/constants/colors.ts`
-- React Native Paper theme configuration in `src/theme/index.ts`
-- Both light and dark theme variants available
-- Material Design 3 components with custom color overrides
+#### Color Palette (Sophisticated Plum/Mauve Theme)
+- **Primary**: #4A3643 (Deep plum) - CTA buttons, links, focus states
+- **Secondary**: #CC8899 (Dusty pink) - Secondary actions, highlights  
+- **Tertiary**: #D4A5A5 (Soft rose) - Accents, badges, light backgrounds
+- **Surface**: #F5E6E6 (Cream blush) - Card backgrounds, input fields
+- **Background**: #FAF7F6 (Warm white) - Main application background
 
-### Usage Guidelines
-- Always use `theme.colors.*` from React Native Paper's useTheme hook
-- Avoid hardcoded colors in components
-- Maintain proper contrast ratios for accessibility
+#### Text Colors (WCAG AA Compliant)
+- **Primary Text**: #2D1B28 (4.5:1 contrast ratio)
+- **Secondary Text**: #6B5D65 (4.5:1 contrast ratio)  
+- **Tertiary Text**: #8A7B83 (3:1 contrast for large text only)
+- **Inverse Text**: #FFFFFF (White on dark backgrounds)
+
+#### Typography
+- **Primary Font**: Inter (Latin text) - Excellent readability and modern appearance
+- **Arabic Font**: Cairo (Arabic text) - Optimized for RTL layouts
+- **Font Weights**: 300 (Light), 400 (Regular), 500 (Medium), 600 (Semi-bold), 700 (Bold)
+
+#### Design System Files
+- **Master Design System**: `/shared/design-system.ts` - Single source of truth
+- **Mobile Colors**: `lamsa-mobile/src/constants/colors.ts`
+- **Mobile Theme**: `lamsa-mobile/src/theme/index.ts` (React Native Paper)
+- **Web Styles**: `lamsa-web/src/app/globals.css` (CSS variables)
+- **Web Config**: `lamsa-web/tailwind.config.ts` (Tailwind CSS)
+
+#### Usage Guidelines
+- **Mobile**: Use `theme.colors.*` from React Native Paper's useTheme hook
+- **Web**: Use CSS custom properties or Tailwind classes (`bg-primary`, `text-primary`)
+- Never hardcode colors - always reference the design system
+- Maintain proper contrast ratios for accessibility (minimum 4.5:1)
 - Test in both Arabic (RTL) and English (LTR) layouts
+- Use semantic color names (success: #4CAF50, warning: #FF9800, error: #F44336, info: #2196F3)
+
+#### Interactive States
+- **Hover**: 10% darker than base color
+- **Active**: 15% darker than base color  
+- **Disabled**: 40% opacity
+- **Focus Ring**: Primary color with 20% opacity
+
+#### Component Standards
+- **Border Radius**: 8px default (can use 4px, 12px, 16px variants)
+- **Spacing**: 8px grid system (4px, 8px, 16px, 24px, 32px, etc.)
+- **Shadows**: Subtle, warm-tinted shadows using primary color base
+- **Button Heights**: 44px (mobile), 40px (desktop) for accessibility
 
 ## Key Development Practices
 

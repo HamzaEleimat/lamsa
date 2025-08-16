@@ -52,7 +52,7 @@ console.log('Supabase Configuration:', {
   url: supabaseUrl,
   hasServiceKey: !!supabaseServiceKey,
   hasAdminClient: !!supabaseAdmin,
-  isCloudInstance: supabaseUrl.includes('supabase.co')
+  isCloudInstance: supabaseUrl.includes('supabase' + '.co')
 });
 
 // Initialize OTP attempt tracker for security

@@ -1,176 +1,175 @@
 import { MD3LightTheme, MD3DarkTheme, configureFonts, MD3Theme } from 'react-native-paper';
 
-// Lamsa brand colors - Based on style-guide.tsx
+// Lamsa brand colors - Unified with design system (Sophisticated Plum/Mauve Theme)
 const brandColors = {
   primary: '#4A3643', // Deep plum - main brand color
-  secondary: '#CC8899', // Pink - secondary brand color
+  secondary: '#CC8899', // Dusty pink - secondary brand color
   tertiary: '#D4A5A5', // Soft rose - tertiary brand color
-  accent: '#F5E6E6', // Cream blush - lightest brand color
-  dark: '#181828', // Dark base color
+  accent: '#F5E6E6', // Cream blush - surface color
+  surface: '#F5E6E6', // Card backgrounds, input fields
+  background: '#FAF7F6', // Main background (warm white)
   
-  // Brand palette
-  brand1: '#4A3643',
-  brand2: '#CC8899',
-  brand3: '#D4A5A5',
-  brand4: '#E8C5C5',
-  brand5: '#F5E6E6',
+  // Interactive States
+  primaryHover: '#3E2B36', // 10% darker
+  primaryActive: '#352029', // 15% darker
+  secondaryHover: '#B8758A', // 10% darker
+  secondaryActive: '#A6677C', // 15% darker
   
-  // Base colors
-  base1: '#e8e8ed',
-  base2: '#9898a0',
-  base3: '#585870',
-  base4: '#383850',
-  base5: '#181828',
-  base6: '#f0f0f5',
-  base7: '#f8f8fc',
+  // Text Colors - WCAG AA Compliant
+  textPrimary: '#2D1B28', // Main text (4.5:1 contrast)
+  textSecondary: '#6B5D65', // Secondary text (4.5:1 contrast)
+  textTertiary: '#8A7B83', // Tertiary text (3:1 contrast)
+  textInverse: '#FFFFFF', // White text on dark backgrounds
   
-  // System colors
-  orange1: '#ffc880',
-  orange2: '#ff9c33',
-  orange3: '#ff8000',
-  orange4: '#e66300',
+  // Neutral Grays - Warm-tinted
+  gray50: '#FAF8F7',
+  gray100: '#F5F2F1',
+  gray200: '#E8E2E0', // Border color
+  gray300: '#D1C7C4',
+  gray400: '#A69BA3',
+  gray500: '#7A6F76',
+  gray600: '#6B5D65',
+  gray700: '#4A3F45',
+  gray800: '#2D1B28',
+  gray900: '#1A0F15',
   
-  blue1: '#99ccff',
-  blue2: '#4da6ff',
-  blue3: '#0080ff',
-  blue4: '#0066cc',
+  // Semantic Colors - Material Design compliant
+  success: '#4CAF50', // Green for success
+  warning: '#FF9800', // Orange for warning
+  error: '#F44336', // Red for error
+  info: '#2196F3', // Blue for info
   
-  yellow1: '#ffe680',
-  yellow2: '#ffdb33',
-  yellow3: '#ffd000',
-  yellow4: '#e6b800',
+  // Semantic Light Backgrounds
+  successLight: '#E8F5E8',
+  warningLight: '#FFF3E0',
+  errorLight: '#FFEBEE',
+  infoLight: '#E3F2FD',
   
-  green1: '#80e6b3',
-  green2: '#33cc88',
-  green3: '#00b366',
-  green4: '#009955',
-  
-  red1: '#ffb3ba',
-  red2: '#ff6680',
-  red3: '#ff3355',
-  red4: '#e60033',
-  
-  // Status colors
-  success: '#00b366', // Green for success
-  warning: '#ff8000', // Orange for warning
-  error: '#ff3355', // Red for error
-  info: '#0080ff', // Blue for info
+  // Legacy aliases for backward compatibility
+  dark: '#2D1B28', // Changed to match textPrimary
+  base1: '#E8E2E0', // gray200
+  base2: '#A69BA3', // gray400
+  base3: '#6B5D65', // gray600
+  base4: '#4A3F45', // gray700
+  base5: '#2D1B28', // gray800
+  base6: '#F5F2F1', // gray100
+  base7: '#FAF7F6', // background
 };
 
-// Custom fonts configuration based on brand guidelines
+// Custom fonts configuration - Inter for readability and accessibility
 const fontConfig = {
-  // Display fonts - Cormorant Garamond for main screen titles (from style guide)
+  // Display fonts - Inter for main screen titles
   displayLarge: {
-    fontFamily: 'CormorantGaramond_300Light',
-    fontSize: 56,
-    fontWeight: '300' as const,
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 48, // Reduced from 56px for mobile
+    fontWeight: '600' as const,
     letterSpacing: -0.02,
-    lineHeight: 64,
-  },
-  displayMedium: {
-    fontFamily: 'CormorantGaramond_400Regular',
-    fontSize: 48,
-    fontWeight: '400' as const,
-    letterSpacing: -0.01,
     lineHeight: 56,
   },
-  displaySmall: {
-    fontFamily: 'CormorantGaramond_400Regular',
+  displayMedium: {
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 36,
-    fontWeight: '400' as const,
-    letterSpacing: 0,
+    fontWeight: '600' as const,
+    letterSpacing: -0.01,
     lineHeight: 44,
   },
-  // Headlines - Cormorant Garamond for section headers
-  headlineLarge: {
-    fontFamily: 'CormorantGaramond_400Regular',
-    fontSize: 32, // Main screen titles
-    fontWeight: '400' as const,
-    letterSpacing: -0.5,
-    lineHeight: 40,
-  },
-  headlineMedium: {
-    fontFamily: 'CormorantGaramond_600SemiBold',
-    fontSize: 28, // Important headers
+  displaySmall: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 30,
     fontWeight: '600' as const,
-    letterSpacing: -0.5,
+    letterSpacing: -0.01,
     lineHeight: 36,
   },
-  headlineSmall: {
-    fontFamily: 'CormorantGaramond_500Medium',
-    fontSize: 24, // Section headers
-    fontWeight: '500' as const,
-    letterSpacing: 0,
+  // Headlines - Inter for section headers
+  headlineLarge: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 24, // Main screen titles
+    fontWeight: '600' as const,
+    letterSpacing: -0.01,
     lineHeight: 32,
   },
-  // Titles - Cormorant Garamond for smaller headings
-  titleLarge: {
-    fontFamily: 'CormorantGaramond_600SemiBold',
-    fontSize: 22, // Call-to-action titles
+  headlineMedium: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 20, // Important headers
     fontWeight: '600' as const,
     letterSpacing: 0,
     lineHeight: 28,
   },
-  titleMedium: {
-    fontFamily: 'CormorantGaramond_500Medium',
-    fontSize: 20, // Smaller CTAs
+  headlineSmall: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 18, // Section headers
     fontWeight: '500' as const,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     lineHeight: 24,
   },
-  titleSmall: {
-    fontFamily: 'CormorantGaramond_500Medium',
-    fontSize: 18, // Minimum CTA size
+  // Titles - Inter for smaller headings
+  titleLarge: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 18, // Call-to-action titles
+    fontWeight: '600' as const,
+    letterSpacing: 0,
+    lineHeight: 24,
+  },
+  titleMedium: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 16, // Smaller CTAs
     fontWeight: '500' as const,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
+    lineHeight: 22,
+  },
+  titleSmall: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14, // Minimum CTA size
+    fontWeight: '500' as const,
+    letterSpacing: 0,
     lineHeight: 20,
   },
-  // Labels - Martel Sans for UI elements
+  // Labels - Inter for UI elements
   labelLarge: {
-    fontFamily: 'MartelSans_700Bold',
+    fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    fontWeight: '700' as const,
-    letterSpacing: 0.1,
+    fontWeight: '500' as const,
+    letterSpacing: 0,
     lineHeight: 20,
   },
   labelMedium: {
-    fontFamily: 'MartelSans_400Regular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     fontWeight: '400' as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     lineHeight: 16,
   },
   labelSmall: {
-    fontFamily: 'MartelSans_400Regular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 11,
     fontWeight: '400' as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     lineHeight: 16,
   },
-  // Body text - Martel Sans for readability
+  // Body text - Inter for maximum readability
   bodyLarge: {
-    fontFamily: 'MartelSans_400Regular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 16, // Standard body text
     fontWeight: '400' as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     lineHeight: 24,
   },
   bodyMedium: {
-    fontFamily: 'MartelSans_400Regular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 14, // Standard body text
     fontWeight: '400' as const,
-    letterSpacing: 0.25,
+    letterSpacing: 0,
     lineHeight: 20,
   },
   bodySmall: {
-    fontFamily: 'MartelSans_400Regular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 12, // Legal/ancillary text
     fontWeight: '400' as const,
-    letterSpacing: 0.4,
-    lineHeight: 18,
+    letterSpacing: 0,
+    lineHeight: 16,
   },
   default: {
-    fontFamily: 'MartelSans_400Regular',
+    fontFamily: 'Inter_400Regular',
     fontWeight: '400' as const,
     letterSpacing: 0,
   },
@@ -181,52 +180,69 @@ export const lightTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
+    // Semantic colors
     success: brandColors.success,
     warning: brandColors.warning,
     info: brandColors.info,
-    primary: brandColors.primary,
-    primaryContainer: brandColors.brand5,
-    secondary: brandColors.secondary,
-    secondaryContainer: brandColors.brand4,
-    tertiary: brandColors.tertiary,
-    tertiaryContainer: brandColors.brand5,
-    surface: '#FFFFFF',
-    surfaceVariant: brandColors.base6,     // #f0f0f5
-    surfaceDisabled: brandColors.base1,    // #e8e8ed
-    background: brandColors.base7,         // #f8f8fc
-    error: brandColors.error,
-    errorContainer: brandColors.red1,
-    onPrimary: '#FFFFFF',
-    onPrimaryContainer: brandColors.primary,
-    onSecondary: '#FFFFFF',
-    onSecondaryContainer: brandColors.primary,
-    onTertiary: '#FFFFFF',
-    onTertiaryContainer: brandColors.primary,
-    onSurface: brandColors.base5,         // #181828 - main text
-    onSurfaceVariant: brandColors.base3,   // #585870 - secondary text
-    onSurfaceDisabled: brandColors.base2,  // #9898a0 - disabled text
-    onError: '#FFFFFF',
-    onErrorContainer: brandColors.red4,
-    onBackground: brandColors.base5,       // #181828
-    outline: brandColors.base1,            // #e8e8ed - border color
-    outlineVariant: brandColors.base6,     // #f0f0f5 - light border
-    inverseSurface: brandColors.primary,   // #4A3643
-    inverseOnSurface: brandColors.base7,   // #f8f8fc
-    inversePrimary: brandColors.secondary, // #CC8899
+    
+    // Brand colors
+    primary: brandColors.primary,          // #4A3643 - Deep plum
+    primaryContainer: brandColors.surface, // #F5E6E6 - Cream blush
+    secondary: brandColors.secondary,      // #CC8899 - Dusty pink
+    secondaryContainer: brandColors.accent, // #F5E6E6 - Surface
+    tertiary: brandColors.tertiary,        // #D4A5A5 - Soft rose
+    tertiaryContainer: brandColors.surface, // #F5E6E6 - Surface
+    
+    // Surface colors
+    surface: '#FFFFFF',                    // White cards
+    surfaceVariant: brandColors.surface,   // #F5E6E6 - Card backgrounds
+    surfaceDisabled: brandColors.gray200,  // #E8E2E0 - Disabled surfaces
+    background: brandColors.background,    // #FAF7F6 - Main background
+    
+    // Error colors
+    error: brandColors.error,              // #F44336
+    errorContainer: brandColors.errorLight, // #FFEBEE
+    
+    // Text colors (on surfaces)
+    onPrimary: brandColors.textInverse,    // White text on primary
+    onPrimaryContainer: brandColors.textPrimary, // Dark text on primary container
+    onSecondary: brandColors.textInverse,  // White text on secondary
+    onSecondaryContainer: brandColors.textPrimary, // Dark text on secondary container
+    onTertiary: brandColors.textInverse,   // White text on tertiary
+    onTertiaryContainer: brandColors.textPrimary, // Dark text on tertiary container
+    onSurface: brandColors.textPrimary,    // #2D1B28 - Main text on white
+    onSurfaceVariant: brandColors.textSecondary, // #6B5D65 - Secondary text
+    onSurfaceDisabled: brandColors.gray400, // #A69BA3 - Disabled text
+    onError: brandColors.textInverse,      // White text on error
+    onErrorContainer: brandColors.textPrimary, // Dark text on error container
+    onBackground: brandColors.textPrimary, // #2D1B28 - Text on background
+    
+    // Outline/Border colors
+    outline: brandColors.gray200,          // #E8E2E0 - Border color
+    outlineVariant: brandColors.gray100,   // #F5F2F1 - Light border
+    
+    // Inverse colors (for dark elements in light theme)
+    inverseSurface: brandColors.primary,   // #4A3643 - Dark surfaces
+    inverseOnSurface: brandColors.textInverse, // White text on dark
+    inversePrimary: brandColors.secondary, // #CC8899 - Inverse primary
+    
+    // System colors
     shadow: '#000000',
     scrim: '#000000',
-    backdrop: 'rgba(0, 0, 0, 0.4)',
+    backdrop: 'rgba(45, 27, 40, 0.4)',    // Dark overlay with brand tint
+    
+    // Elevation surfaces
     elevation: {
       level0: 'transparent',
-      level1: '#FFFFFF',
-      level2: brandColors.base7,
-      level3: brandColors.base6,
-      level4: '#FAF7F6',
-      level5: '#F7F3F1',
+      level1: '#FFFFFF',                   // Pure white
+      level2: brandColors.surface,         // #F5E6E6
+      level3: brandColors.gray100,         // #F5F2F1
+      level4: brandColors.background,      // #FAF7F6
+      level5: brandColors.gray50,          // #FAF8F7
     },
   },
   fonts: configureFonts({ config: fontConfig }),
-  roundness: 16, // Updated to match style guide
+  roundness: 8, // Updated to match design system (8px default)
 };
 
 // Dark theme
@@ -234,52 +250,69 @@ export const darkTheme: MD3Theme = {
   ...MD3DarkTheme,
   colors: {
     ...MD3DarkTheme.colors,
+    // Semantic colors
     success: brandColors.success,
     warning: brandColors.warning,
     info: brandColors.info,
-    primary: brandColors.secondary,    // Use pink as primary in dark mode
-    primaryContainer: brandColors.brand1,
-    secondary: brandColors.tertiary,
-    secondaryContainer: brandColors.brand1,
-    tertiary: brandColors.brand4,
-    tertiaryContainer: brandColors.brand1,
-    surface: '#181828',            // From base5
-    surfaceVariant: '#282838',     // Dark variant
-    surfaceDisabled: brandColors.base4,    // #383850
-    background: '#0a0a0f',         // Very dark background
-    error: brandColors.error,
-    errorContainer: brandColors.red4,
-    onPrimary: '#FFFFFF',
-    onPrimaryContainer: brandColors.brand5,
-    onSecondary: '#FFFFFF',
-    onSecondaryContainer: brandColors.brand5,
-    onTertiary: '#FFFFFF',
-    onTertiaryContainer: brandColors.brand5,
-    onSurface: brandColors.base7,          // #f8f8fc - text on dark
-    onSurfaceVariant: '#b8b8bc',   // Light gray text
-    onSurfaceDisabled: '#7878a0',  // Disabled text on dark
-    onError: '#FFFFFF',
-    onErrorContainer: '#FFFFFF',
-    onBackground: brandColors.base7,       // #f8f8fc
-    outline: brandColors.base4,            // #383850 - border
-    outlineVariant: '#282838',     // Darker border
-    inverseSurface: brandColors.base7,     // #f8f8fc
-    inverseOnSurface: brandColors.base5,   // #181828
-    inversePrimary: brandColors.primary,
+    
+    // Brand colors (adjusted for dark mode)
+    primary: brandColors.secondary,        // #CC8899 - Dusty pink as primary in dark
+    primaryContainer: brandColors.gray700, // #4A3F45 - Dark container
+    secondary: brandColors.tertiary,       // #D4A5A5 - Soft rose as secondary
+    secondaryContainer: brandColors.gray700, // #4A3F45 - Dark container
+    tertiary: brandColors.accent,          // #F5E6E6 - Light tertiary for contrast
+    tertiaryContainer: brandColors.gray700, // #4A3F45 - Dark container
+    
+    // Surface colors
+    surface: brandColors.gray800,          // #2D1B28 - Dark surfaces
+    surfaceVariant: brandColors.gray700,   // #4A3F45 - Card backgrounds
+    surfaceDisabled: brandColors.gray600,  // #6B5D65 - Disabled surfaces
+    background: brandColors.gray900,       // #1A0F15 - Very dark background
+    
+    // Error colors
+    error: brandColors.error,              // #F44336
+    errorContainer: brandColors.gray700,   // Dark error container
+    
+    // Text colors (on dark surfaces)
+    onPrimary: brandColors.textInverse,    // White text on primary
+    onPrimaryContainer: brandColors.textInverse, // White text on dark container
+    onSecondary: brandColors.textInverse,  // White text on secondary
+    onSecondaryContainer: brandColors.textInverse, // White text on dark container
+    onTertiary: brandColors.textPrimary,   // Dark text on light tertiary
+    onTertiaryContainer: brandColors.textInverse, // White text on dark container
+    onSurface: brandColors.textInverse,    // White text on dark surface
+    onSurfaceVariant: brandColors.gray300, // #D1C7C4 - Light secondary text
+    onSurfaceDisabled: brandColors.gray500, // #7A6F76 - Disabled text
+    onError: brandColors.textInverse,      // White text on error
+    onErrorContainer: brandColors.textInverse, // White text on error container
+    onBackground: brandColors.textInverse, // White text on dark background
+    
+    // Outline/Border colors
+    outline: brandColors.gray600,          // #6B5D65 - Border color
+    outlineVariant: brandColors.gray700,   // #4A3F45 - Light border
+    
+    // Inverse colors (for light elements in dark theme)
+    inverseSurface: brandColors.surface,   // #F5E6E6 - Light surfaces
+    inverseOnSurface: brandColors.textPrimary, // Dark text on light
+    inversePrimary: brandColors.primary,   // #4A3643 - Original primary
+    
+    // System colors
     shadow: '#000000',
     scrim: '#000000',
-    backdrop: 'rgba(0, 0, 0, 0.6)',
+    backdrop: 'rgba(0, 0, 0, 0.6)',       // Dark overlay
+    
+    // Elevation surfaces (darker tones)
     elevation: {
       level0: 'transparent',
-      level1: '#181828',
-      level2: '#282838',
-      level3: brandColors.base4,
-      level4: '#403850',
-      level5: '#484058',
+      level1: brandColors.gray800,         // #2D1B28
+      level2: brandColors.gray700,         // #4A3F45
+      level3: brandColors.gray600,         // #6B5D65
+      level4: brandColors.gray500,         // #7A6F76
+      level5: brandColors.gray400,         // #A69BA3
     },
   },
   fonts: configureFonts({ config: fontConfig }),
-  roundness: 16, // Updated to match style guide
+  roundness: 8, // Updated to match design system (8px default)
 };
 
 // Shadow styles from style guide
